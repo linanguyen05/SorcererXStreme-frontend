@@ -1,5 +1,5 @@
-
-'use client';
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface FormattedContentProps {
   content: string;
@@ -7,129 +7,40 @@ interface FormattedContentProps {
 }
 
 export const FormattedContent = ({ content, className = '' }: FormattedContentProps) => {
-  // Kiểm tra content có tồn tại không
-  if (!content || typeof content !== 'string') {
-    return <div className={className}>Không có nội dung để hiển thị.</div>;
-  }
-
-  // Parse content để tách các phần khác nhau
-  const parseContent = (text: string) => {
-    const lines = text.split('\n');
-    const elements: JSX.Element[] = [];
-    let listItems: string[] = [];
-    
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      
-      // Skip empty lines or separator lines
-      if (trimmedLine === '' || trimmedLine.match(/^━+$/)) {
-        if (elements.length > 0) {
-          elements.push(<div key={`space-${index}`} className="h-2" />);
-        }
-        return;
-      }
-      
-      // Headers với **TEXT** (standalone headers)
-      if (trimmedLine.match(/^\*\*([^*]+)\*\*:?\s*$/)) {
-        // Flush any pending list items
-        if (listItems.length > 0) {
-          elements.push(
-            <ul key={`list-${index}`} className="list-disc list-inside space-y-1 mb-4 text-gray-300 ml-4">
-              {listItems.map((item, i) => (
-                <li key={i} className="text-gray-300" dangerouslySetInnerHTML={{ __html: item }} />
-              ))}
-            </ul>
-          );
-          listItems = [];
-        }
-        
-        const headerText = trimmedLine.replace(/^\*\*([^*]+)\*\*:?\s*$/, '$1');
-        elements.push(
-          <h3 key={index} className="text-lg font-bold text-white mb-3 mt-6 first:mt-0">
-            {headerText}
-          </h3>
-        );
-        return;
-      }
-      
-      // Subheaders với emoji (bắt đầu bằng emoji hoặc có emoji trong tiêu đề)
-      if (trimmedLine.match(/^[🔮💫✨🌟💖💕🎯⚠️📊💡🌈🎨🏆🌸🌹🌺🌻💝🐉💼💰🏥🎭🎪🌙📅🔢💎🍀🌊🔥⭐📍🕐🌍]/)) {
-        if (listItems.length > 0) {
-          elements.push(
-            <ul key={`list-${index}`} className="list-disc list-inside space-y-1 mb-4 text-gray-300 ml-4">
-              {listItems.map((item, i) => (
-                <li key={i} className="text-gray-300" dangerouslySetInnerHTML={{ __html: item }} />
-              ))}
-            </ul>
-          );
-          listItems = [];
-        }
-        
-        // Remove ** from emoji headers
-        const cleanedLine = trimmedLine.replace(/\*\*([^*]+)\*\*/g, '$1');
-        
-        elements.push(
-          <h4 key={index} className="text-md font-semibold text-purple-300 mb-2 mt-4">
-            {cleanedLine}
-          </h4>
-        );
-        return;
-      }
-      
-      // List items với • hoặc -
-      if (trimmedLine.match(/^[•\-]\s/)) {
-        const itemText = trimmedLine.replace(/^[•\-]\s/, '');
-        // Clean up ** from list items and convert to HTML
-        const cleanedItem = itemText.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
-        listItems.push(cleanedItem);
-        return;
-      }
-      
-      // Regular paragraphs
-      if (trimmedLine.length > 0) {
-        // Flush any pending list items
-        if (listItems.length > 0) {
-          elements.push(
-            <ul key={`list-${index}`} className="list-disc list-inside space-y-1 mb-4 text-gray-300 ml-4">
-              {listItems.map((item, i) => (
-                <li key={i} className="text-gray-300" dangerouslySetInnerHTML={{ __html: item }} />
-              ))}
-            </ul>
-          );
-          listItems = [];
-        }
-        
-        // Handle bold text within paragraphs - remove ** and apply styling
-        const formattedText = trimmedLine.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
-        
-        elements.push(
-          <p 
-            key={index} 
-            className="text-gray-300 mb-3 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: formattedText }}
-          />
-        );
-        return;
-      }
-    });
-    
-    // Flush any remaining list items
-    if (listItems.length > 0) {
-      elements.push(
-        <ul key="final-list" className="list-disc list-inside space-y-1 mb-4 text-gray-300 ml-4">
-          {listItems.map((item, i) => (
-            <li key={i} className="text-gray-300" dangerouslySetInnerHTML={{ __html: item }} />
-          ))}
-        </ul>
-      );
-    }
-    
-    return elements;
-  };
+  if (!content) return null;
 
   return (
-    <div className={`formatted-content ${className}`}>
-      {parseContent(content)}
+    <div className={`
+      /* Cấu hình Typography cho Dark Mode */
+      prose prose-invert 
+      max-w-none 
+      
+      /* Định dạng đoạn văn */
+      prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-4
+      
+      /* Định dạng Tiêu đề (Gradient màu tím hồng) */
+      prose-headings:text-transparent prose-headings:bg-clip-text prose-headings:bg-gradient-to-r prose-headings:from-purple-200 prose-headings:via-pink-200 prose-headings:to-white
+      prose-headings:font-bold prose-headings:mb-4 prose-headings:mt-6
+      
+      /* Định dạng in đậm (Màu vàng nổi bật) */
+      prose-strong:text-yellow-400 prose-strong:font-bold
+      
+      /* Định dạng danh sách */
+      prose-ul:list-disc prose-ul:pl-5 prose-ul:text-gray-300 prose-ul:mb-4
+      prose-ol:list-decimal prose-ol:pl-5 prose-ol:text-gray-300 prose-ol:mb-4
+      prose-li:mb-2
+      
+      /* Định dạng trích dẫn */
+      prose-blockquote:border-l-4 prose-blockquote:border-purple-500 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-purple-200
+      
+      /* Định dạng code */
+      prose-code:bg-white/10 prose-code:rounded prose-code:px-1 prose-code:text-purple-300
+      
+      ${className}
+    `}>
+      <ReactMarkdown>
+        {content}
+      </ReactMarkdown>
     </div>
   );
 };
