@@ -1,4 +1,3 @@
-// test xử lí định mạng markdown response, chỉnh 3 chổ, 2 chổ sửa code và 1 chổ comment code
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
@@ -210,18 +209,7 @@ const TarotScene = ({
 };
 
 export default function TarotPage() {
-  // const { isAuthenticated, user, token } = useAuthStore();
-  // TESTING WITHOUT AUTH
-  const isAuthenticated = true;
-  const user = { 
-    name: "Tester", 
-    gender: "female", 
-    birth_date: "2000-01-01",
-    birth_time: "12:00",
-    birth_place: "Vietnam"
-  }; 
-  const token = "mock-token";
-  // ---------------------------------------------------------
+  const { isAuthenticated, user, token } = useAuthStore();
   const sidebarCollapsed = useSidebarCollapsed();
   const [readingMode, setReadingMode] = useState<ReadingMode>(null);
   const [phase, setPhase] = useState<ReadingPhase>('selection');
@@ -308,191 +296,137 @@ export default function TarotPage() {
     }
   };
 
-  // const fetchTarotAnalysis = async (cards: (TarotCard & { isReversed: boolean })[]) => {
-  //   if (!token || !user) return;
+  const fetchTarotAnalysis = async (cards: (TarotCard & { isReversed: boolean })[]) => {
+    if (!token || !user) return;
     
-  //   // Ngăn gọi API nhiều lần
-  //   if (isLoadingAnalysis) return;
+    // Ngăn gọi API nhiều lần
+    if (isLoadingAnalysis) return;
 
-  //   setIsLoadingAnalysis(true);
-
-  //   try {
-  //     const featureType = readingMode === 'question' ? 'question' : 'overview';
-      
-  //     // Xác định endpoint dựa vào feature_type
-  //     const endpoint = featureType === 'question' 
-  //       ? '/api/tarot/question' 
-  //       : '/api/tarot/overview';
-      
-  //     const cardsDrawn = cards.map((card, index) => ({
-  //       card_name: card.name,
-  //       is_upright: !card.isReversed,
-  //       // Position chỉ cần cho overview (3 lá)
-  //       ...(featureType === 'overview' && {
-  //         position: index === 0 ? 'past' : index === 1 ? 'present' : 'future'
-  //       })
-  //     }));
-
-  //     const requestBody: any = {
-  //       domain: 'tarot',
-  //       feature_type: featureType,
-  //       user_context: {
-  //         name: user.name || 'User',
-  //         gender: user.gender || 'other',
-  //         birth_date: user.birth_date || '2000-01-01'
-  //       },
-  //       data: {
-  //         cards_drawn: cardsDrawn
-  //       }
-  //     };
-
-  //     // Thêm question nếu là question mode
-  //     if (featureType === 'question' && question) {
-  //       requestBody.data.question = question;
-  //     }
-
-  //     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify(requestBody),
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json().catch(() => ({}));
-  //       console.error('Tarot API error:', errorData);
-
-  //       if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
-  //         setAiAnalysis(
-  //           `⚠️ **Đã hết lượt sử dụng**\n\n` +
-  //           `Bạn đã dùng hết ${errorData.currentUsage}/${errorData.limit} lượt cho tính năng này.\n\n` +
-  //           `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để tiếp tục sử dụng!`
-  //         );
-  //         setIsLoadingAnalysis(false);
-  //         return;
-  //       }
-
-  //       if (response.status === 500) {
-  //         const errorMsg = errorData.message || errorData.error || 'Internal server error';
-  //         setAiAnalysis(
-  //           `❌ **Lỗi 500 - Lỗi Server**\n\n` +
-  //           `${errorMsg}\n\n` +
-  //           `Backend đang gặp sự cố kết nối với AI Service. Vui lòng thử lại sau hoặc liên hệ admin.\n\n` +
-  //           `_Chi tiết: ${JSON.stringify(errorData, null, 2)}_`
-  //         );
-  //         setIsLoadingAnalysis(false);
-  //         return;
-  //       }
-
-  //       throw new Error(errorData.message || 'Không thể lấy phân tích tarot');
-  //     }
-
-  //     const data = await response.json();
-      
-  //     // Backend trả về: { analysis: "string" } hoặc { analysis: { body: "string" } }
-  //     if (data.analysis) {
-  //       let analysisText = '';
-        
-  //       // Nếu analysis là object (Lambda response format)
-  //       if (typeof data.analysis === 'object') {
-  //         // Lambda trả về { statusCode, headers, body }
-  //         if (data.analysis.body) {
-  //           // Body là string JSON, cần parse
-  //           try {
-  //             const bodyData = typeof data.analysis.body === 'string' 
-  //               ? JSON.parse(data.analysis.body) 
-  //               : data.analysis.body;
-              
-  //             // Lấy answer từ bodyData
-  //             analysisText = bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
-  //           } catch (e) {
-  //             // Nếu parse lỗi, dùng body trực tiếp
-  //             analysisText = data.analysis.body;
-  //           }
-  //         }
-  //         // Fallback: thử các field khác
-  //         else if (data.analysis.data) {
-  //           analysisText = data.analysis.data;
-  //         }
-  //         else if (data.analysis.message) {
-  //           analysisText = data.analysis.message;
-  //         }
-  //         else {
-  //           analysisText = JSON.stringify(data.analysis, null, 2);
-  //         }
-  //       } else {
-  //         // analysis is already a string
-  //         analysisText = data.analysis;
-  //       }
-        
-  //       setAiAnalysis(analysisText);
-  //     } else {
-  //       console.error('No analysis found in response:', data);
-  //       setAiAnalysis('AI không trả lời được. Vui lòng thử lại.');
-  //     }
-  //   } catch (error: any) {
-  //     console.error('Error fetching tarot analysis:', error);
-  //     setAiAnalysis(`❌ Lỗi: ${error.message || 'Không thể kết nối với server'}`);
-  //   } finally {
-  //     setIsLoadingAnalysis(false);
-  //   }
-  // };
-
-// TESTING MOCK FUNCTION
-const fetchTarotAnalysis = async (cards: (TarotCard & { isReversed: boolean })[]) => {
-    // 1. Giả lập trạng thái đang tải
     setIsLoadingAnalysis(true);
 
-    // 2. Tạm thời không cần token hay user vì ta đang test giao diện
-    // if (!token || !user) return; 
-
     try {
-      // --- PHẦN NÀY LÀ MOCK DATA (DỮ LIỆU GIẢ) ---
-      // Giả lập độ trễ mạng 1.5 giây cho giống thật
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Đây là chuỗi Markdown mẫu để test hiển thị
-      const mockMarkdown = `
-## 🔮 Luận Giải Bài Tarot Chi Tiết
-
-**Xin chào, đây là kết quả phân tích thử nghiệm giao diện!**
-
-### 1. Phân Tích Tổng Quan
-Dựa trên những lá bài bạn đã bốc, năng lượng hiện tại đang **rất mạnh mẽ**. Bạn đang đứng trước những *cơ hội lớn* nhưng cần sự **tập trung cao độ**.
-
-* **Công việc:** Có sự thăng tiến, mở rộng.
-* **Tình cảm:** Cần lắng nghe đối phương nhiều hơn.
-
-### 2. Chi Tiết Các Lá Bài
-- **Lá thứ 1:** Đại diện cho quá khứ, cho thấy bạn đã nỗ lực rất nhiều.
-- **Lá thứ 2:** Hiện tại, bạn đang cân nhắc giữa hai lựa chọn.
-- **Lá thứ 3:** Tương lai hứa hẹn sự **thành công rực rỡ** nếu bạn kiên định.
-
-### ⚠️ Lời Khuyên
-> "Hãy tin vào trực giác của bản thân và đừng ngại thay đổi hướng đi nếu cần thiết."
-
-Hy vọng giao diện hiển thị đã **đẹp** và **chuẩn Markdown**!
-      `;
-
-      setAiAnalysis(mockMarkdown);
-      // ---------------------------------------------
-
-      /* ĐOẠN CODE GỌI API CŨ (ĐÃ BỊ ẨN ĐI ĐỂ TEST)
       const featureType = readingMode === 'question' ? 'question' : 'overview';
-      ... (code cũ) ...
-      const data = await response.json();
-      ... (code cũ) ...
-      */
+      
+      // Xác định endpoint dựa vào feature_type
+      const endpoint = featureType === 'question' 
+        ? '/api/tarot/question' 
+        : '/api/tarot/overview';
+      
+      const cardsDrawn = cards.map((card, index) => ({
+        card_name: card.name,
+        is_upright: !card.isReversed,
+        // Position chỉ cần cho overview (3 lá)
+        ...(featureType === 'overview' && {
+          position: index === 0 ? 'past' : index === 1 ? 'present' : 'future'
+        })
+      }));
 
+      const requestBody: any = {
+        domain: 'tarot',
+        feature_type: featureType,
+        user_context: {
+          name: user.name || 'User',
+          gender: user.gender || 'other',
+          birth_date: user.birth_date || '2000-01-01'
+        },
+        data: {
+          cards_drawn: cardsDrawn
+        }
+      };
+
+      // Thêm question nếu là question mode
+      if (featureType === 'question' && question) {
+        requestBody.data.question = question;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Tarot API error:', errorData);
+
+        if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
+          setAiAnalysis(
+            `⚠️ **Đã hết lượt sử dụng**\n\n` +
+            `Bạn đã dùng hết ${errorData.currentUsage}/${errorData.limit} lượt cho tính năng này.\n\n` +
+            `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để tiếp tục sử dụng!`
+          );
+          setIsLoadingAnalysis(false);
+          return;
+        }
+
+        if (response.status === 500) {
+          const errorMsg = errorData.message || errorData.error || 'Internal server error';
+          setAiAnalysis(
+            `❌ **Lỗi 500 - Lỗi Server**\n\n` +
+            `${errorMsg}\n\n` +
+            `Backend đang gặp sự cố kết nối với AI Service. Vui lòng thử lại sau hoặc liên hệ admin.\n\n` +
+            `_Chi tiết: ${JSON.stringify(errorData, null, 2)}_`
+          );
+          setIsLoadingAnalysis(false);
+          return;
+        }
+
+        throw new Error(errorData.message || 'Không thể lấy phân tích tarot');
+      }
+
+      const data = await response.json();
+      
+      // Backend trả về: { analysis: "string" } hoặc { analysis: { body: "string" } }
+      if (data.analysis) {
+        let analysisText = '';
+        
+        // Nếu analysis là object (Lambda response format)
+        if (typeof data.analysis === 'object') {
+          // Lambda trả về { statusCode, headers, body }
+          if (data.analysis.body) {
+            // Body là string JSON, cần parse
+            try {
+              const bodyData = typeof data.analysis.body === 'string' 
+                ? JSON.parse(data.analysis.body) 
+                : data.analysis.body;
+              
+              // Lấy answer từ bodyData
+              analysisText = bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
+            } catch (e) {
+              // Nếu parse lỗi, dùng body trực tiếp
+              analysisText = data.analysis.body;
+            }
+          }
+          // Fallback: thử các field khác
+          else if (data.analysis.data) {
+            analysisText = data.analysis.data;
+          }
+          else if (data.analysis.message) {
+            analysisText = data.analysis.message;
+          }
+          else {
+            analysisText = JSON.stringify(data.analysis, null, 2);
+          }
+        } else {
+          // analysis is already a string
+          analysisText = data.analysis;
+        }
+        
+        setAiAnalysis(analysisText);
+      } else {
+        console.error('No analysis found in response:', data);
+        setAiAnalysis('AI không trả lời được. Vui lòng thử lại.');
+      }
     } catch (error: any) {
-      console.error('Lỗi giả lập:', error);
-      setAiAnalysis('Có lỗi xảy ra khi test.');
+      console.error('Error fetching tarot analysis:', error);
+      setAiAnalysis(`❌ Lỗi: ${error.message || 'Không thể kết nối với server'}`);
     } finally {
       setIsLoadingAnalysis(false);
     }
-};
+  };
 
   const resetReading = () => {
     setReadingMode(null);
@@ -507,7 +441,7 @@ Hy vọng giao diện hiển thị đã **đẹp** và **chuẩn Markdown**!
     isPickingCardRef.current = false; // Reset picking flag
   };
 
-  // if (!isAuthenticated) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
@@ -515,8 +449,9 @@ Hy vọng giao diện hiển thị đã **đẹp** và **chuẩn Markdown**!
       <Sidebar />
 
       <main 
-        className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        className={`flex-1 flex flex-col transition-all duration-200 relative z-10 
+          ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
+          ml-0`} 
       >
         {/* Header */}
         <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6 z-50">
