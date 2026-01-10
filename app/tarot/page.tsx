@@ -459,7 +459,8 @@ export default function TarotPage() {
           title="Bói Bài Tarot" 
           description="Khám phá định mệnh qua 78 lá bài huyền bí"
         >
-          {phase !== 'selection' && (
+          {/* Ẩn nút header khi đang xem kết quả */}
+          {phase !== 'selection' && phase !== 'reveal' && (
             <Button
               onClick={resetReading}
               variant="secondary"
