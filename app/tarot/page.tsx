@@ -13,6 +13,7 @@ import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { TAROT_DECK, TarotCard } from '@/lib/tarotData';
 import * as THREE from 'three';
+import ContentHeader from '@/components/layout/ContentHeader';
 
 // Types
 type ReadingMode = 'overview' | 'question' | null;
@@ -454,26 +455,21 @@ export default function TarotPage() {
           ml-0`} 
       >
         {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6 z-50">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
-                Bói Bài Tarot
-              </h1>
-              <p className="text-sm text-gray-400 font-light mt-1">Khám phá định mệnh qua 78 lá bài huyền bí</p>
-            </div>
-            {phase !== 'selection' && (
-              <Button
-                onClick={resetReading}
-                variant="secondary"
-                className="border-white/20 hover:bg-white/10 text-white"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Trải bài mới
-              </Button>
-            )}
-          </div>
-        </div>
+        <ContentHeader 
+          title="Bói Bài Tarot" 
+          description="Khám phá định mệnh qua 78 lá bài huyền bí"
+        >
+          {phase !== 'selection' && (
+            <Button
+              onClick={resetReading}
+              variant="secondary"
+              className="border-white/20 hover:bg-white/10 text-white"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Trải bài mới
+            </Button>
+          )}
+        </ContentHeader>
 
         {/* Content Area */}
         <div className="flex-1 relative overflow-hidden">
@@ -568,26 +564,59 @@ export default function TarotPage() {
                 className="absolute inset-0 flex items-center justify-center p-8 z-50"
               >
                 <div className="bg-black/40 backdrop-blur-2xl p-8 rounded-3xl border border-white/10 max-w-2xl w-full shadow-2xl">
-                  <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    Hãy đặt câu hỏi của bạn
+                  <h2 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    Thông Điệp Từ Vũ Trụ
                   </h2>
-                  <p className="text-gray-300 text-center mb-8">
-                    Tập trung vào vấn đề bạn đang thắc mắc và nhập câu hỏi bên dưới.
-                    Hãy hít thở sâu và giữ tâm trí tĩnh lặng.
-                  </p>
+                  
+                  {/* UX Improvement: Hướng dẫn rõ ràng hơn */}
+                  <div className="text-center mb-8">
+                    <p className="text-gray-300 text-lg mb-2">
+                      Bạn đang băn khoăn điều gì?
+                    </p>
+                    <p className="text-gray-500 text-sm italic">
+                      "Hãy đặt câu hỏi cụ thể, tập trung vào 'Thế nào', 'Tại sao' hoặc 'Lời khuyên' thay vì câu hỏi Có/Không."
+                    </p>
+                  </div>
+
                   <form onSubmit={handleQuestionSubmit} className="space-y-6">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="Ví dụ: Công việc của tôi trong tháng tới sẽ thế nào?"
-                        className="w-full bg-white/5 border border-white/20 rounded-xl px-6 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                        autoFocus
-                      />
-                      <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
+                    <div className="relative space-y-2">
+                      <label className="text-sm font-medium text-blue-300 ml-1">Nội dung câu hỏi</label>
+                      <div className="relative">
+                        <input
+                            type="text"
+                            value={question}
+                            onChange={(e) => setQuestion(e.target.value)}
+                            placeholder="VD: Chuyện tình cảm của tôi tháng này sẽ ra sao?"
+                            className="w-full bg-white/5 border border-white/20 rounded-xl pl-6 pr-14 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+                            autoFocus
+                        />
+                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
+                      </div>
                     </div>
-                    <div className="flex justify-center">
+
+                    {/* UX Improvement: Thêm gợi ý câu hỏi (Chips) */}
+                    <div className="space-y-2">
+                        <span className="text-xs text-gray-500 ml-1">Gợi ý nhanh:</span>
+                        <div className="flex flex-wrap gap-2">
+                            {[
+                                "Công việc sắp tới có thuận lợi không?",
+                                "Người ấy đang nghĩ gì về tôi?",
+                                "Lời khuyên cho tình hình tài chính hiện tại?",
+                                "Tôi cần lưu ý điều gì trong tháng này?"
+                            ].map((suggestion, idx) => (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setQuestion(suggestion)}
+                                    className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-400/50 transition-all text-gray-400 hover:text-blue-300 text-left"
+                                >
+                                    {suggestion}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center pt-2">
                       <Button
                         type="submit"
                         disabled={!question.trim()}
@@ -609,21 +638,57 @@ export default function TarotPage() {
                 exit={{ opacity: 0 }}
                 className="absolute inset-0"
               >
-                <div className="absolute top-8 left-0 right-0 text-center z-20 pointer-events-none">
-                  <h2 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-                    {phase === 'shuffling' ? 'Đang tráo bài...' : (readingMode === 'question' ? 'Hãy chọn 1 lá bài' : 'Hãy chọn 3 lá bài')}
-                  </h2>
-                  <p className="text-gray-300 drop-shadow-md">
-                    {phase === 'shuffling' ? 'Tập trung vào năng lượng của bạn' : `Đã chọn: ${selectedIndices.length}/${readingMode === 'question' ? 1 : 3}`}
-                  </p>
-                  {question && (
-                    <div className="mt-4 inline-block bg-black/30 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
-                      <p className="text-blue-300 italic">"{question}"</p>
-                    </div>
-                  )}
+                {/* --- FIX UI FINAL: Giữ bài nguyên vị trí, Đẩy Text lên cao 1cm --- */}
+                
+                <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between h-full">
+                  
+                  {/* TOP: Tiêu đề & Bộ đếm */}
+                  {/* pt-8 (32px): Đẩy sát lên trên (Cao hơn bản cũ ~1.2cm), đảm bảo an toàn */}
+                  <div className="pt-8 px-4 w-full flex flex-col items-center bg-gradient-to-b from-black/80 via-black/40 to-transparent pb-12">
+                    {phase === 'shuffling' ? (
+                       <div className="flex flex-col items-center gap-2">
+                          <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 animate-pulse text-center">
+                            Vũ Trụ Đang Kết Nối...
+                          </h2>
+                          <div className="flex items-center gap-2 text-xs text-purple-200/70 font-medium tracking-widest uppercase">
+                            <Sparkles className="w-3 h-3 animate-spin-slow" />
+                            <span>Đang hòa trộn năng lượng</span>
+                          </div>
+                       </div>
+                    ) : (
+                       <div className="flex flex-col items-center gap-3">
+                          <h2 className="text-3xl md:text-5xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>
+                            {readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}
+                          </h2>
+                          
+                          <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3">
+                             <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
+                             <div className="h-3 w-[1px] bg-white/20"></div>
+                             <span className="text-lg font-bold text-blue-400 leading-none">
+                                {selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span>
+                             </span>
+                          </div>
+                       </div>
+                    )}
+                  </div>
+
+                  {/* BOTTOM: Câu hỏi (Giữ nguyên vị trí đẹp ở đáy) */}
+                  <div className="w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-4 flex justify-center">
+                    {question && (
+                      <div className="max-w-xl w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 md:p-6 relative shadow-2xl">
+                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 rounded-full p-1.5 shadow-lg shadow-blue-600/40">
+                            <Search className="w-3 h-3 text-white" />
+                         </div>
+                         <p className="text-white/90 text-base md:text-lg font-medium text-center italic break-words line-clamp-2 md:line-clamp-3">
+                            "{question}"
+                         </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="w-full h-full">
+                {/* LAYER 3D: Camera giữ nguyên [0, 0, 12] như ý bạn */}
+                <div className="w-full h-full absolute inset-0 z-10">
                   <Canvas camera={{ position: [0, 0, 12], fov: 45 }}>
                     <TarotScene
                       phase={phase}

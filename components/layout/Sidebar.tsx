@@ -162,8 +162,8 @@ export const Sidebar = () => {
       >
         {/* Header with Toggle Button */}
         <div className={cn(
-          "px-6 py-7 border-b flex-shrink-0 flex items-center justify-between",
-          isVIP ? "border-yellow-500/20" : "border-white/10"
+        "h-20 px-6 border-b flex-shrink-0 flex items-center justify-between", 
+        isVIP ? "border-yellow-500/20" : "border-white/10"
         )}>
           {!isCollapsed && (
             <Link href="/" className="flex items-center gap-3 overflow-hidden flex-1">

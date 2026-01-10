@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { ReminderSettings } from '@/components/profile/ReminderSettings';
+import ContentHeader from '@/components/layout/ContentHeader';
 
 const genderTypes = [
   { value: 'male', label: 'Nam', icon: User, color: 'text-blue-400' },
@@ -254,20 +255,10 @@ export default function ProfilePage() {
         style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
       >
         {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/20 border border-white/10 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <User className="w-6 h-6 text-white relative z-10" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-200 via-pink-200 to-purple-200 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
-                Hồ Sơ Cá Nhân
-              </h1>
-              <p className="text-sm text-gray-400 font-light">Quản lý thông tin cá nhân và mối quan hệ</p>
-            </div>
-          </div>
-        </div>
+        <ContentHeader 
+          title="Hồ Sơ Cá Nhân"
+          description="Quản lý thông tin cá nhân và mối quan hệ"
+        />
 
         <div className="flex-1 overflow-auto p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <div className="max-w-4xl mx-auto">

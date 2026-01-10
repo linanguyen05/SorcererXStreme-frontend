@@ -12,6 +12,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
+import ContentHeader from '@/components/layout/ContentHeader';
 
 // Component để render nội dung AI với formatting đẹp
 const FormattedAIResponse = ({ content }: { content: string }) => {
@@ -243,33 +244,21 @@ export default function ChatPage() {
         style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
       >
         {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 border border-white/10 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Bot className="w-6 h-6 text-white relative z-10" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
-                  AI Chat Huyền Thuật
-                </h1>
-                <p className="text-sm text-gray-400 font-light">Trò chuyện với AI về thế giới bí ẩn</p>
-              </div>
-            </div>
-            
-            {/* Refresh Button */}
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
-              title="Làm mới cuộc trò chuyện"
-            >
-              <RefreshCw className={`w-4 h-4 text-blue-400 transition-transform duration-300 group-hover:rotate-180 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium text-gray-300">Làm mới</span>
-            </button>
-          </div>
-        </div>
+        <ContentHeader
+          title="AI Chat Huyền Thuật"
+          description="Trò chuyện với AI về thế giới bí ẩn"
+        >
+          {/* Nút Refresh được đưa vào children của ContentHeader */}
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+            title="Làm mới cuộc trò chuyện"
+          >
+            <RefreshCw className={`w-4 h-4 text-blue-400 transition-transform duration-300 group-hover:rotate-180 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="text-sm font-medium text-gray-300">Làm mới</span>
+          </button>
+        </ContentHeader>
 
         {/* Messages */}
         <div className="flex-1 overflow-auto p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
