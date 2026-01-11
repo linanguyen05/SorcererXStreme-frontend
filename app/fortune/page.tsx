@@ -490,14 +490,13 @@ export default function FortunePage() {
 
                           <Button
                             type="submit"
-                            disabled={isDailyLoading || !user?.birth_time || !user?.birth_place}
+                            isLoading={isDailyLoading} // Sử dụng prop isLoading
+                            disabled={!user?.birth_time || !user?.birth_place} // Button tự disable khi loading, chỉ cần check điều kiện input
                             className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 py-4 text-lg shadow-lg shadow-yellow-500/25"
                           >
+                            {/* Đơn giản hóa nội dung bên trong */}
                             {isDailyLoading ? (
-                              <>
-                                <LoadingSpinner size="sm" className="mr-2" />
-                                Đang xem tử vi...
-                              </>
+                              "Đang xem tử vi..."
                             ) : (
                               <>
                                 <Star className="w-5 h-5 mr-2" />
@@ -612,14 +611,12 @@ export default function FortunePage() {
 
                           <Button
                             type="submit"
-                            disabled={isLoading}
+                            isLoading={isLoading} // Sử dụng prop isLoading
                             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 py-4 text-lg shadow-lg shadow-purple-500/25"
                           >
+                            {/* Đơn giản hóa nội dung bên trong */}
                             {isLoading ? (
-                              <>
-                                <LoadingSpinner size="sm" className="mr-2" />
-                                Đang luận giải...
-                              </>
+                              "Đang luận giải..."
                             ) : (
                               <>
                                 <Sparkles className="w-5 h-5 mr-2" />
@@ -627,6 +624,7 @@ export default function FortunePage() {
                               </>
                             )}
                           </Button>
+                          
                         </form>
                       </div>
                     </div>

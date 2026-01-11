@@ -404,14 +404,11 @@ export default function NumerologyPage() {
 
                       <Button
                         onClick={performCalculation}
-                        disabled={isCalculating}
+                        isLoading={isCalculating} // Sử dụng prop mới
                         className="w-full py-6 text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         {isCalculating ? (
-                          <>
-                            <LoadingSpinner size="sm" className="mr-3" />
-                            Đang kết nối vũ trụ...
-                          </>
+                          "Đang kết nối vũ trụ..."
                         ) : (
                           <>
                             <Calculator className="w-6 h-6 mr-3" />

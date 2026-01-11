@@ -1,21 +1,24 @@
-
 'use client';
 
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { LoadingSpinner } from './LoadingSpinner'; 
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean; 
   children: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
+  isLoading = false,
   className,
   children,
+  disabled,
   ...props
 }) => {
   const baseStyles = "inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 whitespace-nowrap cursor-pointer font-['Be_Vietnam_Pro']";
@@ -34,16 +37,24 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ scale: (disabled || isLoading) ? 1 : 1.02 }} // Không scale khi loading/disabled
+      whileTap={{ scale: (disabled || isLoading) ? 1 : 0.98 }}
+      disabled={disabled || isLoading} // Tự động disable khi loading
       className={cn(
         baseStyles,
         variants[variant],
         sizes[size],
+        (disabled || isLoading) && "opacity-70 cursor-not-allowed grayscale-[0.2]", // Hiệu ứng mờ khi loading
         className
       )}
       {...(props as any)}
     >
+      {/* Logic hiển thị Spinner tự động */}
+      {isLoading && (
+        <span className="mr-2">
+           <LoadingSpinner size="sm" />
+        </span>
+      )}
       {children}
     </motion.button>
   );
