@@ -1,6 +1,857 @@
+// 'use client';
+
+// import { useState, useRef, useMemo } from 'react';
+// import { Canvas, useFrame } from '@react-three/fiber';
+// import { Float, Stars, Text, useTexture } from '@react-three/drei';
+// import { motion, AnimatePresence } from 'framer-motion';
+// import { ArrowRight, RotateCcw, Heart, Search, BookOpen, Send, Sparkles } from 'lucide-react';
+// import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
+// import { useAuthStore } from '@/lib/store';
+// import { Button } from '@/components/ui/Button';
+// import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+// import { FormattedContent } from '@/components/ui/FormattedContent';
+// import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
+// import { TAROT_DECK, TarotCard } from '@/lib/tarotData';
+// import * as THREE from 'three';
+
+// // Types
+// type ReadingMode = 'overview' | 'question' | null;
+// type ReadingPhase = 'selection' | 'question_input' | 'shuffling' | 'picking' | 'reveal';
+
+// // 3D Card Component
+// const Card3D = ({
+//   position,
+//   rotation,
+//   onClick,
+//   hovered,
+//   setHover,
+//   index,
+//   phase,
+//   isSelected
+// }: {
+//   position: [number, number, number];
+//   rotation: [number, number, number];
+//   onClick?: () => void;
+//   hovered?: boolean;
+//   setHover?: (h: boolean) => void;
+//   index: number;
+//   phase: ReadingPhase;
+//   isSelected: boolean;
+// }) => {
+//   const mesh = useRef<THREE.Group>(null);
+//   // Load texture
+//   const texture = useTexture('/tarot/card_back.png');
+
+//   // Smooth animation for position and rotation
+//   useFrame((state, delta) => {
+//     if (!mesh.current) return;
+
+//     // Slower damp for smoother, heavier feel
+//     const damp = 3;
+
+//     // Target scale
+//     const targetScale = hovered || isSelected ? 1.15 : 1;
+
+//     // Lerp position
+//     mesh.current.position.x = THREE.MathUtils.lerp(mesh.current.position.x, position[0], delta * damp);
+//     mesh.current.position.y = THREE.MathUtils.lerp(mesh.current.position.y, position[1], delta * damp);
+//     mesh.current.position.z = THREE.MathUtils.lerp(mesh.current.position.z, position[2], delta * damp);
+
+//     // Lerp rotation
+//     mesh.current.rotation.x = THREE.MathUtils.lerp(mesh.current.rotation.x, rotation[0], delta * damp);
+//     mesh.current.rotation.y = THREE.MathUtils.lerp(mesh.current.rotation.y, rotation[1], delta * damp);
+//     mesh.current.rotation.z = THREE.MathUtils.lerp(mesh.current.rotation.z, rotation[2], delta * damp);
+
+//     // Lerp scale
+//     mesh.current.scale.x = THREE.MathUtils.lerp(mesh.current.scale.x, targetScale, delta * damp);
+//     mesh.current.scale.y = THREE.MathUtils.lerp(mesh.current.scale.y, targetScale, delta * damp);
+//     mesh.current.scale.z = THREE.MathUtils.lerp(mesh.current.scale.z, targetScale, delta * damp);
+//   });
+
+//   return (
+//     <group
+//       ref={mesh}
+//       onClick={onClick}
+//       onPointerOver={() => setHover && setHover(true)}
+//       onPointerOut={() => setHover && setHover(false)}
+//     >
+//       {/* Card Body (Thickness) */}
+//       <mesh castShadow receiveShadow>
+//         <boxGeometry args={[2, 3.5, 0.02]} />
+//         <meshStandardMaterial
+//           color="#1e1b4b" // Dark indigo side
+//           roughness={0.3}
+//           metalness={0.8}
+//         />
+//       </mesh>
+
+//       {/* Card Back with Texture */}
+//       <mesh position={[0, 0, 0.011]}>
+//         <planeGeometry args={[1.9, 3.4]} />
+//         <meshStandardMaterial
+//           map={texture}
+//           roughness={0.4}
+//           metalness={0.2}
+//           emissive="#4c1d95"
+//           emissiveIntensity={0.1}
+//         />
+//       </mesh>
+
+//       {/* Gold Border */}
+//       <mesh position={[0, 0, 0.01]}>
+//         <planeGeometry args={[2, 3.5]} />
+//         <meshStandardMaterial
+//           color="#fbbf24" // Gold
+//           roughness={0.2}
+//           metalness={1}
+//         />
+//       </mesh>
+
+//       {/* Selection Glow */}
+//       {(hovered || isSelected) && (
+//         <mesh position={[0, 0, -0.05]}>
+//           <planeGeometry args={[2.2, 3.7]} />
+//           <meshBasicMaterial color="#a855f7" transparent opacity={0.4} />
+//         </mesh>
+//       )}
+//     </group>
+//   );
+// };
+
+// // Scene Controller for managing card positions
+// const TarotScene = ({
+//   phase,
+//   onCardPick,
+//   selectedIndices
+// }: {
+//   phase: ReadingPhase;
+//   onCardPick: (index: number) => void;
+//   selectedIndices: number[];
+// }) => {
+//   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+//   // Generate positions based on phase
+//   const cards = useMemo(() => {
+//     // 20 cards for display
+//     return Array.from({ length: 20 }).map((_, i) => {
+//       let pos: [number, number, number] = [0, 0, -10];
+//       let rot: [number, number, number] = [0, 0, 0];
+
+//       if (phase === 'shuffling') {
+//         // Gentle floating stack
+//         const time = Date.now() * 0.001;
+//         // Cards float in a loose stack
+//         pos = [
+//           Math.sin(time + i * 0.1) * 0.5, // Slight X wobble
+//           Math.cos(time * 0.8 + i * 0.1) * 0.5, // Slight Y wobble
+//           i * 0.02 // Stacked in Z
+//         ];
+//         // Very slight rotation
+//         rot = [0, 0, Math.sin(time * 0.5 + i * 0.1) * 0.1];
+
+//       } else if (phase === 'picking') {
+//         // Clean horizontal arc (Fan)
+//         const totalCards = 20;
+//         const width = 14; // Total width of the spread
+//         const x = (i - (totalCards - 1) / 2) * (width / totalCards);
+
+//         // Arch effect
+//         const y = -Math.pow(x * 0.15, 2) + 1; // Parabola for gentle arc
+
+//         const isSelected = selectedIndices.includes(i);
+//         const isHovered = hoveredIndex === i;
+
+//         pos = [
+//           x,
+//           y,
+//           isSelected ? 2 : (isHovered ? 0.5 : i * 0.01) // Bring forward if selected/hovered
+//         ];
+
+//         if (isSelected) {
+//           pos[1] += 1; // Move up
+//         }
+
+//         if (isHovered && !isSelected) {
+//           pos[1] += 0.5; // Slight lift on hover
+//           pos[2] = 1; // Ensure it pops over neighbors
+//         }
+
+//         // Slight rotation to face center, but keep it readable
+//         // If hovered, straighten it out
+//         rot = [0, 0, isHovered ? 0 : -x * 0.05];
+//       }
+
+//       return { pos, rot };
+//     });
+//   }, [phase, hoveredIndex, selectedIndices]);
+
+//   return (
+//     <>
+//       <ambientLight intensity={0.8} />
+//       <pointLight position={[5, 5, 5]} intensity={1.5} />
+//       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+
+//       {cards.map((card, i) => (
+//         <Card3D
+//           key={i}
+//           index={i}
+//           phase={phase}
+//           position={card.pos}
+//           rotation={card.rot}
+//           hovered={hoveredIndex === i}
+//           setHover={(h) => setHoveredIndex(h ? i : null)}
+//           onClick={() => phase === 'picking' && onCardPick(i)}
+//           isSelected={selectedIndices.includes(i)}
+//         />
+//       ))}
+//     </>
+//   );
+// };
+
+// export default function TarotPage() {
+//   const { isAuthenticated, user, token } = useAuthStore();
+//   const sidebarCollapsed = useSidebarCollapsed();
+//   const [readingMode, setReadingMode] = useState<ReadingMode>(null);
+//   const [phase, setPhase] = useState<ReadingPhase>('selection');
+//   const [selectedCards, setSelectedCards] = useState<(TarotCard & { isReversed: boolean })[]>([]);
+//   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+//   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]); // Deck đã shuffle
+//   const [question, setQuestion] = useState('');
+//   const [aiAnalysis, setAiAnalysis] = useState<string>('');
+//   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
+//   const hasCalledApiRef = useRef(false); // Track để tránh gọi API nhiều lần
+//   const isPickingCardRef = useRef(false); // Track để tránh pick nhiều cards cùng lúc
+
+//   const startReading = (mode: ReadingMode) => {
+//     setReadingMode(mode);
+//     if (mode === 'question') {
+//       setPhase('question_input');
+//     } else {
+//       beginShuffling();
+//     }
+//   };
+
+//   const beginShuffling = () => {
+//     // Shuffle deck một lần duy nhất
+//     const shuffled = [...TAROT_DECK].sort(() => Math.random() - 0.5);
+//     setShuffledDeck(shuffled);
+//     setPhase('shuffling');
+//     // Shuffle animation duration
+//     setTimeout(() => {
+//       setPhase('picking');
+//     }, 3000);
+//   };
+
+//   const handleQuestionSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!question.trim()) return;
+//     beginShuffling();
+//   };
+
+//   const handleCardPick = async (index: number) => {
+//     // Ngăn chọn card khi đang loading hoặc đang pick
+//     if (isLoadingAnalysis || isPickingCardRef.current) return;
+
+//     // Xác định số lá bài cần chọn dựa trên mode
+//     const requiredCards = readingMode === 'question' ? 1 : 3;
+
+//     if (selectedIndices.length >= requiredCards || selectedIndices.includes(index)) return;
+
+//     // Set flag để prevent multiple picks
+//     isPickingCardRef.current = true;
+
+//     const newIndices = [...selectedIndices, index];
+//     setSelectedIndices(newIndices);
+
+//     // Lấy lá bài từ shuffled deck theo index đã chọn
+//     const pickedCard = shuffledDeck[index];
+//     const isReversed = Math.random() > 0.8; // 20% chance reversed
+
+//     const newCard = { ...pickedCard, isReversed } as TarotCard & { isReversed: boolean };
+//     const newSelectedCards = [...selectedCards, newCard];
+//     setSelectedCards(newSelectedCards);
+
+//     // Khi đã chọn đủ số lá bài yêu cầu
+//     if (newIndices.length === requiredCards) {
+//       // Reset ref khi bắt đầu reading mới
+//       hasCalledApiRef.current = false;
+
+//       setTimeout(async () => {
+//         setPhase('reveal');
+
+//         // Chỉ gọi API nếu chưa gọi lần nào
+//         if (!hasCalledApiRef.current) {
+//           hasCalledApiRef.current = true;
+//           await fetchTarotAnalysis(newSelectedCards);
+//         }
+
+//         // Reset picking flag after analysis
+//         isPickingCardRef.current = false;
+//       }, 1500);
+//     } else {
+//       // Reset picking flag if not done yet
+//       setTimeout(() => {
+//         isPickingCardRef.current = false;
+//       }, 500);
+//     }
+//   };
+
+//   const fetchTarotAnalysis = async (cards: (TarotCard & { isReversed: boolean })[]) => {
+//     if (!token || !user) return;
+
+//     // Ngăn gọi API nhiều lần
+//     if (isLoadingAnalysis) return;
+
+//     setIsLoadingAnalysis(true);
+
+//     try {
+//       const featureType = readingMode === 'question' ? 'question' : 'overview';
+
+//       // Xác định endpoint dựa vào feature_type
+//       const endpoint = featureType === 'question' 
+//         ? '/api/tarot/question' 
+//         : '/api/tarot/overview';
+
+//       const cardsDrawn = cards.map((card, index) => ({
+//         card_name: card.name,
+//         is_upright: !card.isReversed,
+//         // Position chỉ cần cho overview (3 lá)
+//         ...(featureType === 'overview' && {
+//           position: index === 0 ? 'past' : index === 1 ? 'present' : 'future'
+//         })
+//       }));
+
+//       const requestBody: any = {
+//         domain: 'tarot',
+//         feature_type: featureType,
+//         user_context: {
+//           name: user.name || 'User',
+//           gender: user.gender || 'other',
+//           birth_date: user.birth_date || '2000-01-01'
+//         },
+//         data: {
+//           cards_drawn: cardsDrawn
+//         }
+//       };
+
+//       // Thêm question nếu là question mode
+//       if (featureType === 'question' && question) {
+//         requestBody.data.question = question;
+//       }
+
+//       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           Authorization: `Bearer ${token}`,
+//         },
+//         body: JSON.stringify(requestBody),
+//       });
+
+//       if (!response.ok) {
+//         const errorData = await response.json().catch(() => ({}));
+//         console.error('Tarot API error:', errorData);
+
+//         if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
+//           setAiAnalysis(
+//             `⚠️ **Đã hết lượt sử dụng**\n\n` +
+//             `Bạn đã dùng hết ${errorData.currentUsage}/${errorData.limit} lượt cho tính năng này.\n\n` +
+//             `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để tiếp tục sử dụng!`
+//           );
+//           setIsLoadingAnalysis(false);
+//           return;
+//         }
+
+//         if (response.status === 500) {
+//           const errorMsg = errorData.message || errorData.error || 'Internal server error';
+//           setAiAnalysis(
+//             `❌ **Lỗi 500 - Lỗi Server**\n\n` +
+//             `${errorMsg}\n\n` +
+//             `Backend đang gặp sự cố kết nối với AI Service. Vui lòng thử lại sau hoặc liên hệ admin.\n\n` +
+//             `_Chi tiết: ${JSON.stringify(errorData, null, 2)}_`
+//           );
+//           setIsLoadingAnalysis(false);
+//           return;
+//         }
+
+//         throw new Error(errorData.message || 'Không thể lấy phân tích tarot');
+//       }
+
+//       const data = await response.json();
+
+//       // Backend trả về: { analysis: "string" } hoặc { analysis: { body: "string" } }
+//       if (data.analysis) {
+//         let analysisText = '';
+
+//         // Nếu analysis là object (Lambda response format)
+//         if (typeof data.analysis === 'object') {
+//           // Lambda trả về { statusCode, headers, body }
+//           if (data.analysis.body) {
+//             // Body là string JSON, cần parse
+//             try {
+//               const bodyData = typeof data.analysis.body === 'string' 
+//                 ? JSON.parse(data.analysis.body) 
+//                 : data.analysis.body;
+
+//               // Lấy answer từ bodyData
+//               analysisText = bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
+//             } catch (e) {
+//               // Nếu parse lỗi, dùng body trực tiếp
+//               analysisText = data.analysis.body;
+//             }
+//           }
+//           // Fallback: thử các field khác
+//           else if (data.analysis.data) {
+//             analysisText = data.analysis.data;
+//           }
+//           else if (data.analysis.message) {
+//             analysisText = data.analysis.message;
+//           }
+//           else {
+//             analysisText = JSON.stringify(data.analysis, null, 2);
+//           }
+//         } else {
+//           // analysis is already a string
+//           analysisText = data.analysis;
+//         }
+
+//         setAiAnalysis(analysisText);
+//       } else {
+//         console.error('No analysis found in response:', data);
+//         setAiAnalysis('AI không trả lời được. Vui lòng thử lại.');
+//       }
+//     } catch (error: any) {
+//       console.error('Error fetching tarot analysis:', error);
+//       setAiAnalysis(`❌ Lỗi: ${error.message || 'Không thể kết nối với server'}`);
+//     } finally {
+//       setIsLoadingAnalysis(false);
+//     }
+//   };
+
+//   const resetReading = () => {
+//     setReadingMode(null);
+//     setPhase('selection');
+//     setSelectedCards([]);
+//     setSelectedIndices([]);
+//     setShuffledDeck([]);
+//     setQuestion('');
+//     setAiAnalysis('');
+//     setIsLoadingAnalysis(false);
+//     hasCalledApiRef.current = false; // Reset ref
+//     isPickingCardRef.current = false; // Reset picking flag
+//   };
+
+//   if (!isAuthenticated) return null;
+
+//   return (
+//     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
+//       <AnimatedBackground />
+//       <Sidebar />
+
+//       <main 
+//         className="flex-1 flex flex-col transition-all duration-200 relative z-10"
+//         style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+//       >
+//         {/* Header */}
+//         <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6 z-50">
+//           <div className="flex items-center justify-between">
+//             <div>
+//               <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
+//                 Bói Bài Tarot
+//               </h1>
+//               <p className="text-sm text-gray-400 font-light mt-1">Khám phá định mệnh qua 78 lá bài huyền bí</p>
+//             </div>
+//             {phase !== 'selection' && (
+//               <Button
+//                 onClick={resetReading}
+//                 variant="secondary"
+//                 className="border-white/20 hover:bg-white/10 text-white"
+//               >
+//                 <RotateCcw className="w-4 h-4 mr-2" />
+//                 Trải bài mới
+//               </Button>
+//             )}
+//           </div>
+//         </div>
+
+//         {/* Content Area */}
+//         <div className="flex-1 relative overflow-hidden">
+//           <AnimatePresence mode="wait">
+//             {phase === 'selection' && (
+//               <motion.div
+//                 key="selection"
+//                 initial={{ opacity: 0, y: 20 }}
+//                 animate={{ opacity: 1, y: 0 }}
+//                 exit={{ opacity: 0, y: -20 }}
+//                 className="absolute inset-0 flex flex-col items-center justify-center p-8"
+//               >
+//                 {/* Hero Section */}
+//                 <div className="text-center mb-12 max-w-3xl">
+//                   <motion.div
+//                     initial={{ opacity: 0, y: -20 }}
+//                     animate={{ opacity: 1, y: 0 }}
+//                     transition={{ delay: 0.2 }}
+//                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-6"
+//                   >
+//                     <Sparkles className="w-4 h-4 text-purple-400" />
+//                     <span className="text-sm font-medium text-purple-300">Khám Phá Vận Mệnh</span>
+//                   </motion.div>
+//                   <motion.h1
+//                     initial={{ opacity: 0, y: -20 }}
+//                     animate={{ opacity: 1, y: 0 }}
+//                     transition={{ delay: 0.3 }}
+//                     className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent"
+//                   >
+//                     Bói Bài Tarot
+//                   </motion.h1>
+//                   <motion.p
+//                     initial={{ opacity: 0, y: -20 }}
+//                     animate={{ opacity: 1, y: 0 }}
+//                     transition={{ delay: 0.4 }}
+//                     className="text-lg text-gray-400 leading-relaxed"
+//                   >
+//                     Để AI giải mã thông điệp từ vũ trụ qua các lá bài Tarot bí ẩn.<br />
+//                     Chọn phương thức bạn muốn và bắt đầu hành trình khám phá.
+//                   </motion.p>
+//                 </div>
+
+//                 {/* Cards - Centered and Larger */}
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+//                   {/* Daily Reading */}
+//                   <ReadingOption
+//                     icon={<BookOpen className="w-10 h-10 text-white" />}
+//                     title="Tổng Quan Ngày Mới"
+//                     desc="Xem vận mệnh, công việc và tình cảm trong ngày của bạn qua 3 lá bài."
+//                     color="purple"
+//                     onClick={() => startReading('overview')}
+//                   />
+//                   {/* Question Reading */}
+//                   <ReadingOption
+//                     icon={<Search className="w-10 h-10 text-white" />}
+//                     title="Hỏi Đáp Cụ Thể"
+//                     desc="Đặt một câu hỏi cụ thể và nhận lời khuyên từ những lá bài Tarot."
+//                     color="blue"
+//                     onClick={() => startReading('question')}
+//                   />
+//                 </div>
+
+//                 {/* Decorative Elements */}
+//                 <motion.div
+//                   initial={{ opacity: 0 }}
+//                   animate={{ opacity: 1 }}
+//                   transition={{ delay: 0.6 }}
+//                   className="mt-12 flex items-center gap-8 text-sm text-gray-500"
+//                 >
+//                   <div className="flex items-center gap-2">
+//                     <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+//                     <span>78 Lá Bài</span>
+//                   </div>
+//                   <div className="flex items-center gap-2">
+//                     <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
+//                     <span>AI Phân Tích</span>
+//                   </div>
+//                   <div className="flex items-center gap-2">
+//                     <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" style={{ animationDelay: '1s' }} />
+//                     <span>Kết Quả Chính Xác</span>
+//                   </div>
+//                 </motion.div>
+//               </motion.div>
+//             )}
+
+//             {phase === 'question_input' && (
+//               <motion.div
+//                 key="question_input"
+//                 initial={{ opacity: 0, scale: 0.9 }}
+//                 animate={{ opacity: 1, scale: 1 }}
+//                 exit={{ opacity: 0, scale: 1.1 }}
+//                 className="absolute inset-0 flex items-center justify-center p-8 z-50"
+//               >
+//                 <div className="bg-black/40 backdrop-blur-2xl p-8 rounded-3xl border border-white/10 max-w-2xl w-full shadow-2xl">
+//                   <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+//                     Hãy đặt câu hỏi của bạn
+//                   </h2>
+//                   <p className="text-gray-300 text-center mb-8">
+//                     Tập trung vào vấn đề bạn đang thắc mắc và nhập câu hỏi bên dưới.
+//                     Hãy hít thở sâu và giữ tâm trí tĩnh lặng.
+//                   </p>
+//                   <form onSubmit={handleQuestionSubmit} className="space-y-6">
+//                     <div className="relative">
+//                       <input
+//                         type="text"
+//                         value={question}
+//                         onChange={(e) => setQuestion(e.target.value)}
+//                         placeholder="Ví dụ: Công việc của tôi trong tháng tới sẽ thế nào?"
+//                         className="w-full bg-white/5 border border-white/20 rounded-xl px-6 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+//                         autoFocus
+//                       />
+//                       <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
+//                     </div>
+//                     <div className="flex justify-center">
+//                       <Button
+//                         type="submit"
+//                         disabled={!question.trim()}
+//                         className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-lg font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+//                       >
+//                         Bắt đầu trải bài <ArrowRight className="ml-2 w-5 h-5" />
+//                       </Button>
+//                     </div>
+//                   </form>
+//                 </div>
+//               </motion.div>
+//             )}
+
+//             {(phase === 'shuffling' || phase === 'picking') && (
+//               <motion.div
+//                 key="deck"
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 exit={{ opacity: 0 }}
+//                 className="absolute inset-0"
+//               >
+//                 <div className="absolute top-8 left-0 right-0 text-center z-20 pointer-events-none">
+//                   <h2 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
+//                     {phase === 'shuffling' ? 'Đang tráo bài...' : (readingMode === 'question' ? 'Hãy chọn 1 lá bài' : 'Hãy chọn 3 lá bài')}
+//                   </h2>
+//                   <p className="text-gray-300 drop-shadow-md">
+//                     {phase === 'shuffling' ? 'Tập trung vào năng lượng của bạn' : `Đã chọn: ${selectedIndices.length}/${readingMode === 'question' ? 1 : 3}`}
+//                   </p>
+//                   {question && (
+//                     <div className="mt-4 inline-block bg-black/30 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
+//                       <p className="text-blue-300 italic">"{question}"</p>
+//                     </div>
+//                   )}
+//                 </div>
+
+//                 <div className="w-full h-full">
+//                   <Canvas camera={{ position: [0, 0, 12], fov: 45 }}>
+//                     <TarotScene
+//                       phase={phase}
+//                       onCardPick={handleCardPick}
+//                       selectedIndices={selectedIndices}
+//                     />
+//                   </Canvas>
+//                 </div>
+//               </motion.div>
+//             )}
+
+//             {phase === 'reveal' && (
+//               <motion.div
+//                 key="reveal"
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 className="absolute inset-0 overflow-auto p-8"
+//               >
+//                 <div className="max-w-6xl mx-auto pb-20">
+//                   <div className="text-center mb-12">
+//                     <h2 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Pacifico, cursive' }}>
+//                       Kết Quả Trải Bài
+//                     </h2>
+//                     {question && (
+//                       <div className="inline-block bg-blue-500/10 border border-blue-500/20 px-8 py-4 rounded-2xl backdrop-blur-sm">
+//                         <p className="text-gray-400 text-sm uppercase tracking-wider mb-1">Câu hỏi của bạn</p>
+//                         <p className="text-xl text-blue-300 font-medium italic">"{question}"</p>
+//                       </div>
+//                     )}
+//                   </div>
+
+//                   <div className={`grid grid-cols-1 ${selectedCards.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : 'md:grid-cols-3'} gap-8 mb-12`}>
+//                     {selectedCards.map((card, index) => (
+//                       <motion.div
+//                         key={index}
+//                         initial={{ opacity: 0, y: 50, rotateY: 90 }}
+//                         animate={{ opacity: 1, y: 0, rotateY: 0 }}
+//                         transition={{ delay: index * 0.3, duration: 0.8, type: "spring" }}
+//                         className="relative group perspective"
+//                       >
+//                         <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-purple-500/50 transition-all shadow-2xl">
+//                           {/* Card Image Placeholder */}
+//                           <div className="aspect-[2/3] bg-gray-900 rounded-xl mb-6 relative overflow-hidden shadow-inner border border-white/5 group-hover:shadow-purple-500/20 transition-all">
+//                             <div className={`absolute inset-0 bg-gradient-to-br ${getCardGradient(card.suit)} opacity-20`} />
+//                             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+//                               <span className="text-4xl mb-2">{getSuitIcon(card.suit)}</span>
+//                               <h4 className="text-xl font-serif font-bold text-white/90">{card.name}</h4>
+//                               {card.image && (
+//                                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+//                                   <span className="text-xs text-white">Image Placeholder</span>
+//                                 </div>
+//                               )}
+//                             </div>
+
+//                             {/* Reversed Label */}
+//                             {/* @ts-ignore */}
+//                             {card.isReversed && (
+//                               <div className="absolute top-2 right-2 bg-red-500/80 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
+//                                 Ngược
+//                               </div>
+//                             )}
+//                           </div>
+
+//                           <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+//                             {card.name}
+//                           </h3>
+
+//                           <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+//                             <div className="p-3 bg-white/5 rounded-lg">
+//                               <span className="text-purple-400 font-semibold block mb-1 uppercase text-xs tracking-wider">Ý nghĩa chung</span>
+//                               {/* @ts-ignore */}
+//                               {card.isReversed ? card.meaning.reversed : card.meaning.upright}
+//                             </div>
+//                             {readingMode === 'overview' && (
+//                               <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+//                                 <span className="text-blue-400 font-semibold block mb-1 uppercase text-xs tracking-wider">Công việc</span>
+//                                 {card.meaning.career}
+//                               </div>
+//                             )}
+//                           </div>
+//                         </div>
+//                       </motion.div>
+//                     ))}
+//                   </div>
+
+//                   {/* AI Analysis Section */}
+//                   {(isLoadingAnalysis || aiAnalysis) && (
+//                     <motion.div
+//                       initial={{ opacity: 0, y: 20 }}
+//                       animate={{ opacity: 1, y: 0 }}
+//                       transition={{ delay: 0.9 }}
+//                       className="mb-12 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 backdrop-blur-xl rounded-2xl p-8 border border-purple-500/20 shadow-2xl"
+//                     >
+//                       <div className="flex items-center gap-3 mb-6">
+//                         <Sparkles className="w-6 h-6 text-purple-400" />
+//                         <h3 className="text-2xl font-bold text-white">Phân Tích Chuyên Sâu từ AI</h3>
+//                       </div>
+//                       {isLoadingAnalysis ? (
+//                         <div className="flex items-center justify-center py-8">
+//                           <LoadingSpinner size="md" />
+//                           <span className="ml-3 text-gray-300">AI đang phân tích lá bài của bạn...</span>
+//                         </div>
+//                       ) : (
+//                         <div className="prose prose-invert max-w-none">
+//                           <FormattedContent content={aiAnalysis} />
+//                         </div>
+//                       )}
+//                     </motion.div>
+//                   )}
+
+//                   <div className="flex justify-center">
+//                     <Button
+//                       onClick={resetReading}
+//                       className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl shadow-lg shadow-purple-500/20 text-lg font-medium transition-all hover:scale-105"
+//                     >
+//                       <RotateCcw className="w-5 h-5 mr-2" />
+//                       Trải bài khác
+//                     </Button>
+//                   </div>
+//                 </div>
+//               </motion.div>
+//             )}
+//           </AnimatePresence>
+//         </div>
+//       </main>
+//     </div>
+//   );
+// }
+
+// // Helper Components & Functions
+
+// const ReadingOption = ({ icon, title, desc, color, onClick }: any) => {
+//   const colorMap: any = {
+//     purple: {
+//       gradient: "from-purple-500 to-indigo-600",
+//       border: "border-purple-500/20 hover:border-purple-500/50",
+//       shadow: "shadow-lg shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/40",
+//       text: "text-purple-300",
+//       glow: "group-hover:shadow-[0_0_50px_rgba(168,85,247,0.3)]"
+//     },
+//     blue: {
+//       gradient: "from-blue-500 to-cyan-600",
+//       border: "border-blue-500/20 hover:border-blue-500/50",
+//       shadow: "shadow-lg shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/40",
+//       text: "text-blue-300",
+//       glow: "group-hover:shadow-[0_0_50px_rgba(59,130,246,0.3)]"
+//     },
+//     pink: {
+//       gradient: "from-pink-500 to-rose-600",
+//       border: "border-pink-500/20 hover:border-pink-500/50",
+//       shadow: "shadow-lg shadow-pink-500/20 hover:shadow-2xl hover:shadow-pink-500/40",
+//       text: "text-pink-300",
+//       glow: "group-hover:shadow-[0_0_50px_rgba(236,72,153,0.3)]"
+//     }
+//   };
+
+//   const colors = colorMap[color];
+
+//   return (
+//     <motion.div
+//       initial={{ opacity: 0, y: 20 }}
+//       animate={{ opacity: 1, y: 0 }}
+//       whileHover={{ scale: 1.03, translateY: -8 }}
+//       whileTap={{ scale: 0.98 }}
+//       className={`group relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-3xl p-10 border ${colors.border} ${colors.shadow} ${colors.glow} transition-all duration-500 cursor-pointer overflow-hidden`}
+//       onClick={onClick}
+//     >
+//       {/* Animated Background Gradient */}
+//       <div className={`absolute inset-0 bg-gradient-to-br ${colors.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-700`} />
+
+//       {/* Shine Effect */}
+//       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+//         <div className="absolute top-0 -left-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shine_1.5s_ease-in-out] skew-x-12" />
+//       </div>
+
+//       <div className="relative z-10 flex flex-col h-full">
+//         {/* Icon */}
+//         <div className={`w-20 h-20 bg-gradient-to-br ${colors.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-xl ${colors.shadow} group-hover:scale-110 transition-transform duration-300`}>
+//           {icon}
+//         </div>
+
+//         {/* Title */}
+//         <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 transition-all duration-300">
+//           {title}
+//         </h3>
+
+//         {/* Description */}
+//         <p className="text-gray-400 text-base leading-relaxed mb-6 flex-grow">
+//           {desc}
+//         </p>
+
+//         {/* CTA */}
+//         <div className={`flex items-center justify-between font-semibold ${colors.text} group-hover:gap-3 transition-all duration-300`}>
+//           <span>Bắt đầu ngay</span>
+//           <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+//         </div>
+//       </div>
+
+//       {/* Corner Accent */}
+//       <div className={`absolute top-4 right-4 w-12 h-12 rounded-full bg-gradient-to-br ${colors.gradient} opacity-10 blur-xl group-hover:opacity-30 transition-opacity duration-500`} />
+//     </motion.div>
+//   );
+// };
+
+// function getCardGradient(suit: string | undefined) {
+//   switch (suit) {
+//     case 'wands': return 'from-orange-500 to-red-600';
+//     case 'cups': return 'from-blue-400 to-cyan-600';
+//     case 'swords': return 'from-gray-300 to-slate-500';
+//     case 'pentacles': return 'from-yellow-400 to-amber-600';
+//     default: return 'from-purple-500 to-indigo-600'; // Major
+//   }
+// }
+
+// function getSuitIcon(suit: string | undefined) {
+//   switch (suit) {
+//     case 'wands': return '🔥';
+//     case 'cups': return '🏆';
+//     case 'swords': return '⚔️';
+//     case 'pentacles': return '🪙';
+//     default: return '✨'; // Major
+//   }
+// }
+
+
+
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react'; // Thêm useEffect
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Stars, Text, useTexture } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,11 +865,11 @@ import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { TAROT_DECK, TarotCard } from '@/lib/tarotData';
 import * as THREE from 'three';
 
-// Types
+// --- Types ---
 type ReadingMode = 'overview' | 'question' | null;
 type ReadingPhase = 'selection' | 'question_input' | 'shuffling' | 'picking' | 'reveal';
 
-// 3D Card Component
+// --- 3D Card Component  ---
 const Card3D = ({
   position,
   rotation,
@@ -39,33 +890,22 @@ const Card3D = ({
   isSelected: boolean;
 }) => {
   const mesh = useRef<THREE.Group>(null);
-  // Load texture
   const texture = useTexture('/tarot/card_back.png');
 
-  // Smooth animation for position and rotation
   useFrame((state, delta) => {
     if (!mesh.current) return;
-
-    // Slower damp for smoother, heavier feel
     const damp = 3;
-
-    // Target scale
     const targetScale = hovered || isSelected ? 1.15 : 1;
 
-    // Lerp position
     mesh.current.position.x = THREE.MathUtils.lerp(mesh.current.position.x, position[0], delta * damp);
     mesh.current.position.y = THREE.MathUtils.lerp(mesh.current.position.y, position[1], delta * damp);
     mesh.current.position.z = THREE.MathUtils.lerp(mesh.current.position.z, position[2], delta * damp);
 
-    // Lerp rotation
     mesh.current.rotation.x = THREE.MathUtils.lerp(mesh.current.rotation.x, rotation[0], delta * damp);
     mesh.current.rotation.y = THREE.MathUtils.lerp(mesh.current.rotation.y, rotation[1], delta * damp);
     mesh.current.rotation.z = THREE.MathUtils.lerp(mesh.current.rotation.z, rotation[2], delta * damp);
 
-    // Lerp scale
-    mesh.current.scale.x = THREE.MathUtils.lerp(mesh.current.scale.x, targetScale, delta * damp);
-    mesh.current.scale.y = THREE.MathUtils.lerp(mesh.current.scale.y, targetScale, delta * damp);
-    mesh.current.scale.z = THREE.MathUtils.lerp(mesh.current.scale.z, targetScale, delta * damp);
+    mesh.current.scale.setScalar(THREE.MathUtils.lerp(mesh.current.scale.x, targetScale, delta * damp));
   });
 
   return (
@@ -75,39 +915,18 @@ const Card3D = ({
       onPointerOver={() => setHover && setHover(true)}
       onPointerOut={() => setHover && setHover(false)}
     >
-      {/* Card Body (Thickness) */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[2, 3.5, 0.02]} />
-        <meshStandardMaterial
-          color="#1e1b4b" // Dark indigo side
-          roughness={0.3}
-          metalness={0.8}
-        />
+        <meshStandardMaterial color="#1e1b4b" roughness={0.3} metalness={0.8} />
       </mesh>
-
-      {/* Card Back with Texture */}
       <mesh position={[0, 0, 0.011]}>
         <planeGeometry args={[1.9, 3.4]} />
-        <meshStandardMaterial
-          map={texture}
-          roughness={0.4}
-          metalness={0.2}
-          emissive="#4c1d95"
-          emissiveIntensity={0.1}
-        />
+        <meshStandardMaterial map={texture} roughness={0.4} metalness={0.2} emissive="#4c1d95" emissiveIntensity={0.1} />
       </mesh>
-
-      {/* Gold Border */}
       <mesh position={[0, 0, 0.01]}>
         <planeGeometry args={[2, 3.5]} />
-        <meshStandardMaterial
-          color="#fbbf24" // Gold
-          roughness={0.2}
-          metalness={1}
-        />
+        <meshStandardMaterial color="#fbbf24" roughness={0.2} metalness={1} />
       </mesh>
-
-      {/* Selection Glow */}
       {(hovered || isSelected) && (
         <mesh position={[0, 0, -0.05]}>
           <planeGeometry args={[2.2, 3.7]} />
@@ -118,79 +937,56 @@ const Card3D = ({
   );
 };
 
-// Scene Controller for managing card positions
+// --- Scene Controller (Thêm logic Responsive cho bài) ---
 const TarotScene = ({
   phase,
   onCardPick,
-  selectedIndices
+  selectedIndices,
+  isMobile // Nhận biến mobile
 }: {
   phase: ReadingPhase;
   onCardPick: (index: number) => void;
   selectedIndices: number[];
+  isMobile: boolean;
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Generate positions based on phase
   const cards = useMemo(() => {
-    // 20 cards for display
     return Array.from({ length: 20 }).map((_, i) => {
       let pos: [number, number, number] = [0, 0, -10];
       let rot: [number, number, number] = [0, 0, 0];
 
       if (phase === 'shuffling') {
-        // Gentle floating stack
         const time = Date.now() * 0.001;
-        // Cards float in a loose stack
-        pos = [
-          Math.sin(time + i * 0.1) * 0.5, // Slight X wobble
-          Math.cos(time * 0.8 + i * 0.1) * 0.5, // Slight Y wobble
-          i * 0.02 // Stacked in Z
-        ];
-        // Very slight rotation
+        pos = [Math.sin(time + i * 0.1) * 0.5, Math.cos(time * 0.8 + i * 0.1) * 0.5, i * 0.02];
         rot = [0, 0, Math.sin(time * 0.5 + i * 0.1) * 0.1];
-
       } else if (phase === 'picking') {
-        // Clean horizontal arc (Fan)
         const totalCards = 20;
-        const width = 14; // Total width of the spread
+        // MOBILE: Thu hẹp độ rộng của quạt bài nếu là mobile
+        const width = isMobile ? 8 : 14;
         const x = (i - (totalCards - 1) / 2) * (width / totalCards);
-
-        // Arch effect
-        const y = -Math.pow(x * 0.15, 2) + 1; // Parabola for gentle arc
+        const y = -Math.pow(x * (isMobile ? 0.25 : 0.15), 2) + 1;
 
         const isSelected = selectedIndices.includes(i);
         const isHovered = hoveredIndex === i;
 
-        pos = [
-          x,
-          y,
-          isSelected ? 2 : (isHovered ? 0.5 : i * 0.01) // Bring forward if selected/hovered
-        ];
-
-        if (isSelected) {
-          pos[1] += 1; // Move up
-        }
-
+        pos = [x, y, isSelected ? 2 : (isHovered ? 0.5 : i * 0.01)];
+        if (isSelected) pos[1] += 1;
         if (isHovered && !isSelected) {
-          pos[1] += 0.5; // Slight lift on hover
-          pos[2] = 1; // Ensure it pops over neighbors
+          pos[1] += 0.5;
+          pos[2] = 1;
         }
-
-        // Slight rotation to face center, but keep it readable
-        // If hovered, straighten it out
         rot = [0, 0, isHovered ? 0 : -x * 0.05];
       }
-
       return { pos, rot };
     });
-  }, [phase, hoveredIndex, selectedIndices]);
+  }, [phase, hoveredIndex, selectedIndices, isMobile]);
 
   return (
     <>
       <ambientLight intensity={0.8} />
       <pointLight position={[5, 5, 5]} intensity={1.5} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-
       {cards.map((card, i) => (
         <Card3D
           key={i}
@@ -211,35 +1007,39 @@ const TarotScene = ({
 export default function TarotPage() {
   const { isAuthenticated, user, token } = useAuthStore();
   const sidebarCollapsed = useSidebarCollapsed();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // --- State & Logic ---
   const [readingMode, setReadingMode] = useState<ReadingMode>(null);
   const [phase, setPhase] = useState<ReadingPhase>('selection');
   const [selectedCards, setSelectedCards] = useState<(TarotCard & { isReversed: boolean })[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
-  const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]); // Deck đã shuffle
+  const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
   const [question, setQuestion] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState<string>('');
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
-  const hasCalledApiRef = useRef(false); // Track để tránh gọi API nhiều lần
-  const isPickingCardRef = useRef(false); // Track để tránh pick nhiều cards cùng lúc
+  const hasCalledApiRef = useRef(false);
+  const isPickingCardRef = useRef(false);
+
+  // Kiểm tra screen size
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const startReading = (mode: ReadingMode) => {
     setReadingMode(mode);
-    if (mode === 'question') {
-      setPhase('question_input');
-    } else {
-      beginShuffling();
-    }
+    if (mode === 'question') setPhase('question_input');
+    else beginShuffling();
   };
 
   const beginShuffling = () => {
-    // Shuffle deck một lần duy nhất
     const shuffled = [...TAROT_DECK].sort(() => Math.random() - 0.5);
     setShuffledDeck(shuffled);
     setPhase('shuffling');
-    // Shuffle animation duration
-    setTimeout(() => {
-      setPhase('picking');
-    }, 3000);
+    setTimeout(() => setPhase('picking'), 3000);
   };
 
   const handleQuestionSubmit = (e: React.FormEvent) => {
@@ -249,180 +1049,66 @@ export default function TarotPage() {
   };
 
   const handleCardPick = async (index: number) => {
-    // Ngăn chọn card khi đang loading hoặc đang pick
     if (isLoadingAnalysis || isPickingCardRef.current) return;
-    
-    // Xác định số lá bài cần chọn dựa trên mode
     const requiredCards = readingMode === 'question' ? 1 : 3;
-    
     if (selectedIndices.length >= requiredCards || selectedIndices.includes(index)) return;
 
-    // Set flag để prevent multiple picks
     isPickingCardRef.current = true;
-
     const newIndices = [...selectedIndices, index];
     setSelectedIndices(newIndices);
 
-    // Lấy lá bài từ shuffled deck theo index đã chọn
     const pickedCard = shuffledDeck[index];
-    const isReversed = Math.random() > 0.8; // 20% chance reversed
-
-    const newCard = { ...pickedCard, isReversed } as TarotCard & { isReversed: boolean };
+    const isReversed = Math.random() > 0.8;
+    const newCard = { ...pickedCard, isReversed } as any;
     const newSelectedCards = [...selectedCards, newCard];
     setSelectedCards(newSelectedCards);
 
-    // Khi đã chọn đủ số lá bài yêu cầu
     if (newIndices.length === requiredCards) {
-      // Reset ref khi bắt đầu reading mới
       hasCalledApiRef.current = false;
-      
       setTimeout(async () => {
         setPhase('reveal');
-        
-        // Chỉ gọi API nếu chưa gọi lần nào
         if (!hasCalledApiRef.current) {
           hasCalledApiRef.current = true;
           await fetchTarotAnalysis(newSelectedCards);
         }
-        
-        // Reset picking flag after analysis
         isPickingCardRef.current = false;
       }, 1500);
     } else {
-      // Reset picking flag if not done yet
-      setTimeout(() => {
-        isPickingCardRef.current = false;
-      }, 500);
+      setTimeout(() => { isPickingCardRef.current = false; }, 500);
     }
   };
 
-  const fetchTarotAnalysis = async (cards: (TarotCard & { isReversed: boolean })[]) => {
+  const fetchTarotAnalysis = async (cards: any[]) => {
     if (!token || !user) return;
-    
-    // Ngăn gọi API nhiều lần
-    if (isLoadingAnalysis) return;
-
     setIsLoadingAnalysis(true);
-
     try {
       const featureType = readingMode === 'question' ? 'question' : 'overview';
-      
-      // Xác định endpoint dựa vào feature_type
-      const endpoint = featureType === 'question' 
-        ? '/api/tarot/question' 
-        : '/api/tarot/overview';
-      
+      const endpoint = featureType === 'question' ? '/api/tarot/question' : '/api/tarot/overview';
       const cardsDrawn = cards.map((card, index) => ({
         card_name: card.name,
         is_upright: !card.isReversed,
-        // Position chỉ cần cho overview (3 lá)
         ...(featureType === 'overview' && {
           position: index === 0 ? 'past' : index === 1 ? 'present' : 'future'
         })
       }));
 
-      const requestBody: any = {
-        domain: 'tarot',
-        feature_type: featureType,
-        user_context: {
-          name: user.name || 'User',
-          gender: user.gender || 'other',
-          birth_date: user.birth_date || '2000-01-01'
-        },
-        data: {
-          cards_drawn: cardsDrawn
-        }
-      };
-
-      // Thêm question nếu là question mode
-      if (featureType === 'question' && question) {
-        requestBody.data.question = question;
-      }
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          domain: 'tarot',
+          feature_type: featureType,
+          user_context: { name: user.name, gender: user.gender, birth_date: user.birth_date },
+          data: { cards_drawn: cardsDrawn, ...(featureType === 'question' && { question }) }
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Tarot API error:', errorData);
-
-        if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
-          setAiAnalysis(
-            `⚠️ **Đã hết lượt sử dụng**\n\n` +
-            `Bạn đã dùng hết ${errorData.currentUsage}/${errorData.limit} lượt cho tính năng này.\n\n` +
-            `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để tiếp tục sử dụng!`
-          );
-          setIsLoadingAnalysis(false);
-          return;
-        }
-
-        if (response.status === 500) {
-          const errorMsg = errorData.message || errorData.error || 'Internal server error';
-          setAiAnalysis(
-            `❌ **Lỗi 500 - Lỗi Server**\n\n` +
-            `${errorMsg}\n\n` +
-            `Backend đang gặp sự cố kết nối với AI Service. Vui lòng thử lại sau hoặc liên hệ admin.\n\n` +
-            `_Chi tiết: ${JSON.stringify(errorData, null, 2)}_`
-          );
-          setIsLoadingAnalysis(false);
-          return;
-        }
-
-        throw new Error(errorData.message || 'Không thể lấy phân tích tarot');
-      }
-
       const data = await response.json();
-      
-      // Backend trả về: { analysis: "string" } hoặc { analysis: { body: "string" } }
       if (data.analysis) {
-        let analysisText = '';
-        
-        // Nếu analysis là object (Lambda response format)
-        if (typeof data.analysis === 'object') {
-          // Lambda trả về { statusCode, headers, body }
-          if (data.analysis.body) {
-            // Body là string JSON, cần parse
-            try {
-              const bodyData = typeof data.analysis.body === 'string' 
-                ? JSON.parse(data.analysis.body) 
-                : data.analysis.body;
-              
-              // Lấy answer từ bodyData
-              analysisText = bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
-            } catch (e) {
-              // Nếu parse lỗi, dùng body trực tiếp
-              analysisText = data.analysis.body;
-            }
-          }
-          // Fallback: thử các field khác
-          else if (data.analysis.data) {
-            analysisText = data.analysis.data;
-          }
-          else if (data.analysis.message) {
-            analysisText = data.analysis.message;
-          }
-          else {
-            analysisText = JSON.stringify(data.analysis, null, 2);
-          }
-        } else {
-          // analysis is already a string
-          analysisText = data.analysis;
-        }
-        
-        setAiAnalysis(analysisText);
-      } else {
-        console.error('No analysis found in response:', data);
-        setAiAnalysis('AI không trả lời được. Vui lòng thử lại.');
+        setAiAnalysis(typeof data.analysis === 'string' ? data.analysis : (data.analysis.body ? JSON.parse(data.analysis.body).answer : JSON.stringify(data.analysis)));
       }
     } catch (error: any) {
-      console.error('Error fetching tarot analysis:', error);
-      setAiAnalysis(`❌ Lỗi: ${error.message || 'Không thể kết nối với server'}`);
+      setAiAnalysis(`❌ Lỗi: ${error.message}`);
     } finally {
       setIsLoadingAnalysis(false);
     }
@@ -437,8 +1123,8 @@ export default function TarotPage() {
     setQuestion('');
     setAiAnalysis('');
     setIsLoadingAnalysis(false);
-    hasCalledApiRef.current = false; // Reset ref
-    isPickingCardRef.current = false; // Reset picking flag
+    hasCalledApiRef.current = false;
+    isPickingCardRef.current = false;
   };
 
   if (!isAuthenticated) return null;
@@ -448,27 +1134,26 @@ export default function TarotPage() {
       <AnimatedBackground />
       <Sidebar />
 
-      <main 
-        className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+      <main
+        className="flex-1 flex flex-col transition-all duration-300 relative z-10"
+        style={{
+          // Responsive margin: 0 trên mobile, 80/280 trên desktop
+          marginLeft: isMobile ? '0' : (sidebarCollapsed ? '80px' : '280px')
+        }}
       >
-        {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6 z-50">
+        {/* Header - Thêm p-4 cho mobile */}
+        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-4 md:p-6 z-50">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
+            <div className="flex flex-col">
+              <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
                 Bói Bài Tarot
               </h1>
-              <p className="text-sm text-gray-400 font-light mt-1">Khám phá định mệnh qua 78 lá bài huyền bí</p>
+              <p className="text-[10px] md:text-sm text-gray-400 font-light mt-1">Khám phá định mệnh qua 78 lá bài huyền bí</p>
             </div>
             {phase !== 'selection' && (
-              <Button
-                onClick={resetReading}
-                variant="secondary"
-                className="border-white/20 hover:bg-white/10 text-white"
-              >
+              <Button onClick={resetReading} variant="secondary" className="scale-90 md:scale-100 border-white/20 hover:bg-white/10 text-white">
                 <RotateCcw className="w-4 h-4 mr-2" />
-                Trải bài mới
+                <span className="hidden sm:inline">Trải bài mới</span>
               </Button>
             )}
           </div>
@@ -480,267 +1165,117 @@ export default function TarotPage() {
             {phase === 'selection' && (
               <motion.div
                 key="selection"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="absolute inset-0 flex flex-col items-center justify-center p-8"
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+                className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-8 overflow-y-auto"
               >
-                {/* Hero Section */}
-                <div className="text-center mb-12 max-w-3xl">
-                  <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-6"
-                  >
+                <div className="text-center mb-8 md:mb-12 max-w-3xl">
+                  <motion.div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 mb-4 md:mb-6">
                     <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm font-medium text-purple-300">Khám Phá Vận Mệnh</span>
+                    <span className="text-xs md:text-sm font-medium text-purple-300">Khám Phá Vận Mệnh</span>
                   </motion.div>
-                  <motion.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent"
-                  >
+                  <motion.h1 className="text-3xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
                     Bói Bài Tarot
                   </motion.h1>
-                  <motion.p
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-lg text-gray-400 leading-relaxed"
-                  >
-                    Để AI giải mã thông điệp từ vũ trụ qua các lá bài Tarot bí ẩn.<br />
-                    Chọn phương thức bạn muốn và bắt đầu hành trình khám phá.
-                  </motion.p>
+                  <p className="text-sm md:text-lg text-gray-400">Chọn phương thức bạn muốn và bắt đầu hành trình khám phá.</p>
                 </div>
 
-                {/* Cards - Centered and Larger */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
-                  {/* Daily Reading */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-4xl w-full">
                   <ReadingOption
-                    icon={<BookOpen className="w-10 h-10 text-white" />}
+                    icon={<BookOpen className="w-8 h-8 md:w-10 md:h-10 text-white" />}
                     title="Tổng Quan Ngày Mới"
-                    desc="Xem vận mệnh, công việc và tình cảm trong ngày của bạn qua 3 lá bài."
+                    desc="Xem vận mệnh trong ngày qua 3 lá bài."
                     color="purple"
                     onClick={() => startReading('overview')}
                   />
-                  {/* Question Reading */}
                   <ReadingOption
-                    icon={<Search className="w-10 h-10 text-white" />}
+                    icon={<Search className="w-8 h-8 md:w-10 md:h-10 text-white" />}
                     title="Hỏi Đáp Cụ Thể"
-                    desc="Đặt một câu hỏi cụ thể và nhận lời khuyên từ những lá bài Tarot."
+                    desc="Đặt một câu hỏi cụ thể và nhận lời khuyên."
                     color="blue"
                     onClick={() => startReading('question')}
                   />
                 </div>
-
-                {/* Decorative Elements */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-12 flex items-center gap-8 text-sm text-gray-500"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-                    <span>78 Lá Bài</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <span>AI Phân Tích</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" style={{ animationDelay: '1s' }} />
-                    <span>Kết Quả Chính Xác</span>
-                  </div>
-                </motion.div>
               </motion.div>
             )}
 
             {phase === 'question_input' && (
-              <motion.div
-                key="question_input"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1 }}
-                className="absolute inset-0 flex items-center justify-center p-8 z-50"
-              >
-                <div className="bg-black/40 backdrop-blur-2xl p-8 rounded-3xl border border-white/10 max-w-2xl w-full shadow-2xl">
-                  <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    Hãy đặt câu hỏi của bạn
-                  </h2>
-                  <p className="text-gray-300 text-center mb-8">
-                    Tập trung vào vấn đề bạn đang thắc mắc và nhập câu hỏi bên dưới.
-                    Hãy hít thở sâu và giữ tâm trí tĩnh lặng.
-                  </p>
+              <motion.div className="absolute inset-0 flex items-center justify-center p-4 z-50">
+                <div className="bg-black/40 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-white/10 max-w-2xl w-full shadow-2xl">
+                  <h2 className="text-xl md:text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Hãy đặt câu hỏi của bạn</h2>
                   <form onSubmit={handleQuestionSubmit} className="space-y-6">
                     <div className="relative">
                       <input
-                        type="text"
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="Ví dụ: Công việc của tôi trong tháng tới sẽ thế nào?"
-                        className="w-full bg-white/5 border border-white/20 rounded-xl px-6 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                        type="text" value={question} onChange={(e) => setQuestion(e.target.value)}
+                        placeholder="Ví dụ: Công việc của tôi sẽ thế nào?"
+                        className="w-full bg-white/5 border border-white/20 rounded-xl px-4 md:px-6 py-4 text-white focus:outline-none"
                         autoFocus
                       />
-                      <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
                     </div>
-                    <div className="flex justify-center">
-                      <Button
-                        type="submit"
-                        disabled={!question.trim()}
-                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-lg font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Bắt đầu trải bài <ArrowRight className="ml-2 w-5 h-5" />
-                      </Button>
-                    </div>
+                    <Button type="submit" disabled={!question.trim()} className="w-full md:w-auto mx-auto block px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl">
+                      Bắt đầu trải bài <ArrowRight className="inline ml-2 w-5 h-5" />
+                    </Button>
                   </form>
                 </div>
               </motion.div>
             )}
 
             {(phase === 'shuffling' || phase === 'picking') && (
-              <motion.div
-                key="deck"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0"
-              >
-                <div className="absolute top-8 left-0 right-0 text-center z-20 pointer-events-none">
-                  <h2 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-                    {phase === 'shuffling' ? 'Đang tráo bài...' : (readingMode === 'question' ? 'Hãy chọn 1 lá bài' : 'Hãy chọn 3 lá bài')}
-                  </h2>
-                  <p className="text-gray-300 drop-shadow-md">
-                    {phase === 'shuffling' ? 'Tập trung vào năng lượng của bạn' : `Đã chọn: ${selectedIndices.length}/${readingMode === 'question' ? 1 : 3}`}
-                  </p>
-                  {question && (
-                    <div className="mt-4 inline-block bg-black/30 backdrop-blur-md px-6 py-2 rounded-full border border-white/10">
-                      <p className="text-blue-300 italic">"{question}"</p>
-                    </div>
-                  )}
+              <motion.div key="deck" className="absolute inset-0">
+                <div className="absolute top-4 md:top-8 left-0 right-0 text-center z-20 px-4">
+                  <h2 className="text-lg md:text-2xl font-bold text-white mb-2">{phase === 'shuffling' ? 'Đang tráo bài...' : (readingMode === 'question' ? 'Hãy chọn 1 lá bài' : 'Hãy chọn 3 lá bài')}</h2>
+                  <p className="text-xs md:text-sm text-gray-300">{`Đã chọn: ${selectedIndices.length}/${readingMode === 'question' ? 1 : 3}`}</p>
                 </div>
-
                 <div className="w-full h-full">
-                  <Canvas camera={{ position: [0, 0, 12], fov: 45 }}>
-                    <TarotScene
-                      phase={phase}
-                      onCardPick={handleCardPick}
-                      selectedIndices={selectedIndices}
-                    />
+                  <Canvas camera={{ position: [0, 0, isMobile ? 15 : 12], fov: 45 }}>
+                    <TarotScene phase={phase} onCardPick={handleCardPick} selectedIndices={selectedIndices} isMobile={isMobile} />
                   </Canvas>
                 </div>
               </motion.div>
             )}
 
             {phase === 'reveal' && (
-              <motion.div
-                key="reveal"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="absolute inset-0 overflow-auto p-8"
-              >
+              <motion.div key="reveal" className="absolute inset-0 overflow-y-auto p-4 md:p-8">
                 <div className="max-w-6xl mx-auto pb-20">
-                  <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Pacifico, cursive' }}>
-                      Kết Quả Trải Bài
-                    </h2>
-                    {question && (
-                      <div className="inline-block bg-blue-500/10 border border-blue-500/20 px-8 py-4 rounded-2xl backdrop-blur-sm">
-                        <p className="text-gray-400 text-sm uppercase tracking-wider mb-1">Câu hỏi của bạn</p>
-                        <p className="text-xl text-blue-300 font-medium italic">"{question}"</p>
-                      </div>
-                    )}
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Pacifico, cursive' }}>Kết Quả Trải Bài</h2>
+                    {question && <p className="text-blue-300 italic">"{question}"</p>}
                   </div>
 
-                  <div className={`grid grid-cols-1 ${selectedCards.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : 'md:grid-cols-3'} gap-8 mb-12`}>
+                  {/* Grid Lá bài Responsive */}
+                  <div className={`grid grid-cols-1 ${selectedCards.length === 1 ? 'max-w-xs mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3'} gap-6 md:gap-8 mb-12`}>
                     {selectedCards.map((card, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 50, rotateY: 90 }}
-                        animate={{ opacity: 1, y: 0, rotateY: 0 }}
-                        transition={{ delay: index * 0.3, duration: 0.8, type: "spring" }}
-                        className="relative group perspective"
-                      >
-                        <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-purple-500/50 transition-all shadow-2xl">
-                          {/* Card Image Placeholder */}
-                          <div className="aspect-[2/3] bg-gray-900 rounded-xl mb-6 relative overflow-hidden shadow-inner border border-white/5 group-hover:shadow-purple-500/20 transition-all">
-                            <div className={`absolute inset-0 bg-gradient-to-br ${getCardGradient(card.suit)} opacity-20`} />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                              <span className="text-4xl mb-2">{getSuitIcon(card.suit)}</span>
-                              <h4 className="text-xl font-serif font-bold text-white/90">{card.name}</h4>
-                              {card.image && (
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                  <span className="text-xs text-white">Image Placeholder</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Reversed Label */}
-                            {/* @ts-ignore */}
-                            {card.isReversed && (
-                              <div className="absolute top-2 right-2 bg-red-500/80 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">
-                                Ngược
-                              </div>
-                            )}
+                      <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.2 }} className="bg-white/5 backdrop-blur-xl rounded-2xl p-4 md:p-6 border border-white/10">
+                        <div className="aspect-[2/3] bg-gray-900 rounded-xl mb-4 relative overflow-hidden">
+                          <div className={`absolute inset-0 bg-gradient-to-br ${getCardGradient(card.suit)} opacity-20`} />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                            <span className="text-3xl mb-2">{getSuitIcon(card.suit)}</span>
+                            <h4 className="text-lg font-serif font-bold text-center">{card.name}</h4>
                           </div>
-
-                          <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                            {card.name}
-                          </h3>
-
-                          <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
-                            <div className="p-3 bg-white/5 rounded-lg">
-                              <span className="text-purple-400 font-semibold block mb-1 uppercase text-xs tracking-wider">Ý nghĩa chung</span>
-                              {/* @ts-ignore */}
-                              {card.isReversed ? card.meaning.reversed : card.meaning.upright}
-                            </div>
-                            {readingMode === 'overview' && (
-                              <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                                <span className="text-blue-400 font-semibold block mb-1 uppercase text-xs tracking-wider">Công việc</span>
-                                {card.meaning.career}
-                              </div>
-                            )}
-                          </div>
+                          {card.isReversed && <div className="absolute top-2 right-2 bg-red-500 text-[10px] px-2 py-1 rounded-full">Ngược</div>}
                         </div>
+                        <h3 className="text-lg font-bold mb-2">{card.name}</h3>
+                        <p className="text-xs text-gray-400 line-clamp-4">{card.isReversed ? card.meaning.reversed : card.meaning.upright}</p>
                       </motion.div>
                     ))}
                   </div>
 
                   {/* AI Analysis Section */}
                   {(isLoadingAnalysis || aiAnalysis) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.9 }}
-                      className="mb-12 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 backdrop-blur-xl rounded-2xl p-8 border border-purple-500/20 shadow-2xl"
-                    >
-                      <div className="flex items-center gap-3 mb-6">
-                        <Sparkles className="w-6 h-6 text-purple-400" />
-                        <h3 className="text-2xl font-bold text-white">Phân Tích Chuyên Sâu từ AI</h3>
+                    <div className="bg-white/5 rounded-2xl p-4 md:p-8 border border-purple-500/20 shadow-2xl">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Sparkles className="w-5 h-5 text-purple-400" />
+                        <h3 className="text-xl md:text-2xl font-bold">Phân Tích AI</h3>
                       </div>
                       {isLoadingAnalysis ? (
-                        <div className="flex items-center justify-center py-8">
-                          <LoadingSpinner size="md" />
-                          <span className="ml-3 text-gray-300">AI đang phân tích lá bài của bạn...</span>
-                        </div>
+                        <div className="flex items-center gap-3"><LoadingSpinner size="sm" /> <span>Đang phân tích...</span></div>
                       ) : (
-                        <div className="prose prose-invert max-w-none">
-                          <FormattedContent content={aiAnalysis} />
-                        </div>
+                        <div className="text-sm md:text-base prose prose-invert max-w-none"><FormattedContent content={aiAnalysis} /></div>
                       )}
-                    </motion.div>
+                    </div>
                   )}
 
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={resetReading}
-                      className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl shadow-lg shadow-purple-500/20 text-lg font-medium transition-all hover:scale-105"
-                    >
-                      <RotateCcw className="w-5 h-5 mr-2" />
-                      Trải bài khác
-                    </Button>
+                  <div className="mt-8 flex justify-center">
+                    <Button onClick={resetReading} className="bg-purple-600 hover:bg-purple-500 px-8 py-4"><RotateCcw className="mr-2" /> Trải bài khác</Button>
                   </div>
                 </div>
               </motion.div>
@@ -752,77 +1287,25 @@ export default function TarotPage() {
   );
 }
 
-// Helper Components & Functions
-
+// --- Helper Components & Functions (Giữ nguyên style) ---
 const ReadingOption = ({ icon, title, desc, color, onClick }: any) => {
   const colorMap: any = {
-    purple: {
-      gradient: "from-purple-500 to-indigo-600",
-      border: "border-purple-500/20 hover:border-purple-500/50",
-      shadow: "shadow-lg shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/40",
-      text: "text-purple-300",
-      glow: "group-hover:shadow-[0_0_50px_rgba(168,85,247,0.3)]"
-    },
-    blue: {
-      gradient: "from-blue-500 to-cyan-600",
-      border: "border-blue-500/20 hover:border-blue-500/50",
-      shadow: "shadow-lg shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/40",
-      text: "text-blue-300",
-      glow: "group-hover:shadow-[0_0_50px_rgba(59,130,246,0.3)]"
-    },
-    pink: {
-      gradient: "from-pink-500 to-rose-600",
-      border: "border-pink-500/20 hover:border-pink-500/50",
-      shadow: "shadow-lg shadow-pink-500/20 hover:shadow-2xl hover:shadow-pink-500/40",
-      text: "text-pink-300",
-      glow: "group-hover:shadow-[0_0_50px_rgba(236,72,153,0.3)]"
-    }
+    purple: { gradient: "from-purple-500 to-indigo-600", border: "border-purple-500/20", text: "text-purple-300" },
+    blue: { gradient: "from-blue-500 to-cyan-600", border: "border-blue-500/20", text: "text-blue-300" }
   };
-
   const colors = colorMap[color];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.03, translateY: -8 }}
-      whileTap={{ scale: 0.98 }}
-      className={`group relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl rounded-3xl p-10 border ${colors.border} ${colors.shadow} ${colors.glow} transition-all duration-500 cursor-pointer overflow-hidden`}
-      onClick={onClick}
+      whileHover={{ y: -5 }} onClick={onClick}
+      className={`relative bg-white/5 backdrop-blur-xl rounded-2xl p-6 md:p-10 border ${colors.border} cursor-pointer overflow-hidden`}
     >
-      {/* Animated Background Gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${colors.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-700`} />
-      
-      {/* Shine Effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute top-0 -left-full h-full w-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shine_1.5s_ease-in-out] skew-x-12" />
+      <div className={`w-12 h-12 md:w-20 md:h-20 bg-gradient-to-br ${colors.gradient} rounded-xl flex items-center justify-center mb-4 md:mb-6`}>{icon}</div>
+      <h3 className="text-xl md:text-3xl font-bold mb-2">{title}</h3>
+      <p className="text-xs md:text-base text-gray-400 mb-4">{desc}</p>
+      <div className={`flex items-center gap-2 font-semibold ${colors.text} text-sm md:text-base`}>
+        <span>Bắt đầu ngay</span> <ArrowRight className="w-4 h-4" />
       </div>
-
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Icon */}
-        <div className={`w-20 h-20 bg-gradient-to-br ${colors.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-xl ${colors.shadow} group-hover:scale-110 transition-transform duration-300`}>
-          {icon}
-        </div>
-        
-        {/* Title */}
-        <h3 className="text-3xl font-bold text-white mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 transition-all duration-300">
-          {title}
-        </h3>
-        
-        {/* Description */}
-        <p className="text-gray-400 text-base leading-relaxed mb-6 flex-grow">
-          {desc}
-        </p>
-        
-        {/* CTA */}
-        <div className={`flex items-center justify-between font-semibold ${colors.text} group-hover:gap-3 transition-all duration-300`}>
-          <span>Bắt đầu ngay</span>
-          <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-        </div>
-      </div>
-
-      {/* Corner Accent */}
-      <div className={`absolute top-4 right-4 w-12 h-12 rounded-full bg-gradient-to-br ${colors.gradient} opacity-10 blur-xl group-hover:opacity-30 transition-opacity duration-500`} />
     </motion.div>
   );
 };
@@ -833,7 +1316,7 @@ function getCardGradient(suit: string | undefined) {
     case 'cups': return 'from-blue-400 to-cyan-600';
     case 'swords': return 'from-gray-300 to-slate-500';
     case 'pentacles': return 'from-yellow-400 to-amber-600';
-    default: return 'from-purple-500 to-indigo-600'; // Major
+    default: return 'from-purple-500 to-indigo-600';
   }
 }
 
@@ -843,6 +1326,6 @@ function getSuitIcon(suit: string | undefined) {
     case 'cups': return '🏆';
     case 'swords': return '⚔️';
     case 'pentacles': return '🪙';
-    default: return '✨'; // Major
+    default: return '✨';
   }
 }
