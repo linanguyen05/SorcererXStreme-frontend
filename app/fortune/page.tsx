@@ -13,12 +13,14 @@ import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { horoscopeApi } from '@/lib/api-client';
 import ContentHeader from '@/components/layout/ContentHeader';
+import { Lock } from 'lucide-react';
+import { formatDateApi, getTodayDisplay } from '@/lib/utils';
 
 type Tab = 'daily' | 'tuvi' | 'love';
 
 export default function FortunePage() {
   const sidebarCollapsed = useSidebarCollapsed();
-  const [activeTab, setActiveTab] = useState<Tab>('daily');
+  const [activeTab, setActiveTab] = useState<Tab>('tuvi');
   const { user, isAuthenticated, token } = useAuthStore();
   const { partner, breakupData } = useProfileStore();
 
@@ -34,8 +36,16 @@ export default function FortunePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // States for Daily Horoscope
+  const getTodayString = () => {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    return `${dd}/${mm}/${year}`;
+  };
+
   const [dailyInput, setDailyInput] = useState({
-    targetDate: new Date().toISOString().split('T')[0] // Today's date in YYYY-MM-DD
+    targetDate: getTodayDisplay() // Mặc định format dd/mm/yyyy
   });
   const [dailyResult, setDailyResult] = useState<any>(null);
   const [isDailyLoading, setIsDailyLoading] = useState(false);
@@ -69,6 +79,8 @@ export default function FortunePage() {
   const handleDailySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsDailyLoading(true);
+
+    const apiTargetDate = formatDateApi(dailyInput.targetDate);
 
     try {
       if (!token || !isAuthenticated) {
@@ -108,13 +120,11 @@ export default function FortunePage() {
         return dateStr;
       };
 
-
       console.log('[Fortune Daily] Sending request:', {
-        target_date: dailyInput.targetDate,
+        target_date: apiTargetDate,
         birth_time: user.birth_time,
         birth_place: user.birth_place
       });
-
 
       // Call daily horoscope API
       const response = await horoscopeApi.getHoroscope({
@@ -131,7 +141,6 @@ export default function FortunePage() {
           target_date: dailyInput.targetDate  // ✅ REQUIRED for daily
         }
       }, token);
-
 
       // Parse giống như Tarot - backend trả về: { analysis: {...} }
       let analysis = '';
@@ -182,12 +191,10 @@ export default function FortunePage() {
         return;
       }
 
-
       setDailyResult({
         analysis: analysis,
-        date: dailyInput.targetDate
+        date: apiTargetDate
       });
-
 
       toast.success('Đã xem tử vi thành công!');
     } catch (error: any) {
@@ -198,7 +205,7 @@ export default function FortunePage() {
           analysis: `⚠️ **Đã hết lượt sử dụng**\n\n` +
             `Bạn đã hết lượt xem Tử Vi hàng ngày.\n\n` +
             `Nâng cấp lên **PREMIUM** hoặc **ULTIMATE** để tiếp tục!`,
-          date: dailyInput.targetDate
+          date: apiTargetDate
         });
         toast.error('Đã hết lượt sử dụng');
       } else {
@@ -209,7 +216,6 @@ export default function FortunePage() {
     }
   };
 
-
   // Mock Daily Horoscope - Remove this when API is working
   const dailyHoroscope = {
     general: "Hôm nay là một ngày tràn đầy năng lượng tích cực. Bạn sẽ cảm thấy hứng khởi và sẵn sàng đối mặt với mọi thử thách.",
@@ -219,11 +225,9 @@ export default function FortunePage() {
     luckyColor: "Xanh dương, Tím"
   };
 
-
   const handleTuviSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
 
     try {
       console.log('[Fortune] Checking auth:', {
@@ -238,14 +242,12 @@ export default function FortunePage() {
         return;
       }
 
-
       // Validate required fields
       if (!tuviInput.name || !tuviInput.birthDate) {
         toast.error('Vui lòng điền đầy đủ họ tên và ngày sinh');
         setIsLoading(false);
         return;
       }
-
 
       // ⚠️ CRITICAL: birth_time and birth_place REQUIRED for horoscope
       if (!tuviInput.birthTime) {
@@ -392,11 +394,10 @@ export default function FortunePage() {
           description="Khám phá vận mệnh qua các vì sao"
         />
 
-
         {/* Tabs */}
         <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md">
           <button
-            onClick={() => setActiveTab('daily')}
+            onClick={() => setActiveTab('daily')} 
             className={`flex-1 py-4 text-sm font-medium transition-all relative ${activeTab === 'daily' ? 'text-yellow-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
@@ -446,8 +447,20 @@ export default function FortunePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="space-y-8"
+                  className="space-y-8 relative" // Thêm relative để định vị lớp phủ
                 >
+                  {/* LỚP PHỦ KHÓA TÍNH NĂNG */}
+                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-3xl border border-white/10">
+                    <div className="bg-black/80 p-8 rounded-2xl border border-yellow-500/30 shadow-2xl shadow-yellow-500/10 text-center max-w-md mx-4 transform hover:scale-105 transition-transform duration-300">
+                      <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-8 h-8 text-yellow-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2">Tính Năng Đang Nâng Cấp</h3>
+                      <p className="text-gray-400 text-sm">
+                        Hệ thống đang được tu luyện để mang đến những lời giải đoán chính xác nhất. Vui lòng quay lại sau!
+                      </p>
+                    </div>
+                  </div>
                   {!dailyResult ? (
                     <div className="max-w-2xl mx-auto">
                       <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl">
@@ -481,7 +494,8 @@ export default function FortunePage() {
                               Chọn ngày xem tử vi
                             </label>
                             <input
-                              type="date"
+                              type="text"
+                              placeholder="dd/mm/yyyy"
                               value={dailyInput.targetDate}
                               onChange={(e) => setDailyInput({ ...dailyInput, targetDate: e.target.value })}
                               className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
