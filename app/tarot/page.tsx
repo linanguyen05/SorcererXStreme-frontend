@@ -374,16 +374,34 @@ export default function TarotPage() {
                       <label className="text-sm font-medium text-blue-300 ml-1">Nội dung câu hỏi</label>
                       <div className="relative">
                         <input
-                            type="text"
-                            value={question}
-                            onChange={(e) => setQuestion(e.target.value)}
-                            placeholder="VD: Chuyện tình cảm của tôi tháng này sẽ ra sao?"
-                            className="w-full bg-white/5 border border-white/20 rounded-xl pl-6 pr-14 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
-                            autoFocus
-                        />
-                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6" />
-                      </div>
-                    </div>
+                          type="text"
+                          value={question}
+                          onChange={(e) => setQuestion(e.target.value)}
+                          placeholder="VD: Chuyện tình cảm của tôi tháng này sẽ ra sao?"
+                          className="w-full bg-white/5 border border-white/20 rounded-xl pl-6 pr-14 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
+                          autoFocus
+                          />
+      
+                  {/* FIX BUG 1: Thay thế Search icon bằng nút Send
+                  - type="submit": Để bấm enter hoặc click đều gửi form
+                  - disabled: Chặn click khi chưa nhập
+                  - CSS: Xử lý màu sắc sáng/tối dựa trên trạng thái disabled
+                  */}
+                  <button
+                    type="submit"
+                    disabled={!question.trim()}
+                    className={`
+                      absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-200
+                      ${!question.trim() 
+                        ? 'text-gray-600 cursor-not-allowed' // Style khi rỗng: Tối màu, không bấm được
+                        : 'text-blue-400 hover:text-white hover:bg-blue-500/20 hover:scale-110 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.5)]' // Style khi có chữ: Sáng, hiệu ứng glow
+                      }
+                    `}
+                  >
+                  <Send className="w-6 h-6" />
+                  </button>
+                  </div>
+                  </div>
 
                     {/* Gợi ý câu hỏi (Chips) */}
                     <div className="space-y-2">
@@ -407,15 +425,6 @@ export default function TarotPage() {
                         </div>
                     </div>
 
-                    <div className="flex justify-center pt-2">
-                      <Button
-                        type="submit"
-                        disabled={!question.trim()}
-                        className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-lg font-medium shadow-lg shadow-blue-500/20 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Bắt đầu trải bài <ArrowRight className="ml-2 w-5 h-5" />
-                      </Button>
-                    </div>
                   </form>
                 </div>
               </motion.div>
