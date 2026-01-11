@@ -406,18 +406,12 @@ export default function AstrologyPage() {
 
                             <Button
                               onClick={analyzeChart}
-                              isLoading={isAnalyzing} // Sử dụng prop isLoading mới
+                              isLoading={isAnalyzing}
                               className="w-full py-6 text-lg font-bold bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 hover:from-yellow-500 hover:via-amber-500 hover:to-orange-500 shadow-lg shadow-amber-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                             >
-                              {/* Logic hiển thị text gọn gàng hơn */}
-                              {isAnalyzing ? (
-                                "Đang kết nối các vì sao..."
-                              ) : (
-                                <>
-                                  <Star className="w-6 h-6 mr-3" />
-                                  Phân Tích Bản Đồ Sao
-                                </>
-                              )}
+                              {/* FIX: Giữ nguyên Icon và Text, không đổi khi loading */}
+                              <Star className="w-6 h-6 mr-3" />
+                              Phân Tích Bản Đồ Sao
                             </Button>
                           </div>
                         </div>
@@ -506,17 +500,12 @@ export default function AstrologyPage() {
                         </p>
                         <Button
                           onClick={analyzeChart}
-                          isLoading={isAnalyzing} // Sử dụng prop isLoading mới
+                          isLoading={isAnalyzing}
                           className="w-full py-4 text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-500/25 rounded-xl"
                         >
-                          {isAnalyzing ? (
-                            "Đang tính toán..."
-                          ) : (
-                            <>
-                              <Heart className="w-5 h-5 mr-2" />
-                              Xem Tình Duyên
-                            </>
-                          )}
+                          {/* FIX: Giữ nguyên Icon và Text, không đổi khi loading */}
+                          <Heart className="w-5 h-5 mr-2" />
+                          Xem Tình Duyên
                         </Button>
                       </div>
                     </motion.div>

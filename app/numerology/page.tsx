@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hash, Calculator, RefreshCw, Sparkles, Star, ArrowRight, Zap, Crown, Infinity as InfinityIcon } from 'lucide-react';
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import ContentHeader from '@/components/layout/ContentHeader';
+
 
 const numerologyMeanings = {
   1: {
@@ -78,11 +80,13 @@ const numerologyMeanings = {
   }
 };
 
+
 export default function NumerologyPage() {
   const sidebarCollapsed = useSidebarCollapsed();
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<any>(null);
   const { user, isAuthenticated } = useAuthStore();
+
 
   const calculateLifePath = (birthDate: string) => {
     const numbers = birthDate.replace(/\D/g, '');
@@ -91,13 +95,16 @@ export default function NumerologyPage() {
       sum += parseInt(digit);
     }
 
+
     while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
       const digits = sum.toString().split('');
       sum = digits.reduce((acc, digit) => acc + parseInt(digit), 0);
     }
 
+
     return sum > 9 ? sum : sum;
   };
+
 
   const calculateNameNumber = (name: string) => {
     const letterValues: { [key: string]: number } = {
@@ -111,20 +118,25 @@ export default function NumerologyPage() {
       'Ì': 9, 'Í': 9, 'Ỉ': 9, 'Ĩ': 9, 'Ị': 9,
     };
 
+
     let sum = 0;
     const cleanName = name.toUpperCase().replace(/[^A-ZÀÁẢÃẠÊÈÉẺẼẸÔÒÓỎÕỌƯÙÚỦŨỤÌÍỈĨỊ]/g, '');
+
 
     for (let char of cleanName) {
       sum += letterValues[char] || 0;
     }
+
 
     while (sum > 9) {
       const digits = sum.toString().split('');
       sum = digits.reduce((acc, digit) => acc + parseInt(digit), 0);
     }
 
+
     return sum;
   };
+
 
   const performCalculation = async () => {
     const { token } = useAuthStore.getState();
@@ -133,14 +145,17 @@ export default function NumerologyPage() {
       return;
     }
 
+
     const nameToUse = user?.name || '';
     const birthDateToUse = user?.birth_date || '';
     const genderToUse = user?.gender || 'other';
+
 
     if (!nameToUse || !birthDateToUse) {
       toast.error('Vui lòng cập nhật đầy đủ tên và ngày sinh trong hồ sơ');
       return;
     }
+
 
     // Format birth_date to YYYY-MM-DD
     const formatBirthDate = (dateStr: string): string => {
@@ -155,9 +170,12 @@ export default function NumerologyPage() {
       return dateStr;
     };
 
+
     const formattedBirthDate = formatBirthDate(birthDateToUse);
 
+
     setIsCalculating(true);
+
 
     try {
       const requestBody = {
@@ -170,7 +188,9 @@ export default function NumerologyPage() {
         }
       };
 
+
       console.log('[Numerology] Sending request:', { ...requestBody, token: '***' });
+
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/numerology`, {
         method: 'POST',
@@ -181,11 +201,14 @@ export default function NumerologyPage() {
         body: JSON.stringify(requestBody),
       });
 
+
       console.log('[Numerology] Response status:', response.status);
+
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('[Numerology] Error response:', errorData);
+
 
         if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
           // Calculate local numbers for display even when limit reached
@@ -193,6 +216,7 @@ export default function NumerologyPage() {
           const nameNumber = calculateNameNumber(nameToUse);
           const finalNumber = lifePath <= 9 ? lifePath : lifePath;
           const meaning = numerologyMeanings[finalNumber as keyof typeof numerologyMeanings];
+
 
           setResult({
             name: nameToUse,
@@ -210,6 +234,7 @@ export default function NumerologyPage() {
           return;
         }
 
+
         if (response.status === 500) {
           const errorMsg = errorData.message || errorData.error || 'Internal server error';
           toast.error(`Lỗi server: ${errorMsg}`);
@@ -217,33 +242,36 @@ export default function NumerologyPage() {
           return;
         }
 
+
         toast.error(errorData.message || 'Không thể lấy phân tích thần số học');
         setIsCalculating(false);
         return;
       }
 
+
       const data = await response.json();
       console.log('[Numerology] Backend response:', data);
-      
+     
       // Calculate local numbers for display
       const lifePath = calculateLifePath(birthDateToUse);
       const nameNumber = calculateNameNumber(nameToUse);
       const finalNumber = lifePath <= 9 ? lifePath : lifePath;
       const meaning = numerologyMeanings[finalNumber as keyof typeof numerologyMeanings];
 
+
       // Parse response giống Fortune - 3 tier check
       let analysis = '';
-      
+     
       try {
         // Tier 1: Check response.analysis (object with body)
         if (data.analysis) {
           if (typeof data.analysis === 'object') {
             // Lambda format: { statusCode, headers, body }
             if (data.analysis.body) {
-              const bodyData = typeof data.analysis.body === 'string' 
-                ? JSON.parse(data.analysis.body) 
+              const bodyData = typeof data.analysis.body === 'string'
+                ? JSON.parse(data.analysis.body)
                 : data.analysis.body;
-              
+             
               // Extract analysis from bodyData
               analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
             } else {
@@ -270,6 +298,7 @@ export default function NumerologyPage() {
         analysis = '';
       }
 
+
       if (analysis && analysis.trim() !== '') {
         setResult({
           name: nameToUse,
@@ -284,7 +313,7 @@ export default function NumerologyPage() {
       } else {
         console.error('[Numerology] No analysis in response:', data);
         toast.error('Không nhận được kết quả từ hệ thống');
-        
+       
         // Fallback to local calculation
         setResult({
           name: nameToUse,
@@ -300,12 +329,13 @@ export default function NumerologyPage() {
       console.error('[Numerology] Error:', error);
       toast.error(error.message || 'Có lỗi xảy ra khi tính toán');
       toast.error('Có lỗi xảy ra khi kết nối với AI');
-      
+     
       // Fallback to local calculation
       const lifePath = calculateLifePath(birthDateToUse);
       const nameNumber = calculateNameNumber(nameToUse);
       const finalNumber = lifePath <= 9 ? lifePath : lifePath;
       const meaning = numerologyMeanings[finalNumber as keyof typeof numerologyMeanings];
+
 
       setResult({
         name: nameToUse,
@@ -321,13 +351,16 @@ export default function NumerologyPage() {
     }
   };
 
+
   const resetCalculation = () => {
     setResult(null);
   };
 
+
   if (!isAuthenticated) {
     return null;
   }
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -338,6 +371,7 @@ export default function NumerologyPage() {
       }
     }
   };
+
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -352,12 +386,14 @@ export default function NumerologyPage() {
     }
   };
 
+
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
       <AnimatedBackground />
       <Sidebar />
 
-      <main 
+
+      <main
         className="flex-1 flex flex-col transition-all duration-200 relative z-10"
         style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
       >
@@ -367,8 +403,10 @@ export default function NumerologyPage() {
           description="Khám phá bản chất qua sức mạnh của con số"
         />
 
+
         <div className="flex-1 overflow-auto p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <div className="max-w-6xl mx-auto">
+
 
             {/* Input Section */}
             <AnimatePresence mode="wait">
@@ -384,12 +422,14 @@ export default function NumerologyPage() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-purple-500/20 transition-colors duration-700" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -ml-32 -mb-32 group-hover:bg-indigo-500/20 transition-colors duration-700" />
 
+
                     <div className="relative z-10">
                       <h3 className="text-xl font-bold text-white mb-8 flex items-center justify-center">
                         <Sparkles className="w-5 h-5 text-purple-400 mr-2 animate-pulse" />
                         Thông tin định danh
                         <Sparkles className="w-5 h-5 text-purple-400 ml-2 animate-pulse" />
                       </h3>
+
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div className="bg-black/30 rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-colors">
@@ -402,25 +442,20 @@ export default function NumerologyPage() {
                         </div>
                       </div>
 
+
                       <Button
-                        onClick={performCalculation}
-                        isLoading={isCalculating} 
+                        isLoading={isCalculating}
+                        type="submit"
                         className="w-full py-6 text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                       >
-                        {isCalculating ? (
-                          "Đang kết nối vũ trụ..."
-                        ) : (
-                          <>
-                            <Calculator className="w-6 h-6 mr-3" />
-                            Khám Phá Ngay
-                          </>
-                        )}
+                        Khám Phá Ngay
                       </Button>
                     </div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
+
 
             {/* Results Display */}
             <AnimatePresence>
@@ -444,6 +479,7 @@ export default function NumerologyPage() {
                       </div>
                     </motion.div>
 
+
                     <motion.div variants={itemVariants} className="relative group">
                       <div className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 text-center relative overflow-hidden hover:border-purple-500/50 transition-all duration-300 h-full">
@@ -454,6 +490,7 @@ export default function NumerologyPage() {
                         <p className="text-sm text-gray-400">Năng lực tiềm ẩn và sức mạnh nội tại từ cái tên</p>
                       </div>
                     </motion.div>
+
 
                     <motion.div variants={itemVariants} className="relative group">
                       <div className="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -470,6 +507,7 @@ export default function NumerologyPage() {
                     </motion.div>
                   </div>
 
+
                   {/* Analysis Display */}
                   <motion.div variants={itemVariants} className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-3xl -z-10" />
@@ -484,10 +522,12 @@ export default function NumerologyPage() {
                         <div className="h-1 w-24 bg-gradient-to-r from-transparent via-purple-500 to-transparent mx-auto rounded-full" />
                       </div>
 
+
                       <div className="prose prose-invert max-w-none">
                         <div className="bg-black/20 rounded-2xl p-8 border border-white/5">
                           <FormattedContent content={result.analysis} className="text-gray-200 leading-relaxed text-lg" />
                         </div>
+
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                           <div className="bg-white/5 rounded-xl p-4 border border-white/5">
@@ -505,6 +545,7 @@ export default function NumerologyPage() {
                         </div>
                       </div>
 
+
                       <div className="flex justify-center mt-12">
                         <Button
                           onClick={resetCalculation}
@@ -520,6 +561,7 @@ export default function NumerologyPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
 
             {/* Numbers Reference */}
             <motion.div
@@ -537,6 +579,7 @@ export default function NumerologyPage() {
                 </h2>
                 <div className="h-px w-16 bg-gradient-to-l from-transparent to-white/20" />
               </div>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.entries(numerologyMeanings).map(([number, meaning], index) => (

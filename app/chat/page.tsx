@@ -364,11 +364,10 @@ export default function ChatPage() {
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                isLoading={isLoading} // Thêm hiệu ứng loading cho nút Send
+                isLoading={isLoading} 
                 className="px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 rounded-xl transition-all hover:scale-105 active:scale-95"
               >
-                {/* Khi loading, Button tự hiện spinner, ta chỉ cần ẩn icon Send đi hoặc giữ nguyên tùy ý (ở đây Button đã tự xử lý ẩn hiện nội dung khi loading nên ta cứ để icon Send) */}
-                {!isLoading && <Send className="w-5 h-5" />}
+                <Send className="w-5 h-5" />
               </Button>
             </form>
           </div>

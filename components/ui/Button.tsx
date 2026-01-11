@@ -3,12 +3,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { LoadingSpinner } from './LoadingSpinner'; 
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean; 
+  isLoading?: boolean; // Prop bắt buộc để fix bug loading
   children: React.ReactNode;
 }
 
@@ -37,22 +37,21 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <motion.button
-      whileHover={{ scale: (disabled || isLoading) ? 1 : 1.02 }} // Không scale khi loading/disabled
-      whileTap={{ scale: (disabled || isLoading) ? 1 : 0.98 }}
-      disabled={disabled || isLoading} // Tự động disable khi loading
+      whileHover={disabled || isLoading ? {} : { scale: 1.02 }}
+      whileTap={disabled || isLoading ? {} : { scale: 0.98 }}
+      disabled={disabled || isLoading}
       className={cn(
         baseStyles,
         variants[variant],
         sizes[size],
-        (disabled || isLoading) && "opacity-70 cursor-not-allowed grayscale-[0.2]", // Hiệu ứng mờ khi loading
+        (disabled || isLoading) && "opacity-80 cursor-not-allowed",
         className
       )}
       {...(props as any)}
     >
-      {/* Logic hiển thị Spinner tự động */}
       {isLoading && (
         <span className="mr-2">
-           <LoadingSpinner size="sm" />
+          <LoadingSpinner size="sm" color="text-current" />
         </span>
       )}
       {children}
