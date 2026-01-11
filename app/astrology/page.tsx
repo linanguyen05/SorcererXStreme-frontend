@@ -13,6 +13,7 @@ import AstrologyScene3D from '@/components/astrology/AstrologyScene3D';
 import HouseChart3D from '@/components/astrology/HouseChart3D';
 import StarMap3D from '@/components/astrology/StarMap3D';
 import toast from 'react-hot-toast';
+import ContentHeader from '@/components/layout/ContentHeader';
 
 const zodiacSigns = [
   { name: 'Bạch Dương', date: '21/3 - 19/4', element: 'Hỏa', traits: 'Năng động, dũng cảm, lãnh đạo' },
@@ -306,20 +307,10 @@ export default function AstrologyPage() {
             : (sidebarCollapsed ? '80px' : '280px')  }}
       >
         {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6 sticky top-0 z-50">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 border border-white/10 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Star className="w-6 h-6 text-white relative z-10 group-hover:rotate-12 transition-transform duration-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-200 via-amber-200 to-yellow-200 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
-                Chiêm Tinh Học 3D
-              </h1>
-              <p className="text-sm text-gray-400 font-light">Khám phá vận mệnh qua vị trí các vì sao</p>
-            </div>
-          </div>
-        </div>
+        <ContentHeader
+          title="Chiêm Tinh Học 3D"
+          description="Khám phá vận mệnh qua vị trí các vì sao"
+        />
 
         {/* Tabs */}
         <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md">

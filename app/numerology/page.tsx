@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
+import ContentHeader from '@/components/layout/ContentHeader';
 
 const numerologyMeanings = {
   1: {
@@ -361,20 +362,10 @@ export default function NumerologyPage() {
         style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
       >
         {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6 sticky top-0 z-50">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/20 border border-white/10 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Hash className="w-6 h-6 text-white relative z-10 group-hover:rotate-12 transition-transform duration-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
-                Thần Số Học
-              </h1>
-              <p className="text-sm text-gray-400 font-light">Khám phá bản chất qua sức mạnh của con số</p>
-            </div>
-          </div>
-        </div>
+        <ContentHeader
+          title="Thần Số Học"
+          description="Khám phá bản chất qua sức mạnh của con số"
+        />
 
         <div className="flex-1 overflow-auto p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <div className="max-w-6xl mx-auto">

@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { horoscopeApi } from '@/lib/api-client';
+import ContentHeader from '@/components/layout/ContentHeader';
 
 type Tab = 'daily' | 'tuvi' | 'love';
 
@@ -364,20 +365,10 @@ export default function FortunePage() {
         style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
       >
         {/* Header */}
-        <div className="bg-black/20 backdrop-blur-xl border-b border-white/10 p-6">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20 border border-white/10 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Star className="w-6 h-6 text-white relative z-10" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-200 via-orange-200 to-yellow-200 bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
-                Bói Toán & Tử Vi
-              </h1>
-              <p className="text-sm text-gray-400 font-light">Khám phá vận mệnh qua các vì sao</p>
-            </div>
-          </div>
-        </div>
+        <ContentHeader
+          title="Bói Toán & Tử Vi"
+          description="Khám phá vận mệnh qua các vì sao"
+        />
 
         {/* Tabs */}
         <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md">
