@@ -431,7 +431,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X // Thêm icon đóng cho mobile
+  X
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -526,7 +526,8 @@ export const Sidebar = () => {
       {isMobile && isCollapsed && (
         <button
           onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-[60] p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-xl md:hidden"
+          className="fixed top-4 left-4 z-[60] p-3 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white shadow-xl md:hidden active:scale-90 transition-transform"
+          title="Vuốt hoặc chạm để mở menu"
         >
           <Menu className="w-6 h-6" />
         </button>
@@ -539,7 +540,8 @@ export const Sidebar = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIsCollapsed(true)}
+            // onClick={() => setIsCollapsed(true)}
+            onClick={toggleSidebar}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           />
         )}
@@ -548,24 +550,37 @@ export const Sidebar = () => {
       <motion.div
         initial={false}
         animate={{
-          width: isCollapsed ? (isMobile ? 0 : 80) : 280,
-          x: isMobile && isCollapsed ? -280 : 0
+          // width: isCollapsed ? (isMobile ? 0 : 80) : 280,
+          // x: isMobile && isCollapsed ? -280 : 0,
+          x: isMobile ? (isCollapsed ? "-100%" : "0%") : 0,
+          width: isMobile ? 280 : (isCollapsed ? 80 : 280),
+          opacity: isMobile && isCollapsed ? 0 : 1
         }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        style={{
+          fontFamily: 'Be Vietnam Pro, sans-serif',
+          pointerEvents: isMobile && isCollapsed ? 'none' : 'auto'
+        }}
+
+        // transition={{ duration: 0.3, ease: "easeInOut" }}
+        // className={cn(
+        //   "h-screen backdrop-blur-xl border-r flex flex-col shadow-2xl fixed left-0 top-0 z-[50]",
+        //   isVIP
+        //     ? "bg-black/90 border-yellow-500/20 shadow-yellow-500/10"
+        //     : "bg-black/90 border-white/10",
+        // )}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className={cn(
-          "h-screen backdrop-blur-xl border-r flex flex-col shadow-2xl fixed left-0 top-0 z-[50]",
-          isVIP
-            ? "bg-black/90 border-yellow-500/20 shadow-yellow-500/10"
-            : "bg-black/90 border-white/10",
+          "h-screen fixed left-0 top-0 z-[60] shadow-2xl", // z-index cao hơn để đè lên content
+          isMobile ? "w-[280px]" : "", // Cố định chiều rộng trên mobile
+          isVIP ? "bg-black/95 border-yellow-500/20" : "bg-black/95 border-white/10"
         )}
-        style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}
       >
         {/* Header with Toggle Button */}
         <div className={cn(
-        "h-20 px-6 border-b flex-shrink-0 flex items-center justify-between", 
-        isVIP ? "border-yellow-500/20" : "border-white/10"
+          "h-20 px-6 border-b flex-shrink-0 flex items-center justify-between",
+          isVIP ? "border-yellow-500/20" : "border-white/10"
         )}>
-          {(!isCollapsed || (isMobile && !isCollapsed)) && (
+          {(!isCollapsed) && (
             <Link href="/" className="flex items-center gap-3 overflow-hidden flex-1">
               <div className="flex flex-col overflow-hidden whitespace-nowrap">
                 <h1 className={cn(
@@ -610,7 +625,7 @@ export const Sidebar = () => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link key={item.href} href={item.href} onClick={() => isMobile && setIsCollapsed(true)}>
+                <Link key={item.href} href={item.href} onClick={() => isMobile && toggleSidebar()}>
                   <motion.div
                     whileHover={{ x: isCollapsed ? 0 : 4, scale: 1.02 }}
                     className={cn(

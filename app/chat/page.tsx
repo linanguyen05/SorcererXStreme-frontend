@@ -47,7 +47,7 @@ export default function ChatPage() {
               Authorization: `Bearer ${token}`,
             },
           });
-          
+
           if (response.ok) {
             const data = await response.json();
             setSessionId(data.sessionId || data.session_id);
@@ -57,19 +57,19 @@ export default function ChatPage() {
         }
       }
     };
-    
+
     initSession();
   }, [sessionId, token, setSessionId]);
 
   const handleRefresh = async () => {
     if (isLoading) return;
-    
+
     // Clear messages
     clearMessages();
-    
+
     // Reset session (dùng empty string thay vì null)
     setSessionId('');
-    
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_CHAT_SERVICE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat/new-session`, {
         method: 'POST',
@@ -78,7 +78,7 @@ export default function ChatPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSessionId(data.sessionId || data.session_id);
@@ -107,7 +107,7 @@ export default function ChatPage() {
     try {
       const { token, user } = useAuthStore.getState();
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat`;
-      
+
       // Chuẩn bị user_context từ user profile với validation
       const requestBody = {
         domain: "chatbot",
@@ -141,7 +141,7 @@ export default function ChatPage() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Chat API error:', errorData);
-        
+
         if (response.status === 401) {
           toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
           return;
@@ -154,7 +154,7 @@ export default function ChatPage() {
         } else if (response.status === 500) {
           const errorMsg = errorData.message || errorData.error || 'Lỗi server';
           toast.error(`Lỗi server: ${errorMsg}`);
-          
+
           // Hiển thị chi tiết lỗi trong development mode
           if (process.env.NODE_ENV === 'development') {
             addMessage({
@@ -164,16 +164,16 @@ export default function ChatPage() {
           }
           return;
         }
-        
+
         throw new Error(errorData.message || errorData.error || 'Không thể lấy phản hồi từ AI');
       }
 
       const responseData = await response.json();
       console.log('Chat response data:', responseData);
-      
+
       // Xử lý response từ backend
       let aiAnswer = null;
-      
+
       // Backend trả về: { data: "string" } - data là STRING trực tiếp
       if (responseData.data && typeof responseData.data === 'string') {
         aiAnswer = responseData.data;
@@ -196,15 +196,15 @@ export default function ChatPage() {
       else {
         aiAnswer = responseData.reply || responseData.answer || responseData.message;
       }
-      
+
       console.log('Extracted AI answer:', aiAnswer);
-      
+
       if (aiAnswer) {
         // Đảm bảo content là string
-        const content = typeof aiAnswer === 'string' 
-          ? aiAnswer 
+        const content = typeof aiAnswer === 'string'
+          ? aiAnswer
           : JSON.stringify(aiAnswer, null, 2);
-        
+
         addMessage({
           content: content,
           role: 'assistant'
@@ -217,7 +217,7 @@ export default function ChatPage() {
       console.error('Chat error:', error);
       const errorMessage = error.message || 'Có lỗi xảy ra khi kết nối với AI';
       toast.error(errorMessage);
-      
+
       // Thêm error message vào chat nếu cần debug
       if (process.env.NODE_ENV === 'development') {
         addMessage({
@@ -239,9 +239,9 @@ export default function ChatPage() {
       <AnimatedBackground />
       <Sidebar />
 
-      <main 
+      <main
         className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
         <ContentHeader
@@ -385,8 +385,8 @@ const MessageBubble = ({ message, user }: { message: ChatMessage; user: any }) =
       className={`flex items-start space-x-4 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`}
     >
       <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg border border-white/10 ${isUser
-          ? 'bg-gradient-to-br from-red-500 to-pink-600'
-          : 'bg-gradient-to-br from-purple-600 to-indigo-600'
+        ? 'bg-gradient-to-br from-red-500 to-pink-600'
+        : 'bg-gradient-to-br from-purple-600 to-indigo-600'
         }`}>
         {isUser ? (
           <User className="w-5 h-5 text-white" />
@@ -396,8 +396,8 @@ const MessageBubble = ({ message, user }: { message: ChatMessage; user: any }) =
       </div>
       <div className={`max-w-3xl ${isUser ? 'text-right' : ''}`}>
         <div className={`inline-block px-6 py-4 rounded-2xl shadow-lg backdrop-blur-md border ${isUser
-            ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20 border-red-500/20 text-white rounded-tr-none'
-            : 'bg-white/5 border-white/10 text-gray-100 rounded-tl-none'
+          ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20 border-red-500/20 text-white rounded-tr-none'
+          : 'bg-white/5 border-white/10 text-gray-100 rounded-tl-none'
           }`}>
           {isUser ? (
             <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>

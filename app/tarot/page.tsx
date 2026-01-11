@@ -284,14 +284,14 @@ export default function TarotPage() {
       <Sidebar />
 
       {/* RESOLVED CONFLICT 1: Sử dụng cấu trúc Main (Tailwind + Component) */}
-      <main 
+      <main
         className={`flex-1 flex flex-col transition-all duration-200 relative z-10 
           ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
-          ml-0`} 
+          ml-0`}
       >
         {/* Header - Dùng Component ContentHeader mới */}
-        <ContentHeader 
-          title="Bói Bài Tarot" 
+        <ContentHeader
+          title="Bói Bài Tarot"
           description="Khám phá định mệnh qua 78 lá bài huyền bí"
         >
           {/* Nút Reset được truyền vào dưới dạng children */}
@@ -359,7 +359,7 @@ export default function TarotPage() {
                   <h2 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     Thông Điệp Từ Vũ Trụ
                   </h2>
-                  
+
                   <div className="text-center mb-8">
                     <p className="text-gray-300 text-lg mb-2">
                       Bạn đang băn khoăn điều gì?
@@ -380,49 +380,49 @@ export default function TarotPage() {
                           placeholder="VD: Chuyện tình cảm của tôi tháng này sẽ ra sao?"
                           className="w-full bg-white/5 border border-white/20 rounded-xl pl-6 pr-14 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
                           autoFocus
-                          />
-      
-                  {/* FIX BUG 1: Thay thế Search icon bằng nút Send
+                        />
+
+                        {/* FIX BUG 1: Thay thế Search icon bằng nút Send
                   - type="submit": Để bấm enter hoặc click đều gửi form
                   - disabled: Chặn click khi chưa nhập
                   - CSS: Xử lý màu sắc sáng/tối dựa trên trạng thái disabled
                   */}
-                  <button
-                    type="submit"
-                    disabled={!question.trim()}
-                    className={`
+                        <button
+                          type="submit"
+                          disabled={!question.trim()}
+                          className={`
                       absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-200
-                      ${!question.trim() 
-                        ? 'text-gray-600 cursor-not-allowed' // Style khi rỗng: Tối màu, không bấm được
-                        : 'text-blue-400 hover:text-white hover:bg-blue-500/20 hover:scale-110 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.5)]' // Style khi có chữ: Sáng, hiệu ứng glow
-                      }
+                      ${!question.trim()
+                              ? 'text-gray-600 cursor-not-allowed' // Style khi rỗng: Tối màu, không bấm được
+                              : 'text-blue-400 hover:text-white hover:bg-blue-500/20 hover:scale-110 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.5)]' // Style khi có chữ: Sáng, hiệu ứng glow
+                            }
                     `}
-                  >
-                  <Send className="w-6 h-6" />
-                  </button>
-                  </div>
-                  </div>
+                        >
+                          <Send className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </div>
 
                     {/* Gợi ý câu hỏi (Chips) */}
                     <div className="space-y-2">
-                        <span className="text-xs text-gray-500 ml-1">Gợi ý nhanh:</span>
-                        <div className="flex flex-wrap gap-2">
-                            {[
-                                "Công việc sắp tới có thuận lợi không?",
-                                "Người ấy đang nghĩ gì về tôi?",
-                                "Lời khuyên cho tình hình tài chính hiện tại?",
-                                "Tôi cần lưu ý điều gì trong tháng này?"
-                            ].map((suggestion, idx) => (
-                                <button
-                                    key={idx}
-                                    type="button"
-                                    onClick={() => setQuestion(suggestion)}
-                                    className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-400/50 transition-all text-gray-400 hover:text-blue-300 text-left"
-                                >
-                                    {suggestion}
-                                </button>
-                            ))}
-                        </div>
+                      <span className="text-xs text-gray-500 ml-1">Gợi ý nhanh:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Công việc sắp tới có thuận lợi không?",
+                          "Người ấy đang nghĩ gì về tôi?",
+                          "Lời khuyên cho tình hình tài chính hiện tại?",
+                          "Tôi cần lưu ý điều gì trong tháng này?"
+                        ].map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setQuestion(suggestion)}
+                            className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-400/50 transition-all text-gray-400 hover:text-blue-300 text-left"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                   </form>
@@ -441,33 +441,33 @@ export default function TarotPage() {
               >
                 {/* --- UI FINAL: Overlay thông tin --- */}
                 <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between h-full">
-                  
+
                   {/* TOP: Tiêu đề & Bộ đếm */}
                   <div className="pt-8 px-4 w-full flex flex-col items-center bg-gradient-to-b from-black/80 via-black/40 to-transparent pb-12">
                     {phase === 'shuffling' ? (
-                       <div className="flex flex-col items-center gap-2">
-                          <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 animate-pulse text-center">
-                            Vũ Trụ Đang Kết Nối...
-                          </h2>
-                          <div className="flex items-center gap-2 text-xs text-purple-200/70 font-medium tracking-widest uppercase">
-                            <Sparkles className="w-3 h-3 animate-spin-slow" />
-                            <span>Đang hòa trộn năng lượng</span>
-                          </div>
-                       </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 animate-pulse text-center">
+                          Vũ Trụ Đang Kết Nối...
+                        </h2>
+                        <div className="flex items-center gap-2 text-xs text-purple-200/70 font-medium tracking-widest uppercase">
+                          <Sparkles className="w-3 h-3 animate-spin-slow" />
+                          <span>Đang hòa trộn năng lượng</span>
+                        </div>
+                      </div>
                     ) : (
-                       <div className="flex flex-col items-center gap-3">
-                          <h2 className="text-3xl md:text-5xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>
-                            {readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}
-                          </h2>
-                          
-                          <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3">
-                             <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
-                             <div className="h-3 w-[1px] bg-white/20"></div>
-                             <span className="text-lg font-bold text-blue-400 leading-none">
-                                {selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span>
-                             </span>
-                          </div>
-                       </div>
+                      <div className="flex flex-col items-center gap-3">
+                        <h2 className="text-3xl md:text-5xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>
+                          {readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}
+                        </h2>
+
+                        <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3">
+                          <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
+                          <div className="h-3 w-[1px] bg-white/20"></div>
+                          <span className="text-lg font-bold text-blue-400 leading-none">
+                            {selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span>
+                          </span>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -475,12 +475,12 @@ export default function TarotPage() {
                   <div className="w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-4 flex justify-center">
                     {question && (
                       <div className="max-w-xl w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 md:p-6 relative shadow-2xl">
-                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 rounded-full p-1.5 shadow-lg shadow-blue-600/40">
-                             <Search className="w-3 h-3 text-white" />
-                          </div>
-                          <p className="text-white/90 text-base md:text-lg font-medium text-center italic break-words line-clamp-2 md:line-clamp-3">
-                             "{question}"
-                          </p>
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 rounded-full p-1.5 shadow-lg shadow-blue-600/40">
+                          <Search className="w-3 h-3 text-white" />
+                        </div>
+                        <p className="text-white/90 text-base md:text-lg font-medium text-center italic break-words line-clamp-2 md:line-clamp-3">
+                          "{question}"
+                        </p>
                       </div>
                     )}
                   </div>
