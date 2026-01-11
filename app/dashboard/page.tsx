@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -41,7 +40,7 @@ const tools = [
     border: 'border-purple-500/20'
   },
   {
-    name: 'Chiêm Tinh',
+    name: 'Cung Hoàng Đạo',
     description: 'Khám phá vận mệnh qua sao',
     icon: Star,
     href: '/astrology',

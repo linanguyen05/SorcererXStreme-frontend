@@ -302,7 +302,9 @@ export default function AstrologyPage() {
 
       <main 
         className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth < 768 
+            ? '0' 
+            : (sidebarCollapsed ? '80px' : '280px')  }}
       >
         {/* Header */}
         <ContentHeader
@@ -585,5 +587,6 @@ export default function AstrologyPage() {
         </div>
       </main>
     </div>
-  );
+  );  
+
 }

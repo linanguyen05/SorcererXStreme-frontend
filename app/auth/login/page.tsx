@@ -31,7 +31,7 @@ export default function LoginPage() {
         toast.success('Đăng nhập thành công!');
         const { user } = useAuthStore.getState();
         if (user?.isProfileComplete) {
-          router.push('/profile'); // Redirect to Profile instead of Dashboard
+          router.push('/profile'); 
         } else {
           router.push('/auth/setup');
         }
@@ -131,7 +131,7 @@ export default function LoginPage() {
               </div>
               <input
                 type="email"
-                placeholder="Email thần bí của bạn"
+                placeholder="Email của bạn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all duration-300"
@@ -151,7 +151,7 @@ export default function LoginPage() {
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Mật khẩu bí mật"
+                placeholder="Mật khẩu của bạn"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all duration-300"
