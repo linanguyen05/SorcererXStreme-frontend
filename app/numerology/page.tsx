@@ -149,7 +149,8 @@ export default function NumerologyPage() {
     const nameToUse = user?.name || '';
     const birthDateToUse = user?.birth_date || '';
     const genderToUse = user?.gender || 'other';
-
+    // const nameToUse = user?.name || 'Nguyễn Văn Test'; // Hard-code để test
+    // const birthDateToUse = user?.birth_date || '1999-01-01'; // Hard-code để test
 
     if (!nameToUse || !birthDateToUse) {
       toast.error('Vui lòng cập nhật đầy đủ tên và ngày sinh trong hồ sơ');
@@ -442,10 +443,10 @@ export default function NumerologyPage() {
                         </div>
                       </div>
 
-
                       <Button
                         isLoading={isCalculating}
-                        type="submit"
+                        onClick={performCalculation} 
+                        type="button" 
                         className="w-full py-6 text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         Khám Phá Ngay
