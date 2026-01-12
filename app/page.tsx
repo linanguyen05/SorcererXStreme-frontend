@@ -114,7 +114,7 @@ export default function LandingPage() {
                                     href: "/tarot"
                                 },
                                 {
-                                    title: "Chiêm Tinh",
+                                    title: "Cung Hoàng Đạo",
                                     desc: "Khám phá bản đồ sao cá nhân, hiểu rõ tính cách và tiềm năng ẩn giấu qua vị trí các vì sao.",
                                     icon: <Star className="w-6 h-6 text-blue-400" />,
                                     color: "from-blue-500/20 to-cyan-500/20",

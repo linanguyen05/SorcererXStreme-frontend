@@ -51,7 +51,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                                 <Link href="/tarot" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Tarot</Link>
                             </li>
                             <li>
-                                <Link href="/astrology" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Chiêm Tinh</Link>
+                                <Link href="/astrology" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Cung Hoàng Đạo</Link>
                             </li>
                             <li>
                                 <Link href="/numerology" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Thần Số Học</Link>

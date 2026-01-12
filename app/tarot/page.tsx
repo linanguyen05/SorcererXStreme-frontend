@@ -289,7 +289,7 @@ export default function TarotPage() {
           ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
           ml-0`}
       >
-        {/* Header - Dùng Component ContentHeader mới */}
+        {/* Header */}
         <ContentHeader
           title="Bói Bài Tarot"
           description="Khám phá định mệnh qua 78 lá bài huyền bí"
@@ -346,7 +346,7 @@ export default function TarotPage() {
               </motion.div>
             )}
 
-            {/* RESOLVED CONFLICT 2: Sử dụng giao diện Question Input của Main (Đẹp hơn, có Chips) */}
+            {/* RESOLVED CONFLICT 2: Sử dụng giao diện Question Input của Main */}
             {phase === 'question_input' && (
               <motion.div
                 key="question_input"
