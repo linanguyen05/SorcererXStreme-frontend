@@ -260,24 +260,24 @@ export default function TarotPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <span className="text-xs text-gray-500 ml-1">Gợi ý nhanh:</span>
-                        <div className="flex flex-wrap gap-2">
-                            {[
-                                "Công việc sắp tới có thuận lợi không?",
-                                "Người ấy đang nghĩ gì về tôi?",
-                                "Lời khuyên cho tình hình tài chính hiện tại?",
-                                "Tôi cần lưu ý điều gì trong tháng này?"
-                            ].map((suggestion, idx) => (
-                                <button
-                                    key={idx}
-                                    type="button"
-                                    onClick={() => setQuestion(suggestion)}
-                                    className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-400/50 transition-all text-gray-400 hover:text-blue-300 text-left"
-                                >
-                                    {suggestion}
-                                </button>
-                            ))}
-                        </div>
+                      <span className="text-xs text-gray-500 ml-1">Gợi ý nhanh:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Công việc sắp tới có thuận lợi không?",
+                          "Người ấy đang nghĩ gì về tôi?",
+                          "Lời khuyên cho tình hình tài chính hiện tại?",
+                          "Tôi cần lưu ý điều gì trong tháng này?"
+                        ].map((suggestion, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setQuestion(suggestion)}
+                            className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-400/50 transition-all text-gray-400 hover:text-blue-300 text-left"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                   </form>
@@ -296,19 +296,19 @@ export default function TarotPage() {
               >
                 {/* --- LỚP OVERLAY THÔNG TIN (Giữ nguyên của bản cũ) --- */}
                 <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between h-full">
-                  
+
                   {/* TOP: Tiêu đề & Bộ đếm */}
                   <div className="pt-4 px-4 w-full flex flex-col items-center bg-gradient-to-b from-black/90 via-black/50 to-transparent pb-8 md:pb-12">
                     {phase === 'shuffling' ? (
-                       <div className="flex flex-col items-center gap-2">
-                          <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 animate-pulse text-center">
-                            Vũ Trụ Đang Kết Nối...
-                          </h2>
-                          <div className="flex items-center gap-2 text-xs text-purple-200/70 font-medium tracking-widest uppercase">
-                            <Sparkles className="w-3 h-3 animate-spin-slow" />
-                            <span>Đang hòa trộn năng lượng</span>
-                          </div>
-                       </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 animate-pulse text-center">
+                          Vũ Trụ Đang Kết Nối...
+                        </h2>
+                        <div className="flex items-center gap-2 text-xs text-purple-200/70 font-medium tracking-widest uppercase">
+                          <Sparkles className="w-3 h-3 animate-spin-slow" />
+                          <span>Đang hòa trộn năng lượng</span>
+                        </div>
+                      </div>
                     ) : (
                        <div className="flex flex-col items-center gap-3">
                           <h2 className="text-2xl md:text-4xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>
@@ -330,12 +330,12 @@ export default function TarotPage() {
                   <div className="w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-4 flex justify-center">
                     {question && (
                       <div className="max-w-xl w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 md:p-6 relative shadow-2xl">
-                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 rounded-full p-1.5 shadow-lg shadow-blue-600/40">
-                             <Search className="w-3 h-3 text-white" />
-                          </div>
-                          <p className="text-white/90 text-base md:text-lg font-medium text-center italic break-words line-clamp-2 md:line-clamp-3">
-                             "{question}"
-                          </p>
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 rounded-full p-1.5 shadow-lg shadow-blue-600/40">
+                          <Search className="w-3 h-3 text-white" />
+                        </div>
+                        <p className="text-white/90 text-base md:text-lg font-medium text-center italic break-words line-clamp-2 md:line-clamp-3">
+                          "{question}"
+                        </p>
                       </div>
                     )}
                   </div>

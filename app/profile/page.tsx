@@ -246,13 +246,16 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex bg-black font-sans text-white h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
       <AnimatedBackground />
       <Sidebar />
 
       <main
-        className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        // className={`flex-1 flex flex-col transition-all duration-200 relative z-10 
+        //   ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
+        //   ml-0`}
+        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
         <ContentHeader 
@@ -260,26 +263,27 @@ export default function ProfilePage() {
           description="Quản lý thông tin cá nhân và mối quan hệ"
         />
 
-        <div className="flex-1 overflow-auto p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          <div className="max-w-4xl mx-auto">
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto p-3 sm:p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="max-w-3xl mx-auto">
             {/* User Profile Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl mb-8 relative overflow-hidden"
+              className="bg-white/5 backdrop-blur-xl w-full rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 border border-white/10 shadow-xl mb-8 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
 
-              <div className="flex justify-between items-start mb-8 relative z-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg border-4 border-black/50">
-                    <span className="text-2xl font-bold text-white">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8 relative z-10">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg border-4 border-black/50">
+                    <span className="text-lg md:text-2xl font-bold text-white">
                       {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </span>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">{user?.name || 'Chưa cập nhật'}</h2>
+                    <h2 className="text-lg md:text-2xl font-bold text-white">{user?.name || 'Chưa cập nhật'}</h2>
                     <p className="text-purple-300 flex items-center gap-2">
                       <Sparkles className="w-4 h-4" />
                       Thành viên chính thức
@@ -298,7 +302,7 @@ export default function ProfilePage() {
               </div>
 
               {isEditing ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-300">Họ và tên</label>
                     <Input
@@ -346,8 +350,8 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-                  <div className="bg-black/20 rounded-2xl p-5 border border-white/5 hover:bg-black/30 transition-colors">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+                  <div className="bg-black/20 rounded-2xl p-4 border border-white/5 hover:bg-black/30 transition-colors">
                     <div className="flex items-center mb-3">
                       <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center mr-3">
                         <User className="w-4 h-4 text-purple-400" />
@@ -356,7 +360,7 @@ export default function ProfilePage() {
                     </div>
                     <p className="text-white font-medium pl-11">{user?.name || 'Chưa cập nhật'}</p>
                   </div>
-                  <div className="bg-black/20 rounded-2xl p-5 border border-white/5 hover:bg-black/30 transition-colors">
+                  <div className="bg-black/20 rounded-2xl p-4 border border-white/5 hover:bg-black/30 transition-colors">
                     <div className="flex items-center mb-3">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3">
                         <Calendar className="w-4 h-4 text-blue-400" />
@@ -367,7 +371,7 @@ export default function ProfilePage() {
                       {user?.birth_date ? new Date(user.birth_date).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}
                     </p>
                   </div>
-                  <div className="bg-black/20 rounded-2xl p-5 border border-white/5 hover:bg-black/30 transition-colors">
+                  <div className="bg-black/20 rounded-2xl p-4 border border-white/5 hover:bg-black/30 transition-colors">
                     <div className="flex items-center mb-3">
                       <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center mr-3">
                         <Clock className="w-4 h-4 text-green-400" />
@@ -376,7 +380,7 @@ export default function ProfilePage() {
                     </div>
                     <p className="text-white font-medium pl-11">{user?.birth_time || 'Chưa cập nhật'}</p>
                   </div>
-                  <div className="bg-black/20 rounded-2xl p-5 border border-white/5 hover:bg-black/30 transition-colors">
+                  <div className="bg-black/20 rounded-2xl p-4 border border-white/5 hover:bg-black/30 transition-colors">
                     <div className="flex items-center mb-3">
                       <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center mr-3">
                         <MapPin className="w-4 h-4 text-orange-400" />
@@ -388,7 +392,6 @@ export default function ProfilePage() {
                 </div>
               )}
             </motion.div>
-
             {/* Breakup Status Warning */}
             <AnimatePresence>
               {breakupData && breakupData.isActive && (
@@ -463,7 +466,7 @@ export default function ProfilePage() {
 
                 <div className="flex justify-between items-center mb-8 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow-lg">
                       <Heart className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-xl font-bold text-white">Người Phụ Thuộc Tình Cảm</h2>
@@ -548,7 +551,7 @@ export default function ProfilePage() {
                             />
                           </div>
                         </div>
-                        <div className="flex gap-4 mt-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                           <Button
                             onClick={handleAddPartner}
                             className="flex-1 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500"
@@ -559,7 +562,7 @@ export default function ProfilePage() {
                           <Button
                             onClick={() => setShowAddPartner(false)}
                             variant="secondary"
-                            className="flex-1"
+                            className="flex"
                           >
                             Hủy bỏ
                           </Button>
@@ -663,6 +666,7 @@ export default function ProfilePage() {
             </motion.div>
           </div>
         </div>
+
       </main>
     </div>
   );
