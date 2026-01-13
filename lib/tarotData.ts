@@ -149,7 +149,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 11,
         name: "Justice",
         suit: "major",
-        image: "/tarot/RWS_Tarot_11_Judgement.jpg",
+        image: "/tarot/RWS_Tarot_11_Justice.jpg",
         meaning: {
             upright: "Công lý, sự thật, cân bằng, luật nhân quả.",
             reversed: "Bất công, thiên vị, dối trá, trốn tránh trách nhiệm.",
@@ -269,7 +269,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 21,
         name: "The World",
         suit: "major",
-        image: "/tarot/RWS_Tarot_21_The_World.jpg",
+        image: "/tarot/RWS_Tarot_21_World.jpg",
         meaning: {
             upright: "Hoàn thành, trọn vẹn, thành tựu, du lịch, kết thúc viên mãn.",
             reversed: "Chưa hoàn thành, trì trệ, thiếu một chút để thành công.",
