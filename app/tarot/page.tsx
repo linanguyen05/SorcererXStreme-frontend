@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Stars, Text, useTexture } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, RotateCcw, Heart, Search, BookOpen, Send, Sparkles } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
@@ -12,153 +10,20 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { TAROT_DECK, TarotCard } from '@/lib/tarotData';
-import * as THREE from 'three';
 import ContentHeader from '@/components/layout/ContentHeader';
+// Import Component Giao diện Grid mới
+import { TarotSceneNew } from '@/components/tarot/TarotSceneNew';
 
 // --- Types ---
 type ReadingMode = 'overview' | 'question' | null;
 type ReadingPhase = 'selection' | 'question_input' | 'shuffling' | 'picking' | 'reveal';
-
-// --- 3D Card Component ---
-const Card3D = ({
-  position,
-  rotation,
-  onClick,
-  hovered,
-  setHover,
-  index,
-  phase,
-  isSelected
-}: {
-  position: [number, number, number];
-  rotation: [number, number, number];
-  onClick?: () => void;
-  hovered?: boolean;
-  setHover?: (h: boolean) => void;
-  index: number;
-  phase: ReadingPhase;
-  isSelected: boolean;
-}) => {
-  const mesh = useRef<THREE.Group>(null);
-  const texture = useTexture('/tarot/card_back.png');
-
-  useFrame((state, delta) => {
-    if (!mesh.current) return;
-    const damp = 3;
-    const targetScale = hovered || isSelected ? 1.15 : 1;
-
-    mesh.current.position.x = THREE.MathUtils.lerp(mesh.current.position.x, position[0], delta * damp);
-    mesh.current.position.y = THREE.MathUtils.lerp(mesh.current.position.y, position[1], delta * damp);
-    mesh.current.position.z = THREE.MathUtils.lerp(mesh.current.position.z, position[2], delta * damp);
-
-    mesh.current.rotation.x = THREE.MathUtils.lerp(mesh.current.rotation.x, rotation[0], delta * damp);
-    mesh.current.rotation.y = THREE.MathUtils.lerp(mesh.current.rotation.y, rotation[1], delta * damp);
-    mesh.current.rotation.z = THREE.MathUtils.lerp(mesh.current.rotation.z, rotation[2], delta * damp);
-
-    mesh.current.scale.setScalar(THREE.MathUtils.lerp(mesh.current.scale.x, targetScale, delta * damp));
-  });
-
-  return (
-    <group
-      ref={mesh}
-      onClick={onClick}
-      onPointerOver={() => setHover && setHover(true)}
-      onPointerOut={() => setHover && setHover(false)}
-    >
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={[2, 3.5, 0.02]} />
-        <meshStandardMaterial color="#1e1b4b" roughness={0.3} metalness={0.8} />
-      </mesh>
-      <mesh position={[0, 0, 0.011]}>
-        <planeGeometry args={[1.9, 3.4]} />
-        <meshStandardMaterial map={texture} roughness={0.4} metalness={0.2} emissive="#4c1d95" emissiveIntensity={0.1} />
-      </mesh>
-      <mesh position={[0, 0, 0.01]}>
-        <planeGeometry args={[2, 3.5]} />
-        <meshStandardMaterial color="#fbbf24" roughness={0.2} metalness={1} />
-      </mesh>
-      {(hovered || isSelected) && (
-        <mesh position={[0, 0, -0.05]}>
-          <planeGeometry args={[2.2, 3.7]} />
-          <meshBasicMaterial color="#a855f7" transparent opacity={0.4} />
-        </mesh>
-      )}
-    </group>
-  );
-};
-
-// --- Scene Controller ---
-const TarotScene = ({
-  phase,
-  onCardPick,
-  selectedIndices,
-  isMobile
-}: {
-  phase: ReadingPhase;
-  onCardPick: (index: number) => void;
-  selectedIndices: number[];
-  isMobile: boolean;
-}) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
-  const cards = useMemo(() => {
-    return Array.from({ length: 20 }).map((_, i) => {
-      let pos: [number, number, number] = [0, 0, -10];
-      let rot: [number, number, number] = [0, 0, 0];
-
-      if (phase === 'shuffling') {
-        const time = Date.now() * 0.001;
-        pos = [Math.sin(time + i * 0.1) * 0.5, Math.cos(time * 0.8 + i * 0.1) * 0.5, i * 0.02];
-        rot = [0, 0, Math.sin(time * 0.5 + i * 0.1) * 0.1];
-      } else if (phase === 'picking') {
-        const totalCards = 20;
-        const width = isMobile ? 8 : 14;
-        const x = (i - (totalCards - 1) / 2) * (width / totalCards);
-        const y = -Math.pow(x * (isMobile ? 0.25 : 0.15), 2) + 1;
-
-        const isSelected = selectedIndices.includes(i);
-        const isHovered = hoveredIndex === i;
-
-        pos = [x, y, isSelected ? 2 : (isHovered ? 0.5 : i * 0.01)];
-        if (isSelected) pos[1] += 1;
-        if (isHovered && !isSelected) {
-          pos[1] += 0.5;
-          pos[2] = 1;
-        }
-        rot = [0, 0, isHovered ? 0 : -x * 0.05];
-      }
-      return { pos, rot };
-    });
-  }, [phase, hoveredIndex, selectedIndices, isMobile]);
-
-  return (
-    <>
-      <ambientLight intensity={0.8} />
-      <pointLight position={[5, 5, 5]} intensity={1.5} />
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-      {cards.map((card, i) => (
-        <Card3D
-          key={i}
-          index={i}
-          phase={phase}
-          position={card.pos}
-          rotation={card.rot}
-          hovered={hoveredIndex === i}
-          setHover={(h) => setHoveredIndex(h ? i : null)}
-          onClick={() => phase === 'picking' && onCardPick(i)}
-          isSelected={selectedIndices.includes(i)}
-        />
-      ))}
-    </>
-  );
-};
 
 export default function TarotPage() {
   const { isAuthenticated, user, token } = useAuthStore();
   const sidebarCollapsed = useSidebarCollapsed();
   const [isMobile, setIsMobile] = useState(false);
 
-  // --- State & Logic ---
+  // --- State & Logic (GIỮ NGUYÊN HOÀN TOÀN) ---
   const [readingMode, setReadingMode] = useState<ReadingMode>(null);
   const [phase, setPhase] = useState<ReadingPhase>('selection');
   const [selectedCards, setSelectedCards] = useState<(TarotCard & { isReversed: boolean })[]>([]);
@@ -188,7 +53,8 @@ export default function TarotPage() {
     const shuffled = [...TAROT_DECK].sort(() => Math.random() - 0.5);
     setShuffledDeck(shuffled);
     setPhase('shuffling');
-    setTimeout(() => setPhase('picking'), 3000);
+    // Giảm thời gian chờ xuống 1.5s cho mượt mà hơn với giao diện mới
+    setTimeout(() => setPhase('picking'), 1500); 
   };
 
   const handleQuestionSubmit = (e: React.FormEvent) => {
@@ -221,9 +87,9 @@ export default function TarotPage() {
           await fetchTarotAnalysis(newSelectedCards);
         }
         isPickingCardRef.current = false;
-      }, 1500);
+      }, 1000);
     } else {
-      setTimeout(() => { isPickingCardRef.current = false; }, 500);
+      setTimeout(() => { isPickingCardRef.current = false; }, 300);
     }
   };
 
@@ -283,18 +149,15 @@ export default function TarotPage() {
       <AnimatedBackground />
       <Sidebar />
 
-      {/* RESOLVED CONFLICT 1: Sử dụng cấu trúc Main (Tailwind + Component) */}
       <main
-        className={`flex-1 flex flex-col transition-all duration-200 relative z-10 
-          ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
+        className={`flex-1 flex flex-col transition-all duration-200 relative z-10
+          ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'}
           ml-0`}
       >
-        {/* Header */}
         <ContentHeader
           title="Bói Bài Tarot"
           description="Khám phá định mệnh qua 78 lá bài huyền bí"
         >
-          {/* Nút Reset được truyền vào dưới dạng children */}
           {phase !== 'selection' && phase !== 'reveal' && (
             <Button
               onClick={resetReading}
@@ -346,7 +209,6 @@ export default function TarotPage() {
               </motion.div>
             )}
 
-            {/* RESOLVED CONFLICT 2: Sử dụng giao diện Question Input của Main */}
             {phase === 'question_input' && (
               <motion.div
                 key="question_input"
@@ -359,7 +221,7 @@ export default function TarotPage() {
                   <h2 className="text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     Thông Điệp Từ Vũ Trụ
                   </h2>
-
+                 
                   <div className="text-center mb-8">
                     <p className="text-gray-300 text-lg mb-2">
                       Bạn đang băn khoăn điều gì?
@@ -381,29 +243,22 @@ export default function TarotPage() {
                           className="w-full bg-white/5 border border-white/20 rounded-xl pl-6 pr-14 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"
                           autoFocus
                         />
-
-                        {/* FIX BUG 1: Thay thế Search icon bằng nút Send
-                  - type="submit": Để bấm enter hoặc click đều gửi form
-                  - disabled: Chặn click khi chưa nhập
-                  - CSS: Xử lý màu sắc sáng/tối dựa trên trạng thái disabled
-                  */}
                         <button
                           type="submit"
                           disabled={!question.trim()}
                           className={`
-                      absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-200
-                      ${!question.trim()
-                              ? 'text-gray-600 cursor-not-allowed' // Style khi rỗng: Tối màu, không bấm được
-                              : 'text-blue-400 hover:text-white hover:bg-blue-500/20 hover:scale-110 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.5)]' // Style khi có chữ: Sáng, hiệu ứng glow
+                            absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-200
+                            ${!question.trim()
+                              ? 'text-gray-600 cursor-not-allowed'
+                              : 'text-blue-400 hover:text-white hover:bg-blue-500/20 hover:scale-110 cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.5)]'
                             }
-                    `}
+                          `}
                         >
-                          <Send className="w-6 h-6" />
+                        <Send className="w-6 h-6" />
                         </button>
                       </div>
                     </div>
 
-                    {/* Gợi ý câu hỏi (Chips) */}
                     <div className="space-y-2">
                       <span className="text-xs text-gray-500 ml-1">Gợi ý nhanh:</span>
                       <div className="flex flex-wrap gap-2">
@@ -430,7 +285,7 @@ export default function TarotPage() {
               </motion.div>
             )}
 
-            {/* RESOLVED CONFLICT 3: Sử dụng UI của Main (Overlay đẹp) NHƯNG ĐÃ FIX THÊM isMobile */}
+            {/* --- GIAO DIỆN CHỌN BÀI MỚI (GRID SYSTEM) --- */}
             {(phase === 'shuffling' || phase === 'picking') && (
               <motion.div
                 key="deck"
@@ -439,11 +294,11 @@ export default function TarotPage() {
                 exit={{ opacity: 0 }}
                 className="absolute inset-0"
               >
-                {/* --- UI FINAL: Overlay thông tin --- */}
+                {/* --- LỚP OVERLAY THÔNG TIN (Giữ nguyên của bản cũ) --- */}
                 <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between h-full">
 
                   {/* TOP: Tiêu đề & Bộ đếm */}
-                  <div className="pt-8 px-4 w-full flex flex-col items-center bg-gradient-to-b from-black/80 via-black/40 to-transparent pb-12">
+                  <div className="pt-4 px-4 w-full flex flex-col items-center bg-gradient-to-b from-black/90 via-black/50 to-transparent pb-8 md:pb-12">
                     {phase === 'shuffling' ? (
                       <div className="flex flex-col items-center gap-2">
                         <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 animate-pulse text-center">
@@ -455,19 +310,19 @@ export default function TarotPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-3">
-                        <h2 className="text-3xl md:text-5xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>
-                          {readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}
-                        </h2>
-
-                        <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3">
-                          <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
-                          <div className="h-3 w-[1px] bg-white/20"></div>
-                          <span className="text-lg font-bold text-blue-400 leading-none">
-                            {selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span>
-                          </span>
-                        </div>
-                      </div>
+                       <div className="flex flex-col items-center gap-3">
+                          <h2 className="text-2xl md:text-4xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>
+                            {readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}
+                          </h2>
+                         
+                          <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3 pointer-events-auto">
+                             <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
+                             <div className="h-3 w-[1px] bg-white/20"></div>
+                             <span className="text-lg font-bold text-blue-400 leading-none">
+                                {selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span>
+                             </span>
+                          </div>
+                       </div>
                     )}
                   </div>
 
@@ -486,16 +341,20 @@ export default function TarotPage() {
                   </div>
                 </div>
 
-                {/* LAYER 3D: Fix lỗi thiếu isMobile của nhánh Main */}
-                <div className="w-full h-full absolute inset-0 z-10">
-                  <Canvas camera={{ position: [0, 0, 12], fov: 45 }}>
-                    <TarotScene
+                {/* --- LỚP BÀI (Thay thế Canvas bằng CSS Grid Component) --- */}
+                {/* overflow-y-auto và padding lớn để đảm bảo nội dung không bị overlay che mất */}
+                <div className="w-full h-full absolute inset-0 z-10 overflow-y-auto pt-32 pb-32 no-scrollbar">
+                   <div className="min-h-full flex items-center justify-center">
+                    <TarotSceneNew
+                      cards={shuffledDeck.length > 0 ? shuffledDeck : TAROT_DECK}
+                      selectedCards={selectedCards}
+                      pickedPositions={selectedIndices}
+                      // Adapter: Chuyển đổi từ (index, card) về (index) cho khớp logic cũ
+                      onCardClick={(index, card) => handleCardPick(index)}
+                      isSelectable={phase === 'picking'}
                       phase={phase}
-                      onCardPick={handleCardPick}
-                      selectedIndices={selectedIndices}
-                      isMobile={isMobile} // Đã thêm lại prop quan trọng này
                     />
-                  </Canvas>
+                   </div>
                 </div>
               </motion.div>
             )}

@@ -333,8 +333,9 @@ export default function ChatPage() {
                     </div>
                     <div className="bg-white/5 backdrop-blur-xl rounded-2xl rounded-tl-none px-6 py-4 border border-white/10">
                       <div className="flex items-center gap-3">
-                        <LoadingSpinner size="sm" />
-                        <span className="text-sm text-gray-300">AI đang suy nghĩ...</span>
+                        {/* Spinner thuần túy, không còn chữ "Đang tải..." thừa thãi */}
+                        <LoadingSpinner size="sm" color="text-purple-400" />
+                        <span className="text-sm text-gray-300 animate-pulse">AI đang suy nghĩ...</span>
                       </div>
                     </div>
                   </motion.div>
@@ -363,6 +364,7 @@ export default function ChatPage() {
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
+                isLoading={isLoading} 
                 className="px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 rounded-xl transition-all hover:scale-105 active:scale-95"
               >
                 <Send className="w-5 h-5" />
