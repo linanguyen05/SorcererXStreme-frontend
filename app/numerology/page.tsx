@@ -395,8 +395,8 @@ export default function NumerologyPage() {
 
 
       <main
-        className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        style={{ marginLeft: sidebarCollapsed ? '60px' : '280px' }}
       >
         {/* Header */}
         <ContentHeader
@@ -469,6 +469,8 @@ export default function NumerologyPage() {
                 >
                   {/* Numbers Display */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                    {/* Đường đời */}
                     <motion.div variants={itemVariants} className="relative group">
                       <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 text-center relative overflow-hidden hover:border-blue-500/50 transition-all duration-300 h-full">
@@ -480,7 +482,7 @@ export default function NumerologyPage() {
                       </div>
                     </motion.div>
 
-
+                    {/* Sứ Mệnh */}
                     <motion.div variants={itemVariants} className="relative group">
                       <div className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 text-center relative overflow-hidden hover:border-purple-500/50 transition-all duration-300 h-full">
@@ -492,7 +494,7 @@ export default function NumerologyPage() {
                       </div>
                     </motion.div>
 
-
+                    {/* Kết Quả */}
                     <motion.div variants={itemVariants} className="relative group">
                       <div className="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 backdrop-blur-xl rounded-3xl p-8 border border-amber-500/30 text-center relative overflow-hidden hover:border-amber-500/60 transition-all duration-300 h-full shadow-lg shadow-amber-900/20">
@@ -508,29 +510,28 @@ export default function NumerologyPage() {
                     </motion.div>
                   </div>
 
-
                   {/* Analysis Display */}
-                  <motion.div variants={itemVariants} className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-3xl -z-10" />
-                    <div className="bg-white/5 backdrop-blur-2xl rounded-[2rem] p-10 border border-white/10 shadow-2xl relative overflow-hidden">
+                  <motion.div variants={itemVariants} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-2xl sm:blur-3xl -z-10" />
+                    <div className="bg-white/5 backdrop-blur-2xl rounded-[2rem] p-8 md:p-10 border border-white/10 shadow-2xl relative overflow-hidden">
                       <div className="text-center mb-10">
-                        <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 animate-float">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 animate-float">
                           <InfinityIcon className="w-10 h-10 text-white" />
                         </div>
-                        <h3 className="text-3xl font-bold text-white mb-2">
+                        <h3 className="text-xl sm:text-3xl font-bold text-white mb-2">
                           Phân Tích Chi Tiết
                         </h3>
                         <div className="h-1 w-24 bg-gradient-to-r from-transparent via-purple-500 to-transparent mx-auto rounded-full" />
                       </div>
 
-
+                      {/* Analysis Content */}
                       <div className="prose prose-invert max-w-none">
-                        <div className="bg-black/20 rounded-2xl p-8 border border-white/5">
-                          <FormattedContent content={result.analysis} className="text-gray-200 leading-relaxed text-lg" />
+
+                        <div className="bg-black/20 rounded-2xl p-5 sm:p-8 border border-white/5">
+                          <FormattedContent content={result.analysis} className="text-gray-200 leading-relaxed text-base sm:text-lg" />
                         </div>
 
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
                           <div className="bg-white/5 rounded-xl p-4 border border-white/5">
                             <h4 className="text-purple-400 font-bold mb-2 text-sm uppercase">Nghề nghiệp phù hợp</h4>
                             <p className="text-gray-300 text-sm">{result.meaning.career}</p>
@@ -546,19 +547,20 @@ export default function NumerologyPage() {
                         </div>
                       </div>
 
-
-                      <div className="flex justify-center mt-12">
+                      {/* Reset Button */}
+                      <div className="flex justify-center mt-8 sm:mt-12">
                         <Button
                           onClick={resetCalculation}
                           variant="secondary"
-                          className="group px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10"
+                          className="group px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10"
                         >
-                          <RefreshCw className="w-5 h-5 mr-3 group-hover:rotate-180 transition-transform duration-500" />
+                          <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
                           Tra cứu số khác
                         </Button>
                       </div>
                     </div>
                   </motion.div>
+
                 </motion.div>
               )}
             </AnimatePresence>
