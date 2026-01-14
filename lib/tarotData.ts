@@ -1,3 +1,4 @@
+// file này để lưu và xuất dữ liệu bộ bài tarot
 export interface TarotCard {
     id: number;
     name: string;
