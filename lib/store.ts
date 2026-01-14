@@ -126,24 +126,32 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      updateProfile: async (name: string, birthDate: string, birthTime: string, birthPlace: string, token: string) => {
-        if (token) {
-          try {
-            const user = await profileApi.update({
-              name,
-              birth_date: birthDate,
-              birth_time: birthTime,
-              birth_place: birthPlace
-            }, token);
-            const mappedUser = {
-              ...user,
-              vipTier: user.vip_tier,
-              vipExpiresAt: user.vip_expires_at,
+      updateProfile: async (name, birthDate, birthTime, birthPlace, token) => {
+        try {
+          const payloadForBackend = {
+            name,
+            birth_date: birthDate,
+            birth_time: birthTime,
+            birth_place: birthPlace
+          };
+
+          await profileApi.update(payloadForBackend, token);
+
+          set((state) => {
+            if (!state.user) return {}; 
+            
+            return {
+              user: {
+                ...state.user, 
+                name,
+                birth_date: birthDate, 
+                birth_time: birthTime,
+                birth_place: birthPlace
+              }
             };
-            set({ user: mappedUser });
-          } catch (error) {
-            console.error(error);
-          }
+          });
+        } catch (error) {
+          throw error;
         }
       },
 

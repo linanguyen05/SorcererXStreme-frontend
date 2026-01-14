@@ -52,6 +52,7 @@ export default function ProfilePage() {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
+          cache: 'no-store',
         });
 
         if (response.ok) {
@@ -171,9 +172,13 @@ export default function ProfilePage() {
   const handleSaveProfile = async () => {
     const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
     if (token) {
+      try {
       await updateProfile(editForm.name, editForm.birthDate, editForm.birthTime, editForm.birthPlace, token);
       setIsEditing(false);
       toast.success('Cập nhật thông tin thành công!');
+    } catch (error) {
+      toast.error('Lỗi lưu thông tin. Vui lòng kiểm tra định dạng ngày/giờ.');
+    }
     } else {
       toast.error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
       router.push('/auth/login');
