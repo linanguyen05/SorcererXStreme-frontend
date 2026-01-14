@@ -1,7 +1,7 @@
 export interface TarotCard {
     id: number;
     name: string;
-    image: string; // We will use a naming convention: /tarot/major_0.jpg, /tarot/wands_1.jpg, etc.
+    image: string;
     suit?: 'major' | 'wands' | 'cups' | 'swords' | 'pentacles';
     meaning: {
         upright: string;
@@ -17,7 +17,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 0,
         name: "The Fool",
         suit: "major",
-        image: "/tarot/major_0.jpg",
+        image: "/tarot/RWS_Tarot_00_Fool.jpg",
         meaning: {
             upright: "Khởi đầu mới, tự do, ngây thơ, mạo hiểm, tiềm năng vô hạn.",
             reversed: "Bất cẩn, liều lĩnh, ngây ngô, bị lợi dụng, thiếu suy nghĩ.",
@@ -29,7 +29,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 1,
         name: "The Magician",
         suit: "major",
-        image: "/tarot/major_1.jpg",
+        image: "/tarot/RWS_Tarot_01_Magician.jpg",
         meaning: {
             upright: "Kỹ năng, ý chí, sự tập trung, hành động, tháo vát.",
             reversed: "Thao túng, lừa dối, tài năng bị lãng phí, thiếu kế hoạch.",
@@ -41,7 +41,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 2,
         name: "The High Priestess",
         suit: "major",
-        image: "/tarot/major_2.jpg",
+        image: "/tarot/RWS_Tarot_02_High_Priestess.jpg",
         meaning: {
             upright: "Trực giác, bí ẩn, tiềm thức, sự tĩnh lặng, nữ tính thần thánh.",
             reversed: "Bí mật bị lộ, phớt lờ trực giác, sống hời hợt, cảm xúc bị kìm nén.",
@@ -53,7 +53,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 3,
         name: "The Empress",
         suit: "major",
-        image: "/tarot/major_3.jpg",
+        image: "/tarot/RWS_Tarot_03_Empress.jpg",
         meaning: {
             upright: "Sự trù phú, mẹ thiên nhiên, sáng tạo, nuôi dưỡng, vẻ đẹp.",
             reversed: "Phụ thuộc, thiếu sáng tạo, bỏ bê bản thân, ghen tuông.",
@@ -65,7 +65,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 4,
         name: "The Emperor",
         suit: "major",
-        image: "/tarot/major_4.jpg",
+        image: "/tarot/RWS_Tarot_04_Emperor.jpg",
         meaning: {
             upright: "Quyền lực, cấu trúc, ổn định, lãnh đạo, kỷ luật.",
             reversed: "Độc tài, cứng nhắc, thiếu kỷ luật, lạm quyền.",
@@ -77,7 +77,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 5,
         name: "The Hierophant",
         suit: "major",
-        image: "/tarot/major_5.jpg",
+        image: "/tarot/RWS_Tarot_05_Hierophant.jpg",
         meaning: {
             upright: "Truyền thống, niềm tin, giáo dục, quy tắc xã hội.",
             reversed: "Phá vỡ quy tắc, tư duy mới lạ, đạo đức giả, bị gò bó.",
@@ -89,7 +89,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 6,
         name: "The Lovers",
         suit: "major",
-        image: "/tarot/major_6.jpg",
+        image: "/tarot/RWS_Tarot_06_Lovers.jpg",
         meaning: {
             upright: "Tình yêu, sự hòa hợp, lựa chọn quan trọng, liên kết.",
             reversed: "Mâu thuẫn, chia rẽ, lựa chọn sai lầm, mất cân bằng.",
@@ -101,7 +101,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 7,
         name: "The Chariot",
         suit: "major",
-        image: "/tarot/major_7.jpg",
+        image: "/tarot/RWS_Tarot_07_Chariot.jpg",
         meaning: {
             upright: "Chiến thắng, ý chí, kiểm soát, tiến lên phía trước, quyết tâm.",
             reversed: "Mất kiểm soát, hung hăng, thất bại, đi sai hướng.",
@@ -113,7 +113,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 8,
         name: "Strength",
         suit: "major",
-        image: "/tarot/major_8.jpg",
+        image: "/tarot/RWS_Tarot_08_Strength.jpg",
         meaning: {
             upright: "Sức mạnh nội tâm, lòng trắc ẩn, kiên nhẫn, kiểm soát bản năng.",
             reversed: "Yếu đuối, thiếu tự tin, mất kiểm soát cảm xúc.",
@@ -125,7 +125,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 9,
         name: "The Hermit",
         suit: "major",
-        image: "/tarot/major_9.jpg",
+        image: "/tarot/RWS_Tarot_09_Hermit.jpg",
         meaning: {
             upright: "Cô độc, tìm kiếm nội tâm, soi đường, sự khôn ngoan.",
             reversed: "Cô lập, xa lánh xã hội, cô đơn tiêu cực, từ chối lời khuyên.",
@@ -137,7 +137,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 10,
         name: "Wheel of Fortune",
         suit: "major",
-        image: "/tarot/major_10.jpg",
+        image: "/tarot/RWS_Tarot_10_Wheel_of_Fortune.jpg",
         meaning: {
             upright: "May mắn, định mệnh, thay đổi, chu kỳ cuộc sống.",
             reversed: "Xui xẻo, kháng cự thay đổi, chu kỳ xấu lặp lại.",
@@ -149,7 +149,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 11,
         name: "Justice",
         suit: "major",
-        image: "/tarot/major_11.jpg",
+        image: "/tarot/RWS_Tarot_11_Justice.jpg",
         meaning: {
             upright: "Công lý, sự thật, cân bằng, luật nhân quả.",
             reversed: "Bất công, thiên vị, dối trá, trốn tránh trách nhiệm.",
@@ -161,7 +161,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 12,
         name: "The Hanged Man",
         suit: "major",
-        image: "/tarot/major_12.jpg",
+        image: "/tarot/RWS_Tarot_12_Hanged_Man.jpg",
         meaning: {
             upright: "Hy sinh, góc nhìn mới, chờ đợi, buông bỏ.",
             reversed: "Hy sinh vô ích, bế tắc, cứng đầu, trì hoãn.",
@@ -173,7 +173,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 13,
         name: "Death",
         suit: "major",
-        image: "/tarot/major_13.jpg",
+        image: "/tarot/RWS_Tarot_13_Death.jpg",
         meaning: {
             upright: "Kết thúc, chuyển hóa, thay đổi lớn, buông bỏ cái cũ.",
             reversed: "Kháng cự thay đổi, trì trệ, sợ hãi cái mới.",
@@ -185,7 +185,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 14,
         name: "Temperance",
         suit: "major",
-        image: "/tarot/major_14.jpg",
+        image: "/tarot/RWS_Tarot_14_Temperance.jpg",
         meaning: {
             upright: "Cân bằng, kiên nhẫn, hòa hợp, chữa lành.",
             reversed: "Mất cân bằng, vội vàng, xung đột, thái quá.",
@@ -197,7 +197,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 15,
         name: "The Devil",
         suit: "major",
-        image: "/tarot/major_15.jpg",
+        image: "/tarot/RWS_Tarot_15_Devil.jpg",
         meaning: {
             upright: "Ràng buộc, cám dỗ, vật chất, nghiện ngập, bóng tối.",
             reversed: "Giải phóng, phá vỡ xiềng xích, nhận ra sự thật.",
@@ -209,7 +209,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 16,
         name: "The Tower",
         suit: "major",
-        image: "/tarot/major_16.jpg",
+        image: "/tarot/RWS_Tarot_16_Tower.jpg",
         meaning: {
             upright: "Sụp đổ, tai họa bất ngờ, sự thật vỡ lở, thay đổi đột ngột.",
             reversed: "Tránh được tai họa, sụp đổ từ từ, sợ hãi thay đổi.",
@@ -221,7 +221,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 17,
         name: "The Star",
         suit: "major",
-        image: "/tarot/major_17.jpg",
+        image: "/tarot/RWS_Tarot_17_Star.jpg",
         meaning: {
             upright: "Hy vọng, niềm tin, cảm hứng, chữa lành, tâm linh.",
             reversed: "Thất vọng, thiếu niềm tin, bi quan, mất phương hướng.",
@@ -233,7 +233,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 18,
         name: "The Moon",
         suit: "major",
-        image: "/tarot/major_18.jpg",
+        image: "/tarot/RWS_Tarot_18_Moon.jpg",
         meaning: {
             upright: "Ảo tưởng, sợ hãi, tiềm thức, mơ hồ, trực giác.",
             reversed: "Giải tỏa nỗi sợ, sự thật sáng tỏ, bớt hoang mang.",
@@ -245,7 +245,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 19,
         name: "The Sun",
         suit: "major",
-        image: "/tarot/major_19.jpg",
+        image: "/tarot/RWS_Tarot_19_Sun.jpg",
         meaning: {
             upright: "Niềm vui, thành công, năng lượng tích cực, sự thật, hạnh phúc.",
             reversed: "Niềm vui tạm thời, bi quan, thành công bị trì hoãn.",
@@ -257,7 +257,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 20,
         name: "Judgement",
         suit: "major",
-        image: "/tarot/major_20.jpg",
+        image: "/tarot/RWS_Tarot_20_Judgement.jpg",
         meaning: {
             upright: "Phán xét, tái sinh, tiếng gọi nội tâm, tha thứ.",
             reversed: "Phán xét sai, chần chừ, không chịu thay đổi, hối tiếc.",
@@ -269,7 +269,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 21,
         name: "The World",
         suit: "major",
-        image: "/tarot/major_21.jpg",
+        image: "/tarot/RWS_Tarot_21_World.jpg",
         meaning: {
             upright: "Hoàn thành, trọn vẹn, thành tựu, du lịch, kết thúc viên mãn.",
             reversed: "Chưa hoàn thành, trì trệ, thiếu một chút để thành công.",
@@ -282,7 +282,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 22,
         name: "Ace of Wands",
         suit: "wands",
-        image: "/tarot/wands_1.jpg",
+        image: "/tarot/Wands01.jpg",
         meaning: {
             upright: "Khởi đầu mới, cảm hứng, năng lượng, sáng tạo.",
             reversed: "Trì hoãn, thiếu động lực, ý tưởng không thực tế.",
@@ -294,7 +294,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 23,
         name: "Two of Wands",
         suit: "wands",
-        image: "/tarot/wands_2.jpg",
+        image: "/tarot/Wands02.jpg",
         meaning: {
             upright: "Lập kế hoạch, tầm nhìn xa, quyết định, khám phá.",
             reversed: "Sợ hãi cái mới, kế hoạch kém, thiếu quyết đoán.",
@@ -306,7 +306,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 24,
         name: "Three of Wands",
         suit: "wands",
-        image: "/tarot/wands_3.jpg",
+        image: "/tarot/Wands03.jpg",
         meaning: {
             upright: "Mở rộng, tầm nhìn, chờ đợi kết quả, hợp tác quốc tế.",
             reversed: "Trở ngại, thất vọng, kế hoạch bị hoãn.",
@@ -318,7 +318,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 25,
         name: "Four of Wands",
         suit: "wands",
-        image: "/tarot/wands_4.jpg",
+        image: "/tarot/Wands04.jpg",
         meaning: {
             upright: "Ăn mừng, hạnh phúc, gia đình, ổn định, đám cưới.",
             reversed: "Mâu thuẫn gia đình, hủy bỏ tiệc tùng, thiếu ổn định.",
@@ -330,7 +330,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 26,
         name: "Five of Wands",
         suit: "wands",
-        image: "/tarot/wands_5.jpg",
+        image: "/tarot/Wands05.jpg",
         meaning: {
             upright: "Cạnh tranh, xung đột, mâu thuẫn, thử thách.",
             reversed: "Tránh né xung đột, giải quyết mâu thuẫn, thỏa hiệp.",
@@ -342,7 +342,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 27,
         name: "Six of Wands",
         suit: "wands",
-        image: "/tarot/wands_6.jpg",
+        image: "/tarot/Wands06.jpg",
         meaning: {
             upright: "Chiến thắng, vinh quang, được công nhận, tự hào.",
             reversed: "Thất bại, kiêu ngạo, không được công nhận.",
@@ -354,7 +354,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 28,
         name: "Seven of Wands",
         suit: "wands",
-        image: "/tarot/wands_7.jpg",
+        image: "/tarot/Wands07.jpg",
         meaning: {
             upright: "Phòng thủ, kiên định, bảo vệ quan điểm, dũng cảm.",
             reversed: "Bỏ cuộc, bị áp đảo, yếu thế, mất vị thế.",
@@ -366,7 +366,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 29,
         name: "Eight of Wands",
         suit: "wands",
-        image: "/tarot/wands_8.jpg",
+        image: "/tarot/Wands08.jpg",
         meaning: {
             upright: "Tốc độ, hành động nhanh, tin tức, di chuyển.",
             reversed: "Trì hoãn, vội vàng hấp tấp, tin xấu, lỡ nhịp.",
@@ -378,7 +378,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 30,
         name: "Nine of Wands",
         suit: "wands",
-        image: "/tarot/wands_9.jpg",
+        image: "/tarot/Wands09.jpg",
         meaning: {
             upright: "Kiên cường, đề phòng, mệt mỏi nhưng không bỏ cuộc.",
             reversed: "Kiệt sức, bỏ cuộc, hoang tưởng, phòng thủ thái quá.",
@@ -390,7 +390,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 31,
         name: "Ten of Wands",
         suit: "wands",
-        image: "/tarot/wands_10.jpg",
+        image: "/tarot/Wands10.jpg",
         meaning: {
             upright: "Gánh nặng, áp lực, trách nhiệm, làm việc quá sức.",
             reversed: "Buông bỏ gánh nặng, chia sẻ công việc, sụp đổ.",
@@ -402,7 +402,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 32,
         name: "Page of Wands",
         suit: "wands",
-        image: "/tarot/wands_page.jpg",
+        image: "/tarot/Wands11.jpg",
         meaning: {
             upright: "Tin tức tốt, khám phá, nhiệt huyết trẻ thơ, ý tưởng mới.",
             reversed: "Tin xấu, thiếu nhiệt huyết, trì hoãn, trẻ con.",
@@ -414,7 +414,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 33,
         name: "Knight of Wands",
         suit: "wands",
-        image: "/tarot/wands_knight.jpg",
+        image: "/tarot/Wands12.jpg",
         meaning: {
             upright: "Hành động, phiêu lưu, đam mê, bốc đồng, quyến rũ.",
             reversed: "Hấp tấp, hung hăng, khoe khoang, thiếu kiên nhẫn.",
@@ -426,7 +426,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 34,
         name: "Queen of Wands",
         suit: "wands",
-        image: "/tarot/wands_queen.jpg",
+        image: "/tarot/Wands13.jpg",
         meaning: {
             upright: "Tự tin, độc lập, quyến rũ, năng lượng, ấm áp.",
             reversed: "Ghen tuông, ích kỷ, đòi hỏi, mất tự tin.",
@@ -438,7 +438,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 35,
         name: "King of Wands",
         suit: "wands",
-        image: "/tarot/wands_king.jpg",
+        image: "/tarot/Wands14.jpg",
         meaning: {
             upright: "Lãnh đạo, tầm nhìn, doanh nhân, danh dự, lôi cuốn.",
             reversed: "Độc đoán, nóng nảy, kiêu ngạo, đặt kỳ vọng quá cao.",
@@ -451,7 +451,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 36,
         name: "Ace of Cups",
         suit: "cups",
-        image: "/tarot/cups_1.jpg",
+        image: "/tarot/Cups01.jpg",
         meaning: {
             upright: "Tình yêu mới, cảm xúc dạt dào, trực giác, hạnh phúc.",
             reversed: "Cảm xúc bị kìm nén, thất vọng, tình yêu đơn phương.",
@@ -463,7 +463,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 37,
         name: "Two of Cups",
         suit: "cups",
-        image: "/tarot/cups_2.jpg",
+        image: "/tarot/Cups02.jpg",
         meaning: {
             upright: "Kết đôi, hòa hợp, tình yêu, đối tác, sự cân bằng.",
             reversed: "Mất cân bằng, chia rẽ, hiểu lầm, tan vỡ.",
@@ -475,7 +475,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 38,
         name: "Three of Cups",
         suit: "cups",
-        image: "/tarot/cups_3.jpg",
+        image: "/tarot/Cups03.jpg",
         meaning: {
             upright: "Ăn mừng, tình bạn, hội họp, vui vẻ.",
             reversed: "Tiệc tùng quá đà, tin đồn, bị cô lập, nhóm tan rã.",
@@ -487,7 +487,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 39,
         name: "Four of Cups",
         suit: "cups",
-        image: "/tarot/cups_4.jpg",
+        image: "/tarot/Cups04.jpg",
         meaning: {
             upright: "Thờ ơ, chán nản, bỏ lỡ cơ hội, suy ngẫm.",
             reversed: "Nắm bắt cơ hội, thoát khỏi sự chán nản, động lực mới.",
@@ -499,7 +499,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 40,
         name: "Five of Cups",
         suit: "cups",
-        image: "/tarot/cups_5.jpg",
+        image: "/tarot/Cups05.jpg",
         meaning: {
             upright: "Mất mát, đau khổ, hối tiếc, tập trung vào tiêu cực.",
             reversed: "Chấp nhận mất mát, chữa lành, nhìn về phía trước.",
@@ -511,7 +511,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 41,
         name: "Six of Cups",
         suit: "cups",
-        image: "/tarot/cups_6.jpg",
+        image: "/tarot/Cups06.jpg",
         meaning: {
             upright: "Hoài niệm, quá khứ, ngây thơ, đoàn tụ, quà tặng.",
             reversed: "Mắc kẹt trong quá khứ, không chịu trưởng thành.",
@@ -523,7 +523,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 42,
         name: "Seven of Cups",
         suit: "cups",
-        image: "/tarot/cups_7.jpg",
+        image: "/tarot/Cups07.jpg",
         meaning: {
             upright: "Ảo tưởng, lựa chọn, mơ mộng, nhiều cơ hội.",
             reversed: "Vỡ mộng, lựa chọn thực tế, tập trung.",
@@ -535,7 +535,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 43,
         name: "Eight of Cups",
         suit: "cups",
-        image: "/tarot/cups_8.jpg",
+        image: "/tarot/Cups08.jpg",
         meaning: {
             upright: "Bỏ đi, tìm kiếm ý nghĩa, thất vọng, hành trình tâm linh.",
             reversed: "Sợ thay đổi, quay lại, chấp nhận hoàn cảnh.",
@@ -547,7 +547,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 44,
         name: "Nine of Cups",
         suit: "cups",
-        image: "/tarot/cups_9.jpg",
+        image: "/tarot/Cups09.jpg",
         meaning: {
             upright: "Ước nguyện thành hiện thực, hài lòng, sung túc.",
             reversed: "Tham lam, không hài lòng, tự mãn, khoe khoang.",
@@ -559,7 +559,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 45,
         name: "Ten of Cups",
         suit: "cups",
-        image: "/tarot/cups_10.jpg",
+        image: "/tarot/Cups10.jpg",
         meaning: {
             upright: "Hạnh phúc trọn vẹn, gia đình, hòa hợp, viên mãn.",
             reversed: "Gia đình bất hòa, ly thân, hạnh phúc giả tạo.",
@@ -571,7 +571,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 46,
         name: "Page of Cups",
         suit: "cups",
-        image: "/tarot/cups_page.jpg",
+        image: "/tarot/Cups11.jpg",
         meaning: {
             upright: "Tin vui, trực giác, sáng tạo, lãng mạn, mơ mộng.",
             reversed: "Tin buồn, cảm xúc non nớt, thất vọng, bị lừa dối.",
@@ -583,7 +583,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 47,
         name: "Knight of Cups",
         suit: "cups",
-        image: "/tarot/cups_knight.jpg",
+        image: "/tarot/Cups12.jpg",
         meaning: {
             upright: "Lãng mạn, quyến rũ, lời đề nghị, người tình lý tưởng.",
             reversed: "Thất hứa, lừa dối tình cảm, ủ rũ, ghen tuông.",
@@ -595,7 +595,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 48,
         name: "Queen of Cups",
         suit: "cups",
-        image: "/tarot/cups_queen.jpg",
+        image: "/tarot/Cups13.jpg",
         meaning: {
             upright: "Nhạy cảm, thấu hiểu, trực giác, quan tâm, dịu dàng.",
             reversed: "Phụ thuộc cảm xúc, thao túng, trầm cảm, hay khóc.",
@@ -607,7 +607,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 49,
         name: "King of Cups",
         suit: "cups",
-        image: "/tarot/cups_king.jpg",
+        image: "/tarot/Cups14.jpg",
         meaning: {
             upright: "Cân bằng cảm xúc, rộng lượng, khôn ngoan, ngoại giao.",
             reversed: "Lạnh lùng, thao túng, lừa dối, nghiện ngập.",
@@ -620,7 +620,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 50,
         name: "Ace of Swords",
         suit: "swords",
-        image: "/tarot/swords_1.jpg",
+        image: "/tarot/Swords01.jpg",
         meaning: {
             upright: "Đột phá, ý tưởng mới, sự thật, rõ ràng, chiến thắng.",
             reversed: "Rối trí, thiếu ý tưởng, thất bại, lời nói gây tổn thương.",
@@ -632,7 +632,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 51,
         name: "Two of Swords",
         suit: "swords",
-        image: "/tarot/swords_2.jpg",
+        image: "/tarot/Swords02.jpg",
         meaning: {
             upright: "Bế tắc, lưỡng lự, trốn tránh sự thật, cân nhắc.",
             reversed: "Ra quyết định, nhìn thấy sự thật, hết bế tắc.",
@@ -644,7 +644,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 52,
         name: "Three of Swords",
         suit: "swords",
-        image: "/tarot/swords_3.jpg",
+        image: "/tarot/Swords03.jpg",
         meaning: {
             upright: "Đau khổ, chia tay, tổn thương, buồn bã, phản bội.",
             reversed: "Chữa lành, tha thứ, vượt qua nỗi đau, lạc quan.",
@@ -656,7 +656,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 53,
         name: "Four of Swords",
         suit: "swords",
-        image: "/tarot/swords_4.jpg",
+        image: "/tarot/Swords04.jpg",
         meaning: {
             upright: "Nghỉ ngơi, hồi phục, thiền định, tạm dừng.",
             reversed: "Kiệt sức, không chịu nghỉ, quay lại làm việc.",
@@ -668,7 +668,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 54,
         name: "Five of Swords",
         suit: "swords",
-        image: "/tarot/swords_5.jpg",
+        image: "/tarot/Swords05.jpg",
         meaning: {
             upright: "Xung đột, thất bại, chơi xấu, thắng nhưng mất mát.",
             reversed: "Hòa giải, hối hận, buông bỏ hận thù, kết thúc tranh cãi.",
@@ -680,7 +680,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 55,
         name: "Six of Swords",
         suit: "swords",
-        image: "/tarot/swords_6.jpg",
+        image: "/tarot/Swords06.jpg",
         meaning: {
             upright: "Rời bỏ, chuyển đổi, bình yên sau bão, di chuyển.",
             reversed: "Mắc kẹt, không thể rời đi, vấn đề quay lại.",
@@ -692,7 +692,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 56,
         name: "Seven of Swords",
         suit: "swords",
-        image: "/tarot/swords_7.jpg",
+        image: "/tarot/Swords07.jpg",
         meaning: {
             upright: "Lén lút, lừa dối, chiến thuật, trốn tránh.",
             reversed: "Thú nhận, bị phát hiện, thay đổi chiến thuật.",
@@ -704,7 +704,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 57,
         name: "Eight of Swords",
         suit: "swords",
-        image: "/tarot/swords_8.jpg",
+        image: "/tarot/Swords08.jpg",
         meaning: {
             upright: "Bế tắc, tự giới hạn, sợ hãi, cảm thấy bị trói buộc.",
             reversed: "Thoát khỏi bế tắc, tự do, nhìn nhận vấn đề.",
@@ -716,7 +716,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 58,
         name: "Nine of Swords",
         suit: "swords",
-        image: "/tarot/swords_9.jpg",
+        image: "/tarot/Swords09.jpg",
         meaning: {
             upright: "Lo lắng, mất ngủ, ác mộng, stress, hối hận.",
             reversed: "Giải tỏa lo âu, tìm ra giải pháp, hy vọng.",
@@ -728,7 +728,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 59,
         name: "Ten of Swords",
         suit: "swords",
-        image: "/tarot/swords_10.jpg",
+        image: "/tarot/Swords10.jpg",
         meaning: {
             upright: "Kết thúc đau đớn, phản bội, thất bại hoàn toàn, đáy vực.",
             reversed: "Hồi phục, khởi đầu lại, tồi tệ nhất đã qua.",
@@ -740,7 +740,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 60,
         name: "Page of Swords",
         suit: "swords",
-        image: "/tarot/swords_page.jpg",
+        image: "/tarot/Swords11.jpg",
         meaning: {
             upright: "Tò mò, tin tức, ý tưởng mới, cảnh giác, nói nhiều.",
             reversed: "Tin đồn, nói dối, hứa suông, thiếu kinh nghiệm.",
@@ -752,7 +752,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 61,
         name: "Knight of Swords",
         suit: "swords",
-        image: "/tarot/swords_knight.jpg",
+        image: "/tarot/Swords12.jpg",
         meaning: {
             upright: "Hành động nhanh, quyết đoán, tham vọng, thẳng thắn.",
             reversed: "Hung hăng, thô lỗ, vội vàng, bất cẩn.",
@@ -764,7 +764,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 62,
         name: "Queen of Swords",
         suit: "swords",
-        image: "/tarot/swords_queen.jpg",
+        image: "/tarot/Swords13.jpg",
         meaning: {
             upright: "Thông minh, độc lập, sắc sảo, rõ ràng, công bằng.",
             reversed: "Cay nghiệt, lạnh lùng, phán xét, cô độc.",
@@ -776,7 +776,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 63,
         name: "King of Swords",
         suit: "swords",
-        image: "/tarot/swords_king.jpg",
+        image: "/tarot/Swords14.jpg",
         meaning: {
             upright: "Trí tuệ, quyền lực, logic, sự thật, kỷ luật.",
             reversed: "Độc tài, tàn nhẫn, thao túng, lạm quyền.",
@@ -789,7 +789,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 64,
         name: "Ace of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_1.jpg",
+        image: "/tarot/Pents01.jpg",
         meaning: {
             upright: "Cơ hội tài chính, khởi đầu mới, thịnh vượng, sức khỏe.",
             reversed: "Mất cơ hội, chi tiêu hoang phí, tham lam.",
@@ -801,7 +801,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 65,
         name: "Two of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_2.jpg",
+        image: "/tarot/Pents02.jpg",
         meaning: {
             upright: "Cân bằng, linh hoạt, quản lý tài chính, đa nhiệm.",
             reversed: "Mất cân bằng, rối loạn, nợ nần, quá tải.",
@@ -813,7 +813,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 66,
         name: "Three of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_3.jpg",
+        image: "/tarot/Pents03.jpg",
         meaning: {
             upright: "Hợp tác, kỹ năng, chất lượng, làm việc nhóm.",
             reversed: "Thiếu hợp tác, làm việc kém, mâu thuẫn nhóm.",
@@ -825,7 +825,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 67,
         name: "Four of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_4.jpg",
+        image: "/tarot/Pents04.jpg",
         meaning: {
             upright: "Tiết kiệm, sở hữu, ổn định, kiểm soát.",
             reversed: "Keo kiệt, tham lam, mất kiểm soát, chi tiêu.",
@@ -837,7 +837,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 68,
         name: "Five of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_5.jpg",
+        image: "/tarot/Pents05.jpg",
         meaning: {
             upright: "Nghèo khó, mất mát, cô lập, bệnh tật.",
             reversed: "Hồi phục tài chính, tìm được sự giúp đỡ, cải thiện.",
@@ -849,7 +849,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 69,
         name: "Six of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_6.jpg",
+        image: "/tarot/Pents06.jpg",
         meaning: {
             upright: "Cho đi và nhận lại, từ thiện, hào phóng, chia sẻ.",
             reversed: "Ích kỷ, nợ nần, lợi dụng, bất công.",
@@ -861,7 +861,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 70,
         name: "Seven of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_7.jpg",
+        image: "/tarot/Pents07.jpg",
         meaning: {
             upright: "Kiên nhẫn, đầu tư, chờ đợi thu hoạch, đánh giá.",
             reversed: "Mất kiên nhẫn, đầu tư thất bại, lười biếng.",
@@ -873,7 +873,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 71,
         name: "Eight of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_8.jpg",
+        image: "/tarot/Pents08.jpg",
         meaning: {
             upright: "Chăm chỉ, kỹ năng, chi tiết, học nghề, nỗ lực.",
             reversed: "Lười biếng, làm ẩu, thiếu tham vọng, chán nản.",
@@ -885,7 +885,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 72,
         name: "Nine of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_9.jpg",
+        image: "/tarot/Pents09.jpg",
         meaning: {
             upright: "Sung túc, độc lập, tận hưởng, sang trọng.",
             reversed: "Phụ thuộc tài chính, chi tiêu hoang phí, cô đơn.",
@@ -897,7 +897,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 73,
         name: "Ten of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_10.jpg",
+        image: "/tarot/Pents10.jpg",
         meaning: {
             upright: "Giàu có, di sản, gia đình, ổn định lâu dài.",
             reversed: "Tranh chấp tài sản, gia đình tan vỡ, mất mát.",
@@ -909,7 +909,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 74,
         name: "Page of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_page.jpg",
+        image: "/tarot/Pents11.jpg",
         meaning: {
             upright: "Cơ hội mới, học hỏi, thực tế, tin tức tài chính.",
             reversed: "Thiếu tập trung, lười biếng, tin xấu về tiền bạc.",
@@ -921,7 +921,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 75,
         name: "Knight of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_knight.jpg",
+        image: "/tarot/Pents12.jpg",
         meaning: {
             upright: "Chăm chỉ, đáng tin cậy, kiên trì, thực tế.",
             reversed: "Nhàm chán, lười biếng, cứng nhắc, trì trệ.",
@@ -933,7 +933,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 76,
         name: "Queen of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_queen.jpg",
+        image: "/tarot/Pents13.jpg",
         meaning: {
             upright: "Nuôi dưỡng, thực tế, giàu có, hào phóng, đảm đang.",
             reversed: "Ích kỷ, tham công tiếc việc, bỏ bê gia đình.",
@@ -945,7 +945,7 @@ export const TAROT_DECK: TarotCard[] = [
         id: 77,
         name: "King of Pentacles",
         suit: "pentacles",
-        image: "/tarot/pentacles_king.jpg",
+        image: "/tarot/Pents14.jpg",
         meaning: {
             upright: "Thành đạt, giàu có, quyền lực, đáng tin cậy.",
             reversed: "Tham lam, bủn xỉn, thất bại, lạm quyền.",
