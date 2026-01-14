@@ -266,6 +266,7 @@ export default function ProfilePage() {
         {/* Content Area */}
         <div className="flex-1 overflow-auto p-3 sm:p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <div className="max-w-3xl mx-auto">
+
             {/* User Profile Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -392,6 +393,7 @@ export default function ProfilePage() {
                 </div>
               )}
             </motion.div>
+            
             {/* Breakup Status Warning */}
             <AnimatePresence>
               {breakupData && breakupData.isActive && (
