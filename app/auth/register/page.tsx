@@ -47,7 +47,7 @@ export default function RegisterPage() {
   }, [password, confirmPassword, email]);
 
   const isFormValid = Object.values(validations).every(Boolean);
-
+  const isPasswordInvalid = isTouched && (!validations.length || !validations.upper || !validations.lower || !validations.number || !validations.special);
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
