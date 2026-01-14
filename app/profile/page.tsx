@@ -258,7 +258,7 @@ export default function ProfilePage() {
         style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
-        <ContentHeader 
+        <ContentHeader
           title="Hồ Sơ Cá Nhân"
           description="Quản lý thông tin cá nhân và mối quan hệ"
         />
@@ -393,7 +393,7 @@ export default function ProfilePage() {
                 </div>
               )}
             </motion.div>
-            
+
             {/* Breakup Status Warning */}
             <AnimatePresence>
               {breakupData && breakupData.isActive && (
@@ -466,9 +466,9 @@ export default function ProfilePage() {
               >
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl -ml-32 -mb-32" />
 
-                <div className="flex justify-between items-center mb-8 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow-lg">
+                {/* <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8 relative z-10">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow-lg border-4 border-black/50 transition-transform hover:scale-105 duration-300">
                       <Heart className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-xl font-bold text-white">Người Phụ Thuộc Tình Cảm</h2>
@@ -479,6 +479,39 @@ export default function ProfilePage() {
                       className="bg-pink-500/20 text-pink-300 hover:bg-pink-500/30 border-pink-500/30"
                       variant="secondary"
                       size="sm"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Thêm người phụ thuộc
+                    </Button>
+                  )}
+                </div> */}
+
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8 relative z-10">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    {/* Icon Heart: Style tròn, có viền dày đen/50 giống Profile Avatar */}
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center shadow-lg border-4 border-black/50 transition-transform hover:scale-105 duration-300">
+                      <Heart className="w-8 h-8 md:w-10 md:h-10 text-white fill-white/20" />
+                    </div>
+
+                    <div>
+                      {/* Tiêu đề: Size chữ và độ đậm đồng nhất với Profile */}
+                      <h2 className="text-lg md:text-2xl font-bold text-white tracking-tight">
+                        Người Phụ Thuộc Tình Cảm
+                      </h2>
+                      <p className="text-pink-300/80 flex items-center gap-2 text-sm md:text-base">
+                        <Sparkles className="w-4 h-4" />
+                        Kết nối năng lượng cặp đôi
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Button: Đưa về variant secondary và thêm hiệu ứng backdrop-blur */}
+                  {!partner && !showAddPartner && (
+                    <Button
+                      onClick={() => setShowAddPartner(true)}
+                      variant="secondary"
+                      size="sm"
+                      className="backdrop-blur-md bg-pink-500/20 hover:bg-pink-500/30 border-pink-500/30 text-pink-200"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Thêm người phụ thuộc
