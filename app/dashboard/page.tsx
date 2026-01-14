@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
       <main 
         className="flex-1 relative z-10 overflow-auto transition-all duration-200"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         <div className="p-8 pt-6 max-w-7xl mx-auto">{/* Header Section */}
           {/* Header Section */}

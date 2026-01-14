@@ -62,8 +62,9 @@ export default function RegisterPage() {
       } else {
         toast.error('Đăng ký thất bại, email có thể đã tồn tại');
       }
-    } catch (error) {
-      toast.error('Có lỗi xảy ra, vui lòng thử lại');
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra, vui lòng thử lại';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -295,6 +296,18 @@ export default function RegisterPage() {
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 opacity-0 group-focus-within:opacity-100 pointer-events-none transition-opacity duration-500 -z-10 blur-sm" />
               </motion.div>
 
+              {/* DÒNG CHỮ HƯỚNG DẪN MỚI */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={isPasswordInvalid ? { x: [-5, 5, -3, 3, -1, 1, 0], opacity: 1 } : { opacity: 1 }} // Lắc lư khi isPasswordInvalid = true
+                transition={{ duration: 0.4, type: 'spring' }} // Thời gian và kiểu chuyển động
+                className={`text-[15px] text-center px-2 transition-colors duration-300 ${
+                  isPasswordInvalid ? 'text-red-400 font-medium' : 'text-gray-400'
+                }`}
+              >
+                 Mật khẩu phải có ít nhất 8 kí tự, chữ cái viết thường, chữ cái in hoa và kí tự đặc biệt.
+              </motion.div>
+
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -322,6 +335,7 @@ export default function RegisterPage() {
               </motion.div>
             </form>
           ) : (
+            // Phần Xác thực (Verify) giữ nguyên
             <form onSubmit={handleVerify} className="space-y-5 relative">
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
