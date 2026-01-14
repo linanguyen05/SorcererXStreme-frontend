@@ -50,7 +50,6 @@ function ResetPasswordForm() {
     }
     if (!isFormValid) return;
     
-    // Hiện Modal xác nhận trước khi gửi
     setShowConfirmModal(true);
   };
 
@@ -58,23 +57,23 @@ function ResetPasswordForm() {
     setShowConfirmModal(false);
     setIsLoading(true);
     try {
-      // Gửi code 6 số và mật khẩu mới lên server
-      // Lưu ý: authApi.resetPassword cần nhận (code, newPassword)
-      await authApi.resetPassword(code, password); 
-      
+      if (!initialEmail) {
+        toast.error('Thiếu thông tin Email. Vui lòng thực hiện lại từ đầu.');
+        return;
+      }
+
+      await authApi.resetPassword(initialEmail, code, password); 
       toast.success('Đặt lại mật khẩu thành công! Đang chuyển hướng...');
       setTimeout(() => router.push('/auth/login'), 2000);
 
     } catch (error: any) {
       console.error(error);
-      const msg = error?.response?.data?.message || error?.message || 'Mã xác nhận không đúng hoặc đã hết hạn';
+      const msg = error?.message || 'Mã xác nhận không đúng hoặc đã hết hạn';
       toast.error(msg);
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Component hiển thị checklist mật khẩu
   const RequirementItem = ({ met, text }: { met: boolean; text: string }) => (
     <div className={`flex items-center gap-2 text-xs transition-colors duration-300 ${
       met ? 'text-green-400' : isTouched && password.length > 0 ? 'text-red-400' : 'text-gray-500'
@@ -88,7 +87,7 @@ function ResetPasswordForm() {
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden font-sans text-white">
       <AnimatedBackground />
 
-      {/* Các hiệu ứng bay bay nền */}
+      {/* Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           animate={{ y: [0, -30, 0], rotate: [0, 10, 0], opacity: [0.2, 0.5, 0.2] }}
