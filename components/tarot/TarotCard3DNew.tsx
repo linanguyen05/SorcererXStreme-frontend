@@ -1,13 +1,15 @@
 'use client';
 
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 
+
 interface TarotCard3DNewProps {
   card: { id: number; name: string; meaning: { upright: string; reversed: string; }; image?: string; suit?: string; };
   index: number;      
-  totalIndex: number; 
+  totalIndex: number;
   phase: string;
   isRevealed: boolean;
   isPicked: boolean;
@@ -15,6 +17,7 @@ interface TarotCard3DNewProps {
   onClick?: () => void;
   layoutId?: string;
 }
+
 
 export const TarotCard3DNew: React.FC<TarotCard3DNewProps> = ({
   card,
@@ -27,17 +30,19 @@ export const TarotCard3DNew: React.FC<TarotCard3DNewProps> = ({
   onClick,
   layoutId
 }) => {
-  
-  const isFirstInRow = index === 0; 
+ 
+  const isFirstInRow = index === 0;
   const overlapClass = (phase === 'picking' && !isFirstInRow) ? '-ml-10 md:-ml-12 lg:-ml-14' : '';
+
 
   // Class cho lá bài đã chọn:
   // - brightness-75 (tối nhẹ, không đen kịt)
   // - ring-2 ring-yellow-400 (viền vàng)
   // - shadow-yellow (phát sáng vàng)
-  const pickedClass = isPicked 
-    ? 'brightness-75 contrast-125 ring-2 ring-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.6)] translate-y-2 pointer-events-none' 
-    : '';
+  const pickedClass = isPicked
+      ? 'brightness-75 z-[100] ring-2 ring-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.8)] -translate-y-12 md:-translate-y-16'
+      : (phase === 'picking' ? 'hover:-translate-y-6 hover:scale-105 hover:z-[90] hover:brightness-110 cursor-pointer' : '');
+
 
   const variants = {
     // HIỆU ỨNG CHIA BÀI (Dealing)
@@ -45,38 +50,40 @@ export const TarotCard3DNew: React.FC<TarotCard3DNewProps> = ({
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { 
-        type: 'spring', 
-        damping: 20, 
+      transition: {
+        type: 'spring',
+        damping: 20,
         stiffness: 100,
         delay: totalIndex * 0.015 // Tạo hiệu ứng bài bay ra lần lượt
       }
     }
   };
 
+
   return (
     <motion.div
       layoutId={layoutId}
       className={`
         relative cursor-pointer perspective-1000 flex-shrink-0
-        w-[80px] h-[120px] md:w-[100px] md:h-[150px] 
+        w-[80px] h-[120px] md:w-[100px] md:h-[150px]
         ${overlapClass}
         ${pickedClass}
       `}
-    
+   
       initial={{ opacity: 0, y: 50, scale: 0.8 }}
       variants={variants}
       animate="picking"
-      
-      whileHover={isSelectable && phase === 'picking' ? { 
-        y: -40, 
+     
+      whileHover={isSelectable && phase === 'picking' ? {
+        x: 0,
+        y: 0,
         marginRight: 60,
         marginLeft: 60,
-        scale: 1.3,
+        scale: 1,
         zIndex: 1000,
         transition: { duration: 0.2, ease: "easeOut" }
       } : {}}
-      
+     
       whileTap={isSelectable ? { scale: 0.95 } : {}}
       onClick={isSelectable ? onClick : undefined}
     >
@@ -95,7 +102,8 @@ export const TarotCard3DNew: React.FC<TarotCard3DNewProps> = ({
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
         </div>
 
-        <div 
+
+        <div
           className="absolute inset-0 backface-hidden rounded-lg overflow-hidden bg-slate-900 border border-yellow-500 shadow-2xl"
           style={{ transform: 'rotateY(180deg)' }}
         >
