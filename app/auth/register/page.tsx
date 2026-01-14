@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, Sparkles, Star, Moon, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/lib/store';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import toast from 'react-hot-toast';
@@ -19,12 +18,22 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<'register' | 'verify'>('register');
   const [verificationCode, setVerificationCode] = useState('');
-
-  const { register, confirmRegistration, login } = useAuthStore();
+  const [isPasswordInvalid, setIsPasswordInvalid] = useState(false);
+  const { register, confirmRegistration } = useAuthStore();
   const router = useRouter();
+
+  const validatePassword = (pwd: string) => {
+    if (pwd.length < 8) return false;
+    if (!/[A-Z]/.test(pwd)) return false;
+    if (!/[a-z]/.test(pwd)) return false;
+    if (!/[0-9]/.test(pwd)) return false;
+    if (!/[^A-Za-z0-9]/.test(pwd)) return false;
+    return true;
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsPasswordInvalid(false);
 
     if (!email || !password || !confirmPassword) {
       toast.error('Vui lòng điền đầy đủ thông tin');
@@ -36,8 +45,9 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      toast.error('Mật khẩu phải có ít nhất 6 ký tự');
+    const isValidPwd = validatePassword(password);
+    if (!isValidPwd) {
+      setIsPasswordInvalid(true); 
       return;
     }
 
@@ -48,10 +58,11 @@ export default function RegisterPage() {
         toast.success('Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận.');
         setStep('verify');
       } else {
-        toast.error('Đăng ký thất bại, vui lòng thử lại');
+        toast.error('Email đã tồn tại hoặc không hợp lệ');
       }
-    } catch (error) {
-      toast.error('Có lỗi xảy ra, vui lòng thử lại');
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra, vui lòng thử lại';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -185,10 +196,13 @@ export default function RegisterPage() {
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Mật khẩu (ít nhất 6 ký tự)"
+                  placeholder="Mật khẩu"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all duration-300"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (isPasswordInvalid) setIsPasswordInvalid(false); // Xóa trạng thái lỗi khi user bắt đầu sửa
+                  }}
+                  className={`w-full bg-white/5 border ${isPasswordInvalid ? 'border-red-500' : 'border-white/10'} rounded-xl py-4 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all duration-300`}
                   disabled={isLoading}
                 />
                 <button
@@ -226,6 +240,18 @@ export default function RegisterPage() {
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-500/20 to-orange-500/20 opacity-0 group-focus-within:opacity-100 pointer-events-none transition-opacity duration-500 -z-10 blur-sm" />
+              </motion.div>
+
+              {/* ADD */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={isPasswordInvalid ? { x: [0, -10, 10, -10, 10, -5, 5, 0], opacity: 1 } : { opacity: 1 }}
+                transition={{ duration: 0.4 }} 
+                className={`text-[15px] text-center px-2 transition-colors duration-300 ${
+                  isPasswordInvalid ? 'text-red-400 font-medium' : 'text-gray-400'
+                }`}
+              >
+                 Mật khẩu phải có ít nhất 8 kí tự bao gồm số, chữ cái viết thường, chữ cái in hoa và kí tự đặc biệt.
               </motion.div>
 
               <motion.div
