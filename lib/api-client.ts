@@ -119,13 +119,21 @@ export const authApi = {
   },
 
   forgotPassword: async (email: string) => {
-    return await resetPassword({ username: email });
+    return apiRequest('/api/auth/forgot-password', {
+      method: 'POST',
+      body: { email }
+    });
   },
 
-  resetPassword: async (email: string, code: string, newPassword: string) => {
-    return await confirmResetPassword({ username: email, confirmationCode: code, newPassword });
+  resetPassword: async (code: string, newPassword: string) => {
+    return apiRequest('/api/auth/reset-password', {
+      method: 'POST',
+      body: { 
+        token: code, 
+        password: newPassword 
+      } 
+    });
   },
-
   logout: async () => {
     await signOut();
   }
