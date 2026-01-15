@@ -64,7 +64,7 @@ export default function FortunePage() {
           formattedBirthDate = `${day}/${month}/${year}`;
         }
       }
-     
+
       setTuviInput({
         name: user.name || '',
         gender: user.gender || 'male',
@@ -144,7 +144,7 @@ export default function FortunePage() {
 
       // Parse giống như Tarot - backend trả về: { analysis: {...} }
       let analysis = '';
-     
+
       try {
         // Nếu response có analysis field (như Tarot)
         if (response.analysis) {
@@ -155,7 +155,7 @@ export default function FortunePage() {
               const bodyData = typeof response.analysis.body === 'string'
                 ? JSON.parse(response.analysis.body)
                 : response.analysis.body;
-             
+
               // Lấy answer từ bodyData
               analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
             } else {
@@ -177,12 +177,12 @@ export default function FortunePage() {
             : response.body;
           analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || JSON.stringify(bodyData, null, 2);
         }
-       
+
       } catch (parseError) {
         console.error('[Fortune Daily] Parse error:', parseError);
         analysis = 'Có lỗi khi xử lý kết quả. Vui lòng thử lại.';
       }
-     
+
       if (!analysis || analysis.trim() === '') {
         toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
         setIsDailyLoading(false);
@@ -199,7 +199,7 @@ export default function FortunePage() {
       toast.success('Đã xem tử vi thành công!');
     } catch (error: any) {
       console.error('[Fortune Daily] Error:', error);
-     
+
       if (error.message && error.message.includes('LIMIT_REACHED')) {
         setDailyResult({
           analysis: `⚠️ **Đã hết lượt sử dụng**\n\n` +
@@ -235,7 +235,7 @@ export default function FortunePage() {
         isAuthenticated,
         user: user?.email
       });
-     
+
       if (!token || !isAuthenticated) {
         toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
         setIsLoading(false);
@@ -311,7 +311,7 @@ export default function FortunePage() {
 
       // Parse giống như Tarot
       let analysis = '';
-     
+
       try {
         if (response.analysis) {
           if (typeof response.analysis === 'object') {
@@ -334,12 +334,12 @@ export default function FortunePage() {
             : response.body;
           analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || JSON.stringify(bodyData, null, 2);
         }
-       
+
       } catch (parseError) {
         console.error('[Fortune] Parse error:', parseError);
         analysis = 'Có lỗi khi xử lý kết quả. Vui lòng thử lại.';
       }
-     
+
       if (!analysis || analysis.trim() === '') {
         toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
         setIsLoading(false);
@@ -355,7 +355,7 @@ export default function FortunePage() {
       toast.success('Đã lập lá số tử vi thành công!');
     } catch (error: any) {
       console.error('[Fortune] Error:', error);
-     
+
       // Xử lý error từ API
       if (error.message && error.message.includes('LIMIT_REACHED')) {
         setTuviResult({
@@ -385,8 +385,10 @@ export default function FortunePage() {
 
 
       <main
-        className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        // className="flex-1 flex flex-col transition-all duration-200 relative z-10"
+        // style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
         <ContentHeader
@@ -394,10 +396,10 @@ export default function FortunePage() {
           description="Khám phá vận mệnh qua các vì sao"
         />
 
-        {/* Tabs */}
+        {/* Tabs
         <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md">
           <button
-            onClick={() => setActiveTab('daily')} 
+            onClick={() => setActiveTab('daily')}
             className={`flex-1 py-4 text-sm font-medium transition-all relative ${activeTab === 'daily' ? 'text-yellow-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
           >
@@ -435,6 +437,50 @@ export default function FortunePage() {
               <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-400 to-rose-500" />
             )}
           </button>
+        </div> */}
+        {/* Tabs Container - Thêm overflow-x-auto để mobile có thể vuốt ngang nếu cần */}
+        <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md overflow-x-auto scrollbar-none">
+          <button
+            onClick={() => setActiveTab('daily')}
+            className={`flex-1 min-w-[120px] sm:min-w-0 py-3 sm:py-4 text-[13px] sm:text-sm font-medium transition-all relative ${activeTab === 'daily' ? 'text-yellow-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">Tử Vi Hàng Ngày</span>
+            </div>
+            {activeTab === 'daily' && (
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('tuvi')}
+            className={`flex-1 min-w-[120px] sm:min-w-0 py-3 sm:py-4 text-[13px] sm:text-sm font-medium transition-all relative ${activeTab === 'tuvi' ? 'text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">Lập Lá Số</span>
+            </div>
+            {activeTab === 'tuvi' && (
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400 to-indigo-500" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('love')}
+            className={`flex-1 min-w-[120px] sm:min-w-0 py-3 sm:py-4 text-[13px] sm:text-sm font-medium transition-all relative ${activeTab === 'love' ? 'text-pink-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">Bói Tình Duyên</span>
+            </div>
+            {activeTab === 'love' && (
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-400 to-rose-500" />
+            )}
+          </button>
         </div>
 
         {/* Content */}
@@ -450,14 +496,14 @@ export default function FortunePage() {
                   className="space-y-8 relative" // Thêm relative để định vị lớp phủ
                 >
                   {/* LỚP PHỦ KHÓA TÍNH NĂNG */}
-                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] rounded-3xl border border-white/10">
+                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-[2px] rounded-3xl border border-white/10">
                     <div className="bg-black/80 p-8 rounded-2xl border border-yellow-500/30 shadow-2xl shadow-yellow-500/10 text-center max-w-md mx-4 transform hover:scale-105 transition-transform duration-300">
                       <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Lock className="w-8 h-8 text-yellow-400" />
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">Tính Năng Đang Nâng Cấp</h3>
                       <p className="text-gray-400 text-sm">
-                        Hệ thống đang được tu luyện để mang đến những lời giải đoán chính xác nhất. Vui lòng quay lại sau!
+                        Hệ thống đang được nâng cấp để mang đến những lời giải đoán chính xác nhất. Vui lòng quay lại sau!
                       </p>
                     </div>
                   </div>
@@ -579,15 +625,18 @@ export default function FortunePage() {
                   exit={{ opacity: 0, y: -20 }}
                 >
                   {!tuviResult ? (
-                    <div className="max-w-2xl mx-auto">
-                      <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl">
-                        <div className="text-center mb-8">
-                          <h2 className="text-2xl font-bold text-white mb-2">Lập Lá Số Tử Vi</h2>
-                          <p className="text-gray-400">Nhập thông tin chính xác để có kết quả luận giải chi tiết nhất</p>
+                    <div className="max-w-2xl mx-auto px-2 sm:px-0">
+                      <div className="bg-white/5 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10 shadow-xl">
+
+                        {/* Header Lập lá số tử vi */}
+                        <div className="text-center mb-6 sm:mb-8">
+                          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Lập Lá Số Tử Vi</h2>
+                          <p className="text-gray-400 text-xs sm:text-sm px-4">Nhập thông tin chính xác để có kết quả luận giải chi tiết nhất</p>
                         </div>
 
+                        {/* Form fields */}
+                        <form onSubmit={handleTuviSubmit} className="m-2 space-y-4 sm:space-y-6">
 
-                        <form onSubmit={handleTuviSubmit} className="space-y-6">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-300">Họ và tên</label>
@@ -599,8 +648,6 @@ export default function FortunePage() {
                                 placeholder="Nguyễn Văn A"
                               />
                             </div>
-
-
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-300">Giới tính</label>
                               <select
@@ -612,8 +659,6 @@ export default function FortunePage() {
                                 <option value="female">Nữ</option>
                               </select>
                             </div>
-
-
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-300">Ngày sinh (Dương lịch)</label>
                               <input
@@ -625,8 +670,6 @@ export default function FortunePage() {
                                 pattern="\d{2}/\d{2}/\d{4}"
                               />
                             </div>
-
-
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-300">Giờ sinh</label>
                               <input
@@ -636,31 +679,40 @@ export default function FortunePage() {
                                 className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
                               />
                             </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium text-gray-300">Nơi sinh</label>
+                              <input
+                                type="text"
+                                value={tuviInput.birthPlace}
+                                onChange={(e) => setTuviInput({ ...tuviInput, birthPlace: e.target.value })}
+                                className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
+                                placeholder="Hà Nội, TP.HCM..."
+                              />
+                            </div>
                           </div>
 
-
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-300">Nơi sinh</label>
-                            <input
-                              type="text"
-                              value={tuviInput.birthPlace}
-                              onChange={(e) => setTuviInput({ ...tuviInput, birthPlace: e.target.value })}
-                              className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                              placeholder="Hà Nội, TP.HCM..."
-                            />
-                          </div>
-
-
-                          <Button
+                          {/* Button lập lá số */}
+                          {/* <Button
                             type="submit"
                             isLoading={isLoading}
-                            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 py-4 text-lg shadow-lg shadow-purple-500/25"
+                            className="w-full py-3 sm:py-4 text-base sm:text-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 py-4 shadow-lg shadow-purple-500/25"
                           >
                             <Sparkles className="w-5 h-5 mr-2" />
                             Lập Lá Số
-                          </Button>
-                         
+                          </Button> */}
+                          <div className="flex justify-center mt-6 sm:mt-8">
+                            <Button
+                              type="submit"
+                              isLoading={isLoading}
+                              className="sm:w-auto px-6 py-2.5 sm:py-3 text-sm sm:text-base sm:text-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-500/25 transition-all duration-300"
+                            >
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Lập Lá Số
+                            </Button>
+                          </div>
+
                         </form>
+
                       </div>
                     </div>
                   ) : (
@@ -714,6 +766,7 @@ export default function FortunePage() {
             </AnimatePresence>
           </div>
         </div>
+
       </main>
     </div>
   );
