@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Sparkles, RefreshCw } from 'lucide-react';
+import { Send, Bot, User, Sparkles, RefreshCw, Router } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { useAuthStore, useChatStore, ChatMessage } from '@/lib/store';
 import { useUserContext } from '@/lib/user-context';
@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import ContentHeader from '@/components/layout/ContentHeader';
+import { useRouter } from 'next/navigation';
 
 // Component để render nội dung AI với formatting đẹp
 const FormattedAIResponse = ({ content }: { content: string }) => {
@@ -20,6 +21,7 @@ const FormattedAIResponse = ({ content }: { content: string }) => {
 };
 
 export default function ChatPage() {
+  const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -30,6 +32,12 @@ export default function ChatPage() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     scrollToBottom();

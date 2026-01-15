@@ -1,7 +1,7 @@
 'use client';
 
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Hash, Calculator, RefreshCw, Sparkles, Star, ArrowRight, Zap, Crown, Infinity as InfinityIcon } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import ContentHeader from '@/components/layout/ContentHeader';
-
+import { useRouter } from 'next/navigation';
 
 const numerologyMeanings = {
   1: {
@@ -86,6 +86,18 @@ export default function NumerologyPage() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<any>(null);
   const { user, isAuthenticated } = useAuthStore();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated or profile incomplete
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
 
   const calculateLifePath = (birthDate: string) => {
@@ -104,7 +116,6 @@ export default function NumerologyPage() {
 
     return sum > 9 ? sum : sum;
   };
-
 
   const calculateNameNumber = (name: string) => {
     const letterValues: { [key: string]: number } = {
@@ -136,7 +147,6 @@ export default function NumerologyPage() {
 
     return sum;
   };
-
 
   const performCalculation = async () => {
     const { token } = useAuthStore.getState();
@@ -356,11 +366,6 @@ export default function NumerologyPage() {
   const resetCalculation = () => {
     setResult(null);
   };
-
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
 
   const containerVariants = {

@@ -12,6 +12,7 @@ import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { TAROT_DECK, TarotCard } from '@/lib/tarotData';
 import ContentHeader from '@/components/layout/ContentHeader';
 import { TarotSceneNew } from '@/components/tarot/TarotSceneNew';
+import { useRouter } from 'next/navigation';
 
 // --- Types ---
 type ReadingMode = 'overview' | 'question' | null;
@@ -32,6 +33,18 @@ export default function TarotPage() {
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const hasCalledApiRef = useRef(false);
   const isPickingCardRef = useRef(false);
+  const router = useRouter();
+
+  // Redirect to login if not authenticated or profile incomplete
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -50,7 +63,7 @@ export default function TarotPage() {
     const shuffled = [...TAROT_DECK].sort(() => Math.random() - 0.5);
     setShuffledDeck(shuffled);
     setPhase('shuffling');
-    setTimeout(() => setPhase('picking'), 1500); 
+    setTimeout(() => setPhase('picking'), 1500);
   };
 
   const handleQuestionSubmit = (e: React.FormEvent) => {
@@ -213,14 +226,14 @@ export default function TarotPage() {
                         <div className="flex items-center gap-2 text-xs text-purple-200/70 font-medium tracking-widest uppercase"><Sparkles className="w-3 h-3 animate-spin-slow" /><span>Đang hòa trộn năng lượng</span></div>
                       </div>
                     ) : (
-                       <div className="flex flex-col items-center gap-3">
-                          <h2 className="text-2xl md:text-4xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>{readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}</h2>
-                          <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3 pointer-events-auto">
-                             <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
-                             <div className="h-3 w-[1px] bg-white/20"></div>
-                             <span className="text-lg font-bold text-blue-400 leading-none">{selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span></span>
-                          </div>
-                       </div>
+                      <div className="flex flex-col items-center gap-3">
+                        <h2 className="text-2xl md:text-4xl font-bold text-white drop-shadow-[0_0_25px_rgba(168,85,247,0.6)] text-center" style={{ fontFamily: 'Pacifico, cursive' }}>{readingMode === 'question' ? 'Rút 1 Lá Bài' : 'Rút 3 Lá Bài'}</h2>
+                        <div className="px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-3 pointer-events-auto">
+                          <span className="text-gray-300 text-xs font-bold uppercase tracking-wider">Tiến trình</span>
+                          <div className="h-3 w-[1px] bg-white/20"></div>
+                          <span className="text-lg font-bold text-blue-400 leading-none">{selectedIndices.length} <span className="text-gray-500 text-sm font-normal">/ {readingMode === 'question' ? 1 : 3}</span></span>
+                        </div>
+                      </div>
                     )}
                   </div>
                   <div className="w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-4 flex justify-center">
@@ -233,9 +246,9 @@ export default function TarotPage() {
                   </div>
                 </div>
                 <div className="w-full h-full absolute inset-0 z-10 overflow-y-auto pt-32 pb-32 no-scrollbar">
-                   <div className="min-h-full flex items-center justify-center">
+                  <div className="min-h-full flex items-center justify-center">
                     <TarotSceneNew cards={shuffledDeck.length > 0 ? shuffledDeck : TAROT_DECK} selectedCards={selectedCards} pickedPositions={selectedIndices} onCardClick={(index) => handleCardPick(index)} isSelectable={phase === 'picking'} phase={phase} />
-                   </div>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -254,10 +267,10 @@ export default function TarotPage() {
                       <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.2 }} className="bg-white/5 backdrop-blur-xl rounded-2xl p-4 md:p-6 border border-white/10">
                         <div className="aspect-[1117/1920] bg-gray-900 rounded-xl mb-4 relative overflow-hidden border border-white/10">
                           {card.image ? (
-                            <img 
-                              src={card.image} 
-                              alt={card.name} 
-                              className={`w-full h-full object-cover transition-transform duration-500 ${card.isReversed ? 'rotate-180' : ''}`} 
+                            <img
+                              src={card.image}
+                              alt={card.name}
+                              className={`w-full h-full object-cover transition-transform duration-500 ${card.isReversed ? 'rotate-180' : ''}`}
                             />
                           ) : (
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-4">

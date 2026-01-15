@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Calendar, MapPin, Eye, Heart, Sparkles, Clock, RotateCcw } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
@@ -14,6 +14,7 @@ import HouseChart3D from '@/components/astrology/HouseChart3D';
 import StarMap3D from '@/components/astrology/StarMap3D';
 import toast from 'react-hot-toast';
 import ContentHeader from '@/components/layout/ContentHeader';
+import { useRouter } from 'next/navigation';
 
 const zodiacSigns = [
   { name: 'Bạch Dương', date: '21/3 - 19/4', element: 'Hỏa', traits: 'Năng động, dũng cảm, lãnh đạo' },
@@ -63,6 +64,18 @@ export default function AstrologyPage() {
   const [starMapGenerated, setStarMapGenerated] = useState(false);
   const { user, isAuthenticated } = useAuthStore();
   const { partner, breakupData } = useProfileStore();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated or profile incomplete
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
   const analyzeChart = async () => {
     const { token } = useAuthStore.getState();
@@ -289,10 +302,6 @@ export default function AstrologyPage() {
   const handleStarMapGenerated = () => {
     setStarMapGenerated(true);
   };
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
@@ -526,7 +535,7 @@ export default function AstrologyPage() {
                           onClick={analyzeChart}
                           isLoading={isAnalyzing}
                           className="py-4 text-md md:text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-500/25 rounded-xl"
-                        >            
+                        >
                           <Heart className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                           Xem Tình Duyên
                         </Button>

@@ -41,6 +41,17 @@ export default function ProfilePage() {
   const { user, isAuthenticated, updateProfile, token } = useAuthStore();
   const { partner, breakupData, addPartner, updatePartner, breakup, confirmRecovery, fetchPartner, moveOn } = useProfileStore();
 
+  // Redirect to login if not authenticated or profile incomplete
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
+
   // Load user profile and partner info from backend on mount
   useEffect(() => {
     const loadData = async () => {

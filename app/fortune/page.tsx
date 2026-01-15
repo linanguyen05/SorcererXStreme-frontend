@@ -15,10 +15,12 @@ import { horoscopeApi } from '@/lib/api-client';
 import ContentHeader from '@/components/layout/ContentHeader';
 import { Lock } from 'lucide-react';
 import { formatDateApi, getTodayDisplay } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 type Tab = 'daily' | 'tuvi' | 'love';
 
 export default function FortunePage() {
+  const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
   const [activeTab, setActiveTab] = useState<Tab>('tuvi');
   const { user, isAuthenticated, token } = useAuthStore();
@@ -49,6 +51,17 @@ export default function FortunePage() {
   });
   const [dailyResult, setDailyResult] = useState<any>(null);
   const [isDailyLoading, setIsDailyLoading] = useState(false);
+
+  // Redirect to login if not authenticated or profile incomplete
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
   // Sync user data to form when user loads
   useEffect(() => {
@@ -373,9 +386,6 @@ export default function FortunePage() {
       setIsLoading(false);
     }
   };
-
-
-  if (!isAuthenticated) return null;
 
 
   return (
