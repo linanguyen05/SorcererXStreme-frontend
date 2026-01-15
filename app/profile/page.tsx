@@ -436,7 +436,7 @@ export default function ProfilePage() {
                           size="sm"
                         >
                           <Heart className="w-4 h-4 mr-2" />
-                          Quay lại
+                          Lò vi sóng
                         </Button>
                       </div>
                     </div>
