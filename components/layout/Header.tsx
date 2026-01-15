@@ -137,23 +137,31 @@ export const Header = () => {
                                     )}
                                 </AnimatePresence>
                             </div>
-                        ) : (                        
+                        ) : (
                             <>
-                                <div className="flex items-center gap-3">                                    
+                                {/* <div className="flex items-center gap-3">                                    
                                     <Link href="/auth/login" className="px-5 py-2.5 text-sm font-medium text-white hover:text-purple-300 transition-colors whitespace-nowrap">Đăng Nhập</Link>
                                     <Link href="/auth/register" className="px-6 py-2.5 text-sm font-bold bg-white text-black rounded-full hover:bg-purple-50 transition-all duration-300 whitespace-nowrap">Đăng Ký</Link>                                                             
                                 </div>
 
-                                {/* Mobile Menu Button */}                                
-                                <button
-                                        className="lg:hidden relative z-[110] text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                    >
+                                {/* Mobile Menu Button */}
+                                {/* <button
+                                    className="lg:hidden relative z-[110] text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                >
                                     {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                                </button>
+                                </button> 
+                                */}
 
-                            </>                           
-                        )}                    
+                                <Link
+                                    href="/auth/login"
+                                    className="px-6 py-2.5 text-sm font-bold bg-white text-black rounded-full hover:bg-purple-50 transition-all duration-300 shadow-lg shadow-white/5"
+                                >
+                                    Đăng Nhập
+                                </Link>
+
+                            </>
+                        )}
 
 
                     </div>
