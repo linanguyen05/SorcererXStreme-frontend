@@ -73,7 +73,7 @@ export default function AstrologyPage() {
 
     // Use snake_case properties from user store
     const birthPlace = user?.birth_place || 'Việt Nam';
-    
+
     // Format birth_date to YYYY-MM-DD
     let birthDate = '';
     if (user?.birth_date) {
@@ -96,14 +96,14 @@ export default function AstrologyPage() {
         }
       }
     }
-    
+
     // Validate birth_date
     if (!birthDate) {
       toast.error('Vui lòng cập nhật ngày sinh trong hồ sơ');
       setIsAnalyzing(false);
       return;
     }
-    
+
     const birthTime = user?.birth_time || '';
     const userName = user?.name || '';
     const userGender = user?.gender || 'other';
@@ -150,13 +150,13 @@ export default function AstrologyPage() {
           }
         }
       }
-      
+
       if (!partnerBirthDate) {
         toast.error('Ngày sinh của người yêu không hợp lệ');
         setIsAnalyzing(false);
         return;
       }
-      
+
       partnerContext = {
         name: partner.name,
         gender: partner.gender,
@@ -168,8 +168,8 @@ export default function AstrologyPage() {
 
     try {
       // Endpoint động dựa vào feature_type
-      const endpoint = featureType === 'love' 
-        ? '/api/astrology/love' 
+      const endpoint = featureType === 'love'
+        ? '/api/astrology/love'
         : '/api/astrology/overview';
 
       const requestBody: any = {
@@ -223,21 +223,21 @@ export default function AstrologyPage() {
       }
 
       const data = await response.json();
-      
+
       // Backend trả về: { analysis: "string" } hoặc { analysis: { body: "string" } }
       if (data.analysis) {
         let analysisText = '';
-        
+
         // Nếu analysis là object (Lambda response format)
         if (typeof data.analysis === 'object') {
           // Lambda trả về { statusCode, headers, body }
           if (data.analysis.body) {
             // Body là string JSON, cần parse
             try {
-              const bodyData = typeof data.analysis.body === 'string' 
-                ? JSON.parse(data.analysis.body) 
+              const bodyData = typeof data.analysis.body === 'string'
+                ? JSON.parse(data.analysis.body)
                 : data.analysis.body;
-              
+
               // Lấy answer từ bodyData
               analysisText = bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
             } catch (e) {
@@ -259,7 +259,7 @@ export default function AstrologyPage() {
           // analysis is already a string
           analysisText = data.analysis;
         }
-        
+
         setAnalysis(analysisText);
         if (activeTab === 'overview') {
           setShowStarMap(true);
@@ -300,39 +300,49 @@ export default function AstrologyPage() {
       <AstrologyScene3D isActive={isAnalyzing || showRelationChart || showStarMap} mode="general" />
       <Sidebar />
 
-      <main 
-        className="flex-1 flex flex-col transition-all duration-200 relative z-10"
-        style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth < 768 
-            ? '0' 
-            : (sidebarCollapsed ? '80px' : '280px')  }}
+      <main
+        // className="flex-1 flex flex-col transition-all duration-200 relative z-10"
+        // style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth < 768 
+        //     ? '0' 
+        //     : (sidebarCollapsed ? '80px' : '280px')  }}
+        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
         <ContentHeader
-          title="Chiêm Tinh Học 3D"
+          title="Cung Hoàng Đạo"
           description="Khám phá vận mệnh qua vị trí các vì sao"
         />
 
         {/* Tabs */}
-        <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md">
+        <div className="flex border-b border-white/10 bg-black/20 backdrop-blur-md overflow-x-auto scrollbar-none outline-none">
+          {/* Tab tổng quan */}
           <button
             onClick={() => { setActiveTab('overview'); resetAnalysis(); }}
-            className={`flex-1 py-4 text-sm font-medium transition-all relative ${activeTab === 'overview' ? 'text-yellow-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            className={`flex-1 min-w-[150px] sm:min-w-0 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-all relative ${activeTab === 'overview' ? 'text-yellow-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Eye className="w-4 h-4" />
-              Tổng Quan & Bản Đồ Sao
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+
+              <span className="whitespace-nowrap">
+                <span className="inline">Tổng Quan & Bản Đồ Sao</span>
+              </span>
             </div>
             {activeTab === 'overview' && (
               <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-amber-500" />
             )}
           </button>
+
+          {/* Tab tình duyên */}
           <button
             onClick={() => { setActiveTab('love'); resetAnalysis(); }}
-            className={`flex-1 py-4 text-sm font-medium transition-all relative ${activeTab === 'love' ? 'text-pink-400' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+            className={`flex-1 min-w-[120px] sm:min-w-0 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-all relative ${activeTab === 'love' ? 'text-pink-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Heart className="w-4 h-4" />
-              Tình Duyên
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+              <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap sm:normal-case">Tình Duyên</span>
             </div>
             {activeTab === 'love' && (
               <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-400 to-rose-500" />
@@ -344,6 +354,7 @@ export default function AstrologyPage() {
         <div className="flex-1 overflow-auto p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <div className="max-w-6xl mx-auto">
             <AnimatePresence mode="wait">
+              {/* Tab tổng quan */}
               {activeTab === 'overview' && (
                 <motion.div
                   key="overview"
@@ -360,25 +371,27 @@ export default function AstrologyPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="max-w-2xl mx-auto"
                       >
-                        <div className="bg-white/5 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+                        <div className="bg-white/5 backdrop-blur-2xl rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
                           {/* Decorative Elements */}
-                          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-amber-500/20 transition-colors duration-700" />
-                          <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl -ml-32 -mb-32 group-hover:bg-yellow-500/20 transition-colors duration-700" />
-
+                          <div className="absolute top-0 right-0 w-32 h-32 sm:w-64 sm:h-64 bg-amber-500/10 rounded-full blur-2xl sm:blur-3xl -mr-16 -mt-16 group-hover:bg-amber-500/20 transition-colors duration-700" />
                           <div className="relative z-10">
-                            <h3 className="text-xl font-bold text-white mb-8 flex items-center justify-center">
-                              <Sparkles className="w-5 h-5 text-yellow-400 mr-2 animate-pulse" />
-                              Thông tin sinh của bạn
-                              <Sparkles className="w-5 h-5 text-yellow-400 ml-2 animate-pulse" />
+                            {/* Header */}
+                            <h3 className="text-lg sm:text-xl font-bold text-white mb-6 sm:mb-8 flex items-center justify-center">
+                              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 mr-2 animate-pulse" />
+                              Thông tin ngày sinh của bạn
+                              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 ml-2 animate-pulse" />
                             </h3>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            {/* Fields */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+
+                              {/* Ngày sinh */}
                               <div className="bg-black/30 rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors">
                                 <div className="flex items-center gap-2 mb-2 text-yellow-300/80">
                                   <Calendar className="w-4 h-4" />
                                   <span className="text-xs uppercase tracking-wider font-semibold">Ngày sinh</span>
                                 </div>
-                                <p className="text-white font-medium text-lg">
+                                <p className="text-white font-medium text-md md:text-lg">
                                   {user?.birth_date ? (() => {
                                     const date = new Date(user.birth_date);
                                     const day = String(date.getDate()).padStart(2, '0');
@@ -388,33 +401,42 @@ export default function AstrologyPage() {
                                   })() : 'Chưa có'}
                                 </p>
                               </div>
+
+                              {/* Giờ sinh */}
                               <div className="bg-black/30 rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors">
                                 <div className="flex items-center gap-2 mb-2 text-yellow-300/80">
                                   <Clock className="w-4 h-4" />
                                   <span className="text-xs uppercase tracking-wider font-semibold">Giờ sinh</span>
                                 </div>
-                                <p className="text-white font-medium text-lg">{user?.birth_time || 'Chưa có'}</p>
+                                <p className="text-white font-medium text-md md:text-lg">{user?.birth_time || 'Chưa có'}</p>
                               </div>
+
+                              {/* Nơi sinh */}
                               <div className="bg-black/30 rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors">
                                 <div className="flex items-center gap-2 mb-2 text-yellow-300/80">
                                   <MapPin className="w-4 h-4" />
                                   <span className="text-xs uppercase tracking-wider font-semibold">Nơi sinh</span>
                                 </div>
-                                <p className="text-white font-medium text-lg truncate">{user?.birth_place || 'Việt Nam'}</p>
+                                <p className="text-white font-medium text-md md:text-lg truncate">{user?.birth_place || 'Việt Nam'}</p>
                               </div>
+
                             </div>
 
-                            <Button
-                              onClick={analyzeChart}
-                              isLoading={isAnalyzing}
-                              className="w-full py-6 text-lg font-bold bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 hover:from-yellow-500 hover:via-amber-500 hover:to-orange-500 shadow-lg shadow-amber-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                            >
-                              {/* FIX: Giữ nguyên Icon và Text, không đổi khi loading */}
-                              <Star className="w-6 h-6 mr-3" />
-                              Phân Tích Bản Đồ Sao
-                            </Button>
+                            {/* Analyze Button */}
+                            <div className="flex justify-center">
+                              <Button
+                                onClick={analyzeChart}
+                                isLoading={isAnalyzing}
+                                className="sm:w-auto px-6 sm:px-12 py-4 sm:py-5 text-md md:text-lg font-bold bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 hover:from-yellow-500 hover:via-amber-500 hover:to-orange-500 shadow-lg shadow-amber-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center"
+                              >
+                                <Star className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
+                                <span className="whitespace-nowrap">Phân Tích Bản Đồ Sao</span>
+                              </Button>
+                            </div>
+
                           </div>
                         </div>
+
                       </motion.div>
                     </>
                   ) : (
@@ -458,15 +480,15 @@ export default function AstrologyPage() {
                             <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/30 animate-float">
                               <Star className="w-10 h-10 text-white" />
                             </div>
-                            <h3 className="text-3xl font-bold text-white mb-2">
+                            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
                               Luận Giải Chi Tiết
                             </h3>
                             <div className="h-1 w-24 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto rounded-full" />
                           </div>
 
                           <div className="prose prose-invert max-w-none">
-                            <div className="bg-black/20 rounded-2xl p-8 border border-white/5">
-                              <FormattedContent content={analysis} className="text-gray-200 leading-relaxed text-lg" />
+                            <div className="bg-black/20 rounded-2xl p-5 md:p-8 border border-white/5">
+                              <FormattedContent content={analysis} className="text-gray-200 leading-relaxed text-sm md:text-base" />
                             </div>
                           </div>
                         </motion.div>
@@ -476,6 +498,8 @@ export default function AstrologyPage() {
                 </motion.div>
               )}
 
+
+              {/* Tab tình duyên */}
               {activeTab === 'love' && (
                 <motion.div
                   key="love"
@@ -490,21 +514,20 @@ export default function AstrologyPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       className="max-w-2xl mx-auto text-center"
                     >
-                      <div className="bg-white/5 backdrop-blur-2xl rounded-[2rem] p-12 border border-white/10 shadow-2xl relative overflow-hidden">
-                        <div className="w-24 h-24 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
-                          <Heart className="w-12 h-12 text-pink-400" />
+                      <div className="bg-white/5 backdrop-blur-2xl rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+                        <div className="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                          <Heart className="w-8 h-8 text-pink-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-4">Phân Tích Tình Duyên</h2>
-                        <p className="text-gray-400 mb-8 leading-relaxed">
+                        <h2 className="text-md md:text-xl font-bold text-white mb-4">Phân Tích Tình Duyên</h2>
+                        <p className="text-gray-400 mb-8 leading-relaxed text-md md:text-lg">
                           Khám phá vận mệnh tình duyên của bạn qua góc nhìn chiêm tinh học. Tìm hiểu về sự tương hợp, thời điểm gặp gỡ định mệnh và lời khuyên cho mối quan hệ.
                         </p>
                         <Button
                           onClick={analyzeChart}
                           isLoading={isAnalyzing}
-                          className="w-full py-4 text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-500/25 rounded-xl"
-                        >
-                          {/* FIX: Giữ nguyên Icon và Text, không đổi khi loading */}
-                          <Heart className="w-5 h-5 mr-2" />
+                          className="py-4 text-md md:text-lg font-bold bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 shadow-lg shadow-pink-500/25 rounded-xl"
+                        >            
+                          <Heart className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                           Xem Tình Duyên
                         </Button>
                       </div>
@@ -517,7 +540,7 @@ export default function AstrologyPage() {
                     >
                       {/* House Chart 3D */}
                       {user?.birth_date && user?.birth_time && (
-                        <div className="h-[600px] w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
+                        <div className="h-[1300px] md:h-[800px] w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
                           <HouseChart3D
                             birthDate={String(user.birth_date)}
                             birthTime={user.birth_time}
@@ -549,15 +572,15 @@ export default function AstrologyPage() {
                             <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-pink-500/30">
                               <Heart className="w-10 h-10 text-white" />
                             </div>
-                            <h3 className="text-3xl font-bold text-white mb-2">
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
                               Luận Giải Tình Duyên
                             </h3>
                             <div className="h-1 w-24 bg-gradient-to-r from-transparent via-pink-500 to-transparent mx-auto rounded-full" />
                           </div>
 
                           <div className="prose prose-invert max-w-none">
-                            <div className="bg-black/20 rounded-2xl p-8 border border-white/5">
-                              <FormattedContent content={analysis} className="text-gray-200 leading-relaxed text-lg" />
+                            <div className="bg-black/20 rounded-2xl p-5 md:p-8 border border-white/5">
+                              <FormattedContent content={analysis} className="text-gray-200 leading-relaxed text-sm md:text-base" />
                             </div>
                           </div>
                         </motion.div>
@@ -571,6 +594,6 @@ export default function AstrologyPage() {
         </div>
       </main>
     </div>
-  );  
+  );
 
 }
