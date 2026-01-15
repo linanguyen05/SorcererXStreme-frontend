@@ -14,7 +14,7 @@ export default function ContentHeader({ title, description, children, className 
       // MOBILE: Căn giữa toàn bộ
       "flex flex-col items-center text-center gap-4 py-8 px-6 mb-8", 
       // LAPTOP (md): Reset về căn trái, dàn hàng ngang 2 đầu
-      "md:flex-row md:justify-between md:items-center md:text-left md:h-20 md:py-0 md:px-8 md:mb-0",
+      "md:flex-row md:justify-between md:items-center md:text-left md:h-20 md:py-0 md:pl-20 md:mb-0",
       "backdrop-blur-xl border-b border-white/10 bg-black/20 z-40 flex-shrink-0 w-full",
       className
     )}>
