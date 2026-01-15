@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { color, motion } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, Star, Moon, Sun, ArrowRight, Zap, Shield, Heart } from 'lucide-react';
+import { Sparkles, Star, Moon, Sun, ArrowRight, Zap, Shield, Heart, MessageCircle } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 
@@ -104,8 +104,15 @@ export default function LandingPage() {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                             {[
+                                {
+                                    title: "Chat AI",
+                                    desc: "Trải nghiệm trò chuyện với AI, giải đáp mọi thắc mắc của bạn.",
+                                    icon: <MessageCircle className="w-6 h-6 text-green-400" />,
+                                    color: "from-green-500/20 to-green-500/20",
+                                    href: "/chat"
+                                },
                                 {
                                     title: "Tarot",
                                     desc: "Trải nghiệm bói bài Tarot với AI, giải mã thông điệp từ vũ trụ một cách chính xác và sâu sắc.",
