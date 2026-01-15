@@ -410,9 +410,9 @@ export default function ProfilePage() {
                 >
                   <div className="absolute inset-0 bg-orange-500/5 animate-pulse" />
                   <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-6 mb-8">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mr-4">
+                        <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mr-4">
                           <Heart className="w-6 h-6 text-orange-400" />
                         </div>
                         <div>
@@ -442,7 +442,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="bg-black/20 rounded-2xl p-6 border border-orange-500/20">
-                      <p className="text-orange-200 mb-4 text-lg">
+                      <p className="text-orange-200 mb-4 text-md md:text-lg">
                         Bạn đang trải qua giai đoạn sau chia tay với <span className="font-bold">{breakupData.partnerName}</span>
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -614,10 +614,10 @@ export default function ProfilePage() {
 
                 {/* Current Partner Display */}
                 {partner ? (
-                  <div className="bg-gradient-to-br from-pink-900/20 to-rose-900/20 rounded-2xl p-8 border border-pink-500/20 relative z-10 group hover:border-pink-500/40 transition-all">
-                    <div className="flex justify-between items-start mb-8">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center text-3xl shadow-inner">
+                  <div className="bg-gradient-to-br from-pink-900/20 to-rose-900/20 rounded-2xl p-6 md:p-10 border border-pink-500/20 relative z-10 group hover:border-pink-500/40 transition-all">
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-6 mb-8">
+                      <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                        <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center text-3xl shadow-inner shrink-0">
                           {(() => {
                             const type = getGenderInfo(partner.gender);
                             const Icon = type.icon;
