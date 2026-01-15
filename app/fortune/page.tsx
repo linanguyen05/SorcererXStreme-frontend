@@ -59,10 +59,6 @@ export default function FortunePage() {
   //   }
   // }, [isAuthenticated, user, router]);
 
-  if (!isAuthenticated || !user?.isProfileComplete) {
-    return null;
-  }
-
   // Sync user data to form when user loads
   useEffect(() => {
     if (user) {
@@ -387,6 +383,9 @@ export default function FortunePage() {
     }
   };
 
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
