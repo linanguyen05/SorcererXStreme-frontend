@@ -33,11 +33,11 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, router]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     router.push('/auth/login');
+  //   }
+  // }, [isAuthenticated, router]);
 
   useEffect(() => {
     scrollToBottom();
