@@ -252,7 +252,7 @@ export default function NumerologyPage() {
 
       const data = await response.json();
       console.log('[Numerology] Backend response:', data);
-     
+
       // Calculate local numbers for display
       const lifePath = calculateLifePath(birthDateToUse);
       const nameNumber = calculateNameNumber(nameToUse);
@@ -262,7 +262,7 @@ export default function NumerologyPage() {
 
       // Parse response giống Fortune - 3 tier check
       let analysis = '';
-     
+
       try {
         // Tier 1: Check response.analysis (object with body)
         if (data.analysis) {
@@ -272,7 +272,7 @@ export default function NumerologyPage() {
               const bodyData = typeof data.analysis.body === 'string'
                 ? JSON.parse(data.analysis.body)
                 : data.analysis.body;
-             
+
               // Extract analysis from bodyData
               analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
             } else {
@@ -314,7 +314,7 @@ export default function NumerologyPage() {
       } else {
         console.error('[Numerology] No analysis in response:', data);
         toast.error('Không nhận được kết quả từ hệ thống');
-       
+
         // Fallback to local calculation
         setResult({
           name: nameToUse,
@@ -330,7 +330,7 @@ export default function NumerologyPage() {
       console.error('[Numerology] Error:', error);
       toast.error(error.message || 'Có lỗi xảy ra khi tính toán');
       toast.error('Có lỗi xảy ra khi kết nối với AI');
-     
+
       // Fallback to local calculation
       const lifePath = calculateLifePath(birthDateToUse);
       const nameNumber = calculateNameNumber(nameToUse);
@@ -396,7 +396,7 @@ export default function NumerologyPage() {
 
       <main
         className="flex-1 relative z-10 overflow-auto transition-all duration-200"
-        style={{ marginLeft: sidebarCollapsed ? '60px' : '280px' }}
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
         <ContentHeader
@@ -435,22 +435,24 @@ export default function NumerologyPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div className="bg-black/30 rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-colors">
                           <p className="text-xs text-purple-300 uppercase tracking-wider mb-2 font-semibold">Họ và tên</p>
-                          <p className="text-white font-medium text-xl truncate">{user?.name || 'Chưa cập nhật'}</p>
+                          <p className="text-white font-medium text-md md:text-lg truncate">{user?.name || 'Chưa cập nhật'}</p>
                         </div>
                         <div className="bg-black/30 rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-colors">
                           <p className="text-xs text-purple-300 uppercase tracking-wider mb-2 font-semibold">Ngày sinh</p>
-                          <p className="text-white font-medium text-xl">{user?.birth_date ? new Date(user.birth_date).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</p>
+                          <p className="text-white font-medium text-md md:text-lg">{user?.birth_date ? new Date(user.birth_date).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</p>
                         </div>
                       </div>
 
-                      <Button
-                        isLoading={isCalculating}
-                        onClick={performCalculation} 
-                        type="button" 
-                        className="w-full py-6 text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                      >
-                        Khám Phá Ngay
-                      </Button>
+                      <div className="flex justify-center">
+                        <Button
+                          isLoading={isCalculating}
+                          onClick={performCalculation}
+                          type="button"
+                          className="py-3 text-sm md:text-lg font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          Khám Phá Ngay
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
