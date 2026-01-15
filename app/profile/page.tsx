@@ -42,15 +42,15 @@ export default function ProfilePage() {
   const { partner, breakupData, addPartner, updatePartner, breakup, confirmRecovery, fetchPartner, moveOn } = useProfileStore();
 
   // Redirect to login if not authenticated or profile incomplete
-  useEffect(() => {
-    if (!isAuthenticated || !user?.isProfileComplete) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, user, router]);
+  // useEffect(() => {
+  //   if (!isAuthenticated || !user?.isProfileComplete) {
+  //     router.push('/auth/login');
+  //   }
+  // }, [isAuthenticated, user, router]);
 
-  if (!isAuthenticated || !user?.isProfileComplete) {
-    return null;
-  }
+  // if (!isAuthenticated || !user?.isProfileComplete) {
+  //   return null;
+  // }
 
   // Load user profile and partner info from backend on mount
   useEffect(() => {
@@ -179,17 +179,17 @@ export default function ProfilePage() {
       }
     }
   }, [breakupData, confirmRecovery]);
-  
+
   const handleSaveProfile = async () => {
     const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
     if (token) {
       try {
-      await updateProfile(editForm.name, editForm.birthDate, editForm.birthTime, editForm.birthPlace, token);
-      setIsEditing(false);
-      toast.success('Cập nhật thông tin thành công!');
-    } catch (error) {
-      toast.error('Lỗi lưu thông tin. Vui lòng kiểm tra định dạng ngày/giờ.');
-    }
+        await updateProfile(editForm.name, editForm.birthDate, editForm.birthTime, editForm.birthPlace, token);
+        setIsEditing(false);
+        toast.success('Cập nhật thông tin thành công!');
+      } catch (error) {
+        toast.error('Lỗi lưu thông tin. Vui lòng kiểm tra định dạng ngày/giờ.');
+      }
     } else {
       toast.error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
       router.push('/auth/login');

@@ -100,11 +100,11 @@ export default function DashboardPage() {
   const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
 
-  useEffect(() => {
-    if (!isAuthenticated || !user?.isProfileComplete) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, user, router]);
+  // useEffect(() => {
+  //   if (!isAuthenticated || !user?.isProfileComplete) {
+  //     router.push('/auth/login');
+  //   }
+  // }, [isAuthenticated, user, router]);
 
   if (!isAuthenticated || !user?.isProfileComplete) {
     return null;

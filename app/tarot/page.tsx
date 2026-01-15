@@ -36,11 +36,11 @@ export default function TarotPage() {
   const router = useRouter();
 
   // Redirect to login if not authenticated or profile incomplete
-  useEffect(() => {
-    if (!isAuthenticated || !user?.isProfileComplete) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, user, router]);
+  // useEffect(() => {
+  //   if (!isAuthenticated || !user?.isProfileComplete) {
+  //     router.push('/auth/login');
+  //   }
+  // }, [isAuthenticated, user, router]);
 
   if (!isAuthenticated || !user?.isProfileComplete) {
     return null;
