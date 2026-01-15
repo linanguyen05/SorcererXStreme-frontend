@@ -40,11 +40,7 @@ export default function TarotPage() {
   //   if (!isAuthenticated || !user?.isProfileComplete) {
   //     router.push('/auth/login');
   //   }
-  // }, [isAuthenticated, user, router]);
-
-  if (!isAuthenticated || !user?.isProfileComplete) {
-    return null;
-  }
+  // }, [isAuthenticated, user, router]);  
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -52,6 +48,10 @@ export default function TarotPage() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
   const startReading = (mode: ReadingMode) => {
     setReadingMode(mode);
