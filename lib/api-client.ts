@@ -141,8 +141,8 @@ export const profileApi = {
     apiRequest('/api/users/profile', { token }),
 
   update: (data: any, token: string) =>
-    apiRequest('/api/users/complete-profile', {
-      method: 'PUT',
+    apiRequest('/api/users/update-profile', {
+      method: 'PATCH',
       body: data,
       token,
     }),
