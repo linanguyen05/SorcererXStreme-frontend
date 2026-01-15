@@ -67,9 +67,9 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
   const getZodiacSignFromDate = (date: Date) => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    
-    const zodiacSigns = ['Bạch Dương', 'Kim Ngưu', 'Song Tử', 'Cự Giải', 'Sư Tử', 'Xử Nữ', 
-                         'Thiên Bình', 'Hổ Cáp', 'Nhân Mã', 'Ma Kết', 'Bảo Bình', 'Song Ngư'];
+
+    const zodiacSigns = ['Bạch Dương', 'Kim Ngưu', 'Song Tử', 'Cự Giải', 'Sư Tử', 'Xử Nữ',
+      'Thiên Bình', 'Hổ Cáp', 'Nhân Mã', 'Ma Kết', 'Bảo Bình', 'Song Ngư'];
 
     if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return zodiacSigns[0];
     if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return zodiacSigns[1];
@@ -88,7 +88,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
   const calculatePlanetPosition = (planetIndex: number, date: Date, hour: number, minute: number) => {
     const totalMinutes = hour * 60 + minute;
     const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // More accurate base calculation from birth date
     const yearsSince2000 = (date.getFullYear() - 2000) + (dayOfYear / 365.25);
     const baseAngle = (dayOfYear / 365.25) * Math.PI * 2;
@@ -97,13 +97,13 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
     // More realistic orbital periods and starting positions
     const orbitalPeriods = [1, 0.24, 0.62, 1, 1.88, 11.86, 29.46, 84.01, 164.8];
     const startingAngles = [0, 1.2, 2.4, 0, 0.8, 5.2, 3.7, 1.1, 4.9]; // Different starting positions
-    
+
     let planetAngle = (baseAngle / orbitalPeriods[planetIndex]) + startingAngles[planetIndex] + (yearsSince2000 * 0.1);
-    
+
     // For Sun (index 0), adjust to match user's zodiac more accurately
     if (planetIndex === 0 && userZodiac) {
-      const zodiacOrder = ['Bạch Dương', 'Kim Ngưu', 'Song Tử', 'Cự Giải', 'Sư Tử', 'Xử Nữ', 
-                          'Thiên Bình', 'Hổ Cáp', 'Nhân Mã', 'Ma Kết', 'Bảo Bình', 'Song Ngư'];
+      const zodiacOrder = ['Bạch Dương', 'Kim Ngưu', 'Song Tử', 'Cự Giải', 'Sư Tử', 'Xử Nữ',
+        'Thiên Bình', 'Hổ Cáp', 'Nhân Mã', 'Ma Kết', 'Bảo Bình', 'Song Ngư'];
       const userZodiacIndex = zodiacOrder.indexOf(userZodiac.name);
       if (userZodiacIndex !== -1) {
         // Position Sun in the middle of user's zodiac sign
@@ -177,12 +177,12 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
       { name: 'Hải Vương', color: '#0000cd', size: 7 }
     ];
 
-    const zodiacSigns = ['Bạch Dương', 'Kim Ngưu', 'Song Tử', 'Cự Giải', 'Sư Tử', 'Xử Nữ', 
-                         'Thiên Bình', 'Hổ Cáp', 'Nhân Mã', 'Ma Kết', 'Bảo Bình', 'Song Ngư'];
+    const zodiacSigns = ['Bạch Dương', 'Kim Ngưu', 'Song Tử', 'Cự Giải', 'Sư Tử', 'Xử Nữ',
+      'Thiên Bình', 'Hổ Cáp', 'Nhân Mã', 'Ma Kết', 'Bảo Bình', 'Song Ngư'];
 
     const newPlanets: PlanetPosition[] = planetData.map((planet, index) => {
       const position = calculatePlanetPosition(index, date, hour, minute);
-      
+
       let planetSign;
       if (index === 0 && userZodiac) {
         // Sun (Mặt Trời) must always be in the user's actual zodiac sign
@@ -272,7 +272,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
     ctx.lineWidth = 1.5;
     constellationGroups.forEach((starsInConstellation) => {
       if (starsInConstellation.length >= 3) {
-        const visibleStars = starsInConstellation.filter(s => 
+        const visibleStars = starsInConstellation.filter(s =>
           s.screenX > 0 && s.screenX < canvas.width && s.screenY > 0 && s.screenY < canvas.height
         );
 
@@ -283,8 +283,8 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
 
           for (let i = 1; i < Math.min(5, sortedStars.length); i++) {
             const distance = Math.sqrt(
-              Math.pow(sortedStars[i].screenX - sortedStars[i-1].screenX, 2) +
-              Math.pow(sortedStars[i].screenY - sortedStars[i-1].screenY, 2)
+              Math.pow(sortedStars[i].screenX - sortedStars[i - 1].screenX, 2) +
+              Math.pow(sortedStars[i].screenY - sortedStars[i - 1].screenY, 2)
             );
 
             if (distance < 150) {
@@ -380,11 +380,11 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
           ctx.fill();
 
           const bodyGradient = ctx.createRadialGradient(
-            screenX - size * 0.4, 
-            screenY - size * 0.4, 
-            0, 
-            screenX, 
-            screenY, 
+            screenX - size * 0.4,
+            screenY - size * 0.4,
+            0,
+            screenX,
+            screenY,
             size * 1.2
           );
           bodyGradient.addColorStop(0, planet.color);
@@ -398,11 +398,11 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
           ctx.fill();
 
           const highlightGradient = ctx.createRadialGradient(
-            screenX - size * 0.3, 
-            screenY - size * 0.3, 
-            0, 
-            screenX - size * 0.3, 
-            screenY - size * 0.3, 
+            screenX - size * 0.3,
+            screenY - size * 0.3,
+            0,
+            screenX - size * 0.3,
+            screenY - size * 0.3,
             size * 0.8
           );
           highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
@@ -485,7 +485,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
     const deltaY = e.clientY - mouseRef.current.y;
 
     setRotationY(prev => prev + deltaX * 0.008);
-    setRotationX(prev => Math.max(-Math.PI/2, Math.min(Math.PI/2, prev + deltaY * 0.008)));
+    setRotationX(prev => Math.max(-Math.PI / 2, Math.min(Math.PI / 2, prev + deltaY * 0.008)));
 
     mouseRef.current.x = e.clientX;
     mouseRef.current.y = e.clientY;
@@ -554,43 +554,46 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
       className="relative"
     >
       <div className="bg-[#0a0a2e] rounded-2xl p-6 border border-gray-700/40 backdrop-blur-xl shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white flex items-center">
-            <Star className="w-6 h-6 mr-2 text-yellow-400" />
-            Bản Đồ Sao 3D - {birthPlace}
+
+        {/* Header */}
+        <div className="flex items-center justify-between gap-2 mb-6">
+          <h3 className=" text-md md:text-xl font-bold text-white flex items-center min-w-0">
+            <Star className="w-5 h-5 mr-2 text-yellow-400 shrink-0" />
+            <span className="truncate">Bản đồ sao 3D - {birthPlace}</span>
           </h3>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={resetView}
-              className="px-3 py-2 bg-gray-800/80 hover:bg-gray-700/80 rounded-lg border border-gray-600/50 text-white text-sm font-medium transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap"
-            >
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* Nút đặt lại góc nhìn */}
+            <button onClick={resetView} className="p-2 sm:px-3 sm:py-2 bg-gray-800/80 rounded-lg border border-gray-600/50 text-white transition-all">
               <RotateCw className="w-4 h-4" />
-              Đặt lại góc nhìn
+              <span className="hidden sm:inline ml-2 text-sm">Đặt lại</span>
             </button>
 
+            {/* Nút xoay */}
             <button
               onClick={() => setAutoRotate(!autoRotate)}
-              className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
-                autoRotate 
-                  ? 'bg-blue-600/80 hover:bg-blue-500/80 border-blue-500/50 text-white' 
-                  : 'bg-gray-800/80 hover:bg-gray-700/80 border-gray-600/50 text-white'
-              }`}
+              className={`p-2 sm:px-3 sm:py-2 rounded-lg border transition-all ${autoRotate ? 'bg-blue-600/80 border-blue-500' : 'bg-gray-800/80 border-gray-600'
+                }`}
             >
-              <Zap className="w-4 h-4 inline mr-1" />
-              {autoRotate ? 'Tự động xoay' : 'Xoay thủ công'}
+              <Zap className={`w-4 h-4 ${autoRotate ? 'fill-current' : ''}`} />
+              <span className="hidden sm:inline ml-2 text-sm">
+                {autoRotate ? 'Tự động' : 'Thủ công'}
+              </span>
             </button>
           </div>
         </div>
 
+        {/* Bản đồ sao 3D */}
         <div className="relative rounded-xl overflow-hidden border border-gray-600/40 bg-[#0a0a2e]">
           <canvas
             ref={canvasRef}
             className="w-full h-auto cursor-grab active:cursor-grabbing block"
-            style={{ 
+            style={{
               width: '100%',
-              height: '800px',
-              minHeight: '800px'
+              // height: '800px',
+              // minHeight: '800px'
+              height: 'clamp(400px, 70vh, 800px)', 
+              minHeight: '400px'
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -622,7 +625,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
           )}
 
           <div className="absolute top-4 right-4 bg-gray-800/95 backdrop-blur-md rounded-lg p-4 border border-gray-600/60">
-            <p className="text-xs text-gray-200 font-semibold mb-3">🎮 Điều khiển bản đồ:</p>
+            <p className="text-xs text-gray-200 font-semibold mb-3">🎮 Điều khiển bản đồ</p>
             <div className="space-y-1 text-xs text-gray-300">
               <p>• <span className="text-blue-300">Kéo chuột</span> để xoay góc nhìn</p>
               <p>• <span className="text-green-300">Click hành tinh</span> để chọn</p>
@@ -667,13 +670,15 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
           )}
         </div>
 
+        {/* Thông tin ngày sinh */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+
           <div className="bg-gradient-to-br from-orange-900/30 to-yellow-900/30 rounded-xl p-4 border border-orange-500/20">
             <div className="flex items-center mb-2">
               <Sun className="w-5 h-5 text-orange-400 mr-2" />
               <p className="text-gray-300 font-medium">Ngày sinh</p>
             </div>
-            <p className="text-white font-bold text-lg">{formatBirthDate(birthDate)}</p>
+            <p className="text-white font-bold text-sm md:text-lg">{formatBirthDate(birthDate)}</p>
           </div>
 
           <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-xl p-4 border border-blue-500/20">
@@ -681,7 +686,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
               <Moon className="w-5 h-5 text-blue-400 mr-2" />
               <p className="text-gray-300 font-medium">Giờ sinh</p>
             </div>
-            <p className="text-white font-bold text-lg">{birthTime}</p>
+            <p className="text-white font-bold text-sm md:text-lg">{birthTime}</p>
           </div>
 
           <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-xl p-4 border border-purple-500/20">
@@ -689,7 +694,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
               <Star className="w-5 h-5 text-purple-400 mr-2" />
               <p className="text-gray-300 font-medium">Vị trí</p>
             </div>
-            <p className="text-white font-bold">{birthPlace}</p>
+            <p className="text-white font-bold text-sm md:text-lg">{birthPlace}</p>
           </div>
         </div>
 
@@ -705,18 +710,17 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
                 <motion.button
                   key={index}
                   onClick={() => handlePlanetClick(planet.name)}
-                  className={`bg-gray-800/60 hover:bg-gray-700/60 rounded-lg p-3 border transition-all cursor-pointer ${
-                    selectedPlanet === planet.name
-                      ? 'border-white shadow-lg'
-                      : 'border-gray-600/30 hover:border-gray-500/50'
-                  }`}
+                  className={`bg-gray-800/60 hover:bg-gray-700/60 rounded-lg p-3 border transition-all cursor-pointer ${selectedPlanet === planet.name
+                    ? 'border-white shadow-lg'
+                    : 'border-gray-600/30 hover:border-gray-500/50'
+                    }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className="flex flex-col items-center">
-                    <div 
+                    <div
                       className="w-5 h-5 rounded-full mb-2 border"
-                      style={{ 
+                      style={{
                         backgroundColor: planet.color,
                         borderColor: planet.color + 'CC',
                         boxShadow: selectedPlanet === planet.name ? `0 0 12px ${planet.color}80` : 'none'
@@ -733,6 +737,7 @@ export default function StarMap3D({ birthDate, birthTime, birthPlace, userZodiac
             </div>
           </div>
         )}
+
       </div>
     </motion.div>
   );

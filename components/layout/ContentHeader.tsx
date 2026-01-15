@@ -4,16 +4,18 @@ import { cn } from '@/lib/utils';
 interface ContentHeaderProps {
   title: string;
   description?: string;
-  children?: React.ReactNode; // Dùng cho nút bấm bên phải (ví dụ: Reset bài)
+  children?: React.ReactNode;
   className?: string;
 }
 
 export default function ContentHeader({ title, description, children, className }: ContentHeaderProps) {
   return (
     <div className={cn(
-      // Key fix: h-20 (80px) để khớp với Sidebar sửa ở Bước 2
-      "h-20 px-6 flex items-center justify-between flex-shrink-0", 
-      "backdrop-blur-xl border-b border-white/10 bg-black/20 z-40",
+      // MOBILE: Căn giữa toàn bộ
+      "flex flex-col items-center text-center gap-4 py-8 px-6 mb-8", 
+      // LAPTOP (md): Reset về căn trái, dàn hàng ngang 2 đầu
+      "md:flex-row md:justify-between md:items-center md:text-left md:h-20 md:py-0 md:px-8 md:mb-0",
+      "backdrop-blur-xl border-b border-white/10 bg-black/20 z-40 flex-shrink-0 w-full",
       className
     )}>
       <div>
@@ -27,7 +29,7 @@ export default function ContentHeader({ title, description, children, className 
           <p className="text-sm text-gray-400 font-light mt-0.5">{description}</p>
         )}
       </div>
-      
+
       {children && (
         <div className="flex items-center gap-3">
           {children}
