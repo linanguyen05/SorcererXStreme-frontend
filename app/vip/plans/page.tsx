@@ -344,30 +344,31 @@ export default function VIPPlansPage() {
               exit={{ opacity: 0, height: 0 }}
               className="w-full bg-black/10 backdrop-blur-sm border-t border-white/5"
             >
-              <div className="max-w-4xl mx-auto px-6 py-20">
-                <div className="text-center mb-12">
-                  <h2 className="text-3xl font-bold text-white mb-3">Thông tin thanh toán</h2>
-                  <p className="text-gray-400">Vui lòng chuyển khoản theo thông tin bên dưới để kích hoạt VIP</p>
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-20">
+                
+                <div className="text-center mb-8 md:mb-12">
+                  <h2 className="text-xl md:text-3xl font-bold text-white mb-3">Thông tin thanh toán</h2>
+                  <p className="text-sm md:text-base text-gray-400">Vui lòng chuyển khoản theo thông tin bên dưới để kích hoạt VIP</p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-12 bg-gray-900/40 backdrop-blur-2xl rounded-3xl p-8 border border-white/10 shadow-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 bg-gray-900/40 backdrop-blur-2xl rounded-2xl md:rounded-3xl p-5 md:p-8 border border-white/10 shadow-2xl">
                   {/* QR Code Column */}
-                  <div className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-lg relative overflow-hidden group">
+                  <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-2xl shadow-lg relative overflow-hidden group">
                     <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500" />
                     {/* Dynamic QR */}
-                    <div className="w-56 h-auto bg-white rounded-lg flex items-center justify-center mb-4 relative p-2">
+                    <div className="w-48 md:w-56 h-auto bg-white rounded-lg flex items-center justify-center mb-4 relative p-2">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={paymentData.qrUrl} alt="VietQR Code" className="w-full h-full object-contain" />
                     </div>
-                    <div className="text-black font-bold text-xl mb-1">{paymentData.amount?.toLocaleString('vi-VN')} VNĐ</div>
+                    <div className="text-black font-bold text-lg md:text-xl mb-1">{paymentData.amount?.toLocaleString('vi-VN')} VNĐ</div>
                     <div className="text-gray-500 text-xs uppercase tracking-wider text-center px-4 break-all">
                       Nội dung: <span className="font-bold text-gray-800">{paymentData.transactionCode}</span>
                     </div>
                   </div>
 
                   {/* Bank Info Column */}
-                  <div className="flex flex-col justify-center space-y-6">
-                    <div className="space-y-4">
+                  <div className="flex flex-col justify-center space-y-4 md:space-y-6">
+                    <div className="space-y-4 gap-3 md:gap-4">
 
                       {/* Bank Name */}
                       <div className="bg-white/5 backdrop-blur-xl p-4 rounded-xl border border-white/10 hover:border-yellow-500/30 transition-colors group shadow-lg">
@@ -428,6 +429,7 @@ export default function VIPPlansPage() {
                   </div>
                 </div>
               </div>
+
             </motion.div>
           )}
         </AnimatePresence>
