@@ -5,8 +5,20 @@ import Link from 'next/link';
 import { Sparkles, Star, Moon, Sun, ArrowRight, Zap, Shield, Heart, MessageCircle } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
+import { useRouter } from 'next/navigation'; 
+import { useAuthStore } from '@/lib/store';  
 
 export default function LandingPage() {
+    const router = useRouter();
+    const { user } = useAuthStore();
+
+    const handleNavigation = (path: string) => {
+        if (!user) {
+            router.push('/auth/register'); // Chưa đăng nhập -> Sang đăng ký
+        } else {
+            router.push(path);             // Đã đăng nhập -> Vào tính năng
+        }
+    };
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-purple-500/30">
             <Header />
@@ -142,10 +154,10 @@ export default function LandingPage() {
                                     href: "/numerology"
                                 }
                             ].map((feature, index) => (
-                                <Link
+                                <div
                                     key={index}
-                                    href={feature.href}
-                                    className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 overflow-hidden"
+                                    onClick={() => handleNavigation(feature.href)}
+                                    className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 overflow-hidden cursor-pointer"
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                                     <div className="relative z-10">
@@ -157,7 +169,7 @@ export default function LandingPage() {
                                             {feature.desc}
                                         </p>
                                     </div>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     </div>
