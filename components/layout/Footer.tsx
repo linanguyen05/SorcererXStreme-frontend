@@ -91,7 +91,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                             </li>
                             <li className="flex items-center gap-3 text-gray-400 text-sm">
                                 <Phone className="w-5 h-5 text-purple-500 flex-shrink-0" />
-                                <span>+84 123 456 789</span>
+                                <span>+84 373 939 617</span>
                             </li>
                             <li className="flex items-center gap-3 text-gray-400 text-sm">
                                 <Mail className="w-5 h-5 text-purple-500 flex-shrink-0" />
