@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { VIPBadge } from '@/components/ui/VIPBadge';
 import { Footer } from '@/components/layout/Footer';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
+import { useEffect, useState } from 'react';
 
 const benefits = [
   {
@@ -50,16 +51,26 @@ const features = [
 export default function VIPIntroPage() {
   const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-black font-sans text-white"
+    <div className="flex h-screen overflow-hidden bg-black font-sans text-white "
       style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
       <AnimatedBackground />
       <Sidebar />
 
       <main
-        className="flex-1 relative z-10 overflow-x-hidden overflow-y-auto transition-all duration-200"
-        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
+        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        style={{ marginLeft: isMobile ? '0' : (sidebarCollapsed ? '80px' : '280px') }}
       >
         {/* Hero Section */}
         <motion.section
