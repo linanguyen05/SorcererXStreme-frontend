@@ -1,11 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store'; // Import store thật
 import { Shield, ShieldAlert, CheckCircle, LogOut, ArrowRight, FlaskConical } from 'lucide-react';
+import { useRouter, notFound } from 'next/navigation'; // Thêm notFound
 
 export default function TestLabPage() {
+    // --- CODE BẢO VỆ ---
+    // Kiểm tra: Nếu là môi trường Production (Web thật) -> Trả về lỗi 404 (Không tìm thấy trang)
+    if (process.env.NODE_ENV === 'production') {
+        notFound();
+    }
+    // ---------------------------------------------
+
     const router = useRouter();
     
     // Lấy user từ store để hiển thị trạng thái realtime
