@@ -40,6 +40,16 @@ export default function ProfilePage() {
 
   const { user, isAuthenticated, updateProfile, token } = useAuthStore();
   const { partner, breakupData, addPartner, updatePartner, breakup, confirmRecovery, fetchPartner, moveOn } = useProfileStore();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Redirect to login if not authenticated or profile incomplete
   // useEffect(() => {
@@ -271,7 +281,7 @@ export default function ProfilePage() {
         //   ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
         //   ml-0`}
         className="flex-1 relative z-10 overflow-x-hidden overflow-y-auto transition-all duration-200"
-        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
+        style={{ marginLeft: isMobile ? '0' : (sidebarCollapsed ? '60px' : '280px') }}
       >
         {/* Header */}
         <ContentHeader
