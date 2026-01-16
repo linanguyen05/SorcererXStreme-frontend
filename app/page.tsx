@@ -5,10 +5,17 @@ import Link from 'next/link';
 import { Sparkles, Star, Moon, Sun, ArrowRight, Zap, Shield, Heart, MessageCircle } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
-import { useRouter } from 'next/navigation'; 
 import { useAuthStore } from '@/lib/store';  
+import { useRouter, notFound } from 'next/navigation'; // 1. Thêm notFound
 
 export default function LandingPage() {
+// --- CODE BẢO VỆ ---
+    // Kiểm tra: Nếu là môi trường Production (Web thật) -> Trả về lỗi 404 (Không tìm thấy trang)
+    if (process.env.NODE_ENV === 'production') {
+        notFound();
+    }
+    // ---------------------------------------------
+
     const router = useRouter();
     const { user } = useAuthStore();
 
