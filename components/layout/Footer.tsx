@@ -17,11 +17,12 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
     }
 
     return (
-        <footer className="bg-gray-950 border-t border-white/10 pt-16 pb-8">
-            <div className="container mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <footer className="bg-gray-950 border-t border-white/10 pt-12 md:pt-16 pb-8 w-full">
+            <div className="max-w-[1440px] px-6 md:px-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-12">
+
                     {/* Brand Info */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 col-span-1 sm:col-span-2 lg:col-span-1">
                         <Link href="/" className="inline-block">
                             <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white" style={{ fontFamily: 'Pacifico, cursive' }}>
                                 SorcererXStreme
@@ -48,6 +49,9 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                         <h3 className="text-white font-bold text-lg mb-6">Khám Phá</h3>
                         <ul className="space-y-3">
                             <li>
+                                <Link href="/chat" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Chat AI</Link>
+                            </li>
+                            <li>
                                 <Link href="/tarot" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Tarot</Link>
                             </li>
                             <li>
@@ -67,16 +71,16 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                         <h3 className="text-white font-bold text-lg mb-6">Hỗ Trợ</h3>
                         <ul className="space-y-3">
                             <li>
-                                <Link href="/about" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Về Chúng Tôi</Link>
+                                <Link href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Về Chúng Tôi</Link>
                             </li>
                             <li>
-                                <Link href="/contact" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Liên Hệ</Link>
+                                <Link href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Liên Hệ</Link>
                             </li>
                             <li>
-                                <Link href="/privacy" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Chính Sách Bảo Mật</Link>
+                                <Link href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Chính Sách Bảo Mật</Link>
                             </li>
                             <li>
-                                <Link href="/terms" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Điều Khoản Sử Dụng</Link>
+                                <Link href="#" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Điều Khoản Sử Dụng</Link>
                             </li>
                         </ul>
                     </div>
@@ -101,7 +105,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
                     <p className="text-gray-500 text-sm text-center md:text-left">
                         © {new Date().getFullYear()} SorcererXStreme. All rights reserved.
                     </p>
