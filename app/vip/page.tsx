@@ -58,7 +58,7 @@ export default function VIPIntroPage() {
       <Sidebar />
 
       <main
-        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        className="flex-1 relative z-10 overflow-x-hidden overflow-y-auto transition-all duration-200"
         style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Hero Section */}
@@ -252,7 +252,7 @@ export default function VIPIntroPage() {
               <Crown className="w-6 h-6 mr-2" />
               Chọn gói VIP ngay
             </Button> */}
-            
+
             <Button
               onClick={() => router.push('/vip/plans')}
               className="relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold

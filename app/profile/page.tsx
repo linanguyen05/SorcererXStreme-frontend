@@ -270,7 +270,7 @@ export default function ProfilePage() {
         // className={`flex-1 flex flex-col transition-all duration-200 relative z-10 
         //   ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'} 
         //   ml-0`}
-        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        className="flex-1 relative z-10 overflow-x-hidden overflow-y-auto transition-all duration-200"
         style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header */}
