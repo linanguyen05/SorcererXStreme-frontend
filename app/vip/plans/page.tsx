@@ -44,7 +44,7 @@ const VIP_PLANS_DISPLAY: (VIPPlanInfo & { badge?: string })[] = [
     tier: VIPTier.VIP,
     name: 'VIP Premium',
     nameEn: 'VIP',
-    price: 39000,
+    price: 18000,
     duration: 'tháng',
     color: 'from-amber-400 to-yellow-600',
     description: 'Mở khóa toàn bộ sức mạnh',
@@ -223,7 +223,7 @@ export default function VIPPlansPage() {
 
       <main
         className="flex-1 flex flex-col transition-all duration-200 relative z-10 overflow-auto"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Header Section */}
         <div className="relative pt-20 pb-12 text-center px-4">
