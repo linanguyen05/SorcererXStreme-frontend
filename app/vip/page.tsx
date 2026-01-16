@@ -52,13 +52,14 @@ export default function VIPIntroPage() {
   const sidebarCollapsed = useSidebarCollapsed();
 
   return (
-    <div className="flex min-h-screen bg-black overflow-hidden" style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
+    <div className="flex h-screen overflow-hidden bg-black font-sans text-white"
+      style={{ fontFamily: 'Be Vietnam Pro, sans-serif' }}>
       <AnimatedBackground />
       <Sidebar />
 
       <main
-        className="flex-1 overflow-auto transition-all duration-200"
-        style={{ marginLeft: sidebarCollapsed ? '80px' : '280px' }}
+        className="flex-1 relative z-10 overflow-auto transition-all duration-200"
+        style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
         {/* Hero Section */}
         <motion.section
@@ -73,6 +74,7 @@ export default function VIPIntroPage() {
           </div>
 
           <div className="relative z-10 max-w-6xl mx-auto px-8 py-20 text-center">
+
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -106,7 +108,7 @@ export default function VIPIntroPage() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto"
+              className="text-lg md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto"
             >
               Mở khóa toàn bộ sức mạnh huyền bí và trải nghiệm không giới hạn
             </motion.p>
@@ -115,16 +117,18 @@ export default function VIPIntroPage() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 w-full px-4"
             >
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative group max-w-full">
+                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-xl blur opacity-20 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <Button
                   onClick={() => router.push('/vip/plans')}
-                  className="relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold py-6 px-12 rounded-xl shadow-xl shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all text-xl border border-yellow-300/50"
+                  className="relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold
+                  py-4 px-6 sm:py-6 sm:px-12 text-[16px] xs:text-lg sm:text-xl rounded-xl shadow-xl shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all border border-yellow-300/50
+                  flex items-center justify-center max-w-full"
                 >
-                  <Crown className="w-6 h-6 mr-3 animate-pulse" />
-                  Nâng cấp ngay - Chỉ 39k/tháng
+                  <Crown className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 animate-pulse flex-shrink-0" />
+                  <span className="whitespace-nowrap overflow-hidden text-ellipsis">Nâng cấp ngay</span>
                 </Button>
               </div>
             </motion.div>
@@ -237,13 +241,28 @@ export default function VIPIntroPage() {
             <p className="text-xl text-gray-300 mb-8">
               Tham gia hàng nghìn người dùng đã nâng cấp và khám phá tiềm năng tối đa
             </p>
-            <Button
+
+            {/* <Button
               onClick={() => router.push('/vip/plans')}
-              className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold py-6 px-12 rounded-2xl shadow-2xl shadow-yellow-500/30 hover:shadow-yellow-500/50 transition-all text-xl border-2 border-yellow-300"
+              // className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold py-6 px-12 rounded-2xl shadow-2xl shadow-yellow-500/30 hover:shadow-yellow-500/50 transition-all text-xl border-2 border-yellow-300"
+              className="relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold
+              py-4 px-6 sm:py-6 sm:px-12 text-[16px] xs:text-lg sm:text-xl rounded-xl shadow-xl shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all border border-yellow-300/50
+              flex items-center justify-center max-w-full"
             >
               <Crown className="w-6 h-6 mr-2" />
               Chọn gói VIP ngay
+            </Button> */}
+            
+            <Button
+              onClick={() => router.push('/vip/plans')}
+              className="relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold
+                  py-4 px-6 sm:py-6 sm:px-12 text-[16px] xs:text-lg sm:text-xl rounded-xl shadow-xl shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all border border-yellow-300/50
+                 items-center justify-center max-w-full"
+            >
+              <Crown className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 animate-pulse flex-shrink-0" />
+              <span className="whitespace-nowrap overflow-hidden text-ellipsis">Chọn gói VIP ngay</span>
             </Button>
+
             <p className="text-gray-500 text-sm mt-6">
               Ưu đãi đặc biệt: Giảm 30% cho tháng đầu tiên!
             </p>
