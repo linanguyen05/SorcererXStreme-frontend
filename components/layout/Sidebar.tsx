@@ -431,7 +431,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X
+  X,
+  Briefcase
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -651,7 +652,6 @@ export const Sidebar = () => {
               );
             })}
           </div>
-
           {/* VIP Upgrade Box - Giữ nguyên style */}
           <div className="mt-6">
             {isVIP ? (
@@ -681,7 +681,7 @@ export const Sidebar = () => {
             )}
           </div>
         </nav>
-
+        
         {/* User Section - Giữ nguyên style */}
         <div className={cn(
           "border-t flex-shrink-0 backdrop-blur-md p-4",
