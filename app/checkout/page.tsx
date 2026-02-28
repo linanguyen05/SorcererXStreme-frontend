@@ -1,17 +1,17 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, User, CreditCard, QrCode, MapPin, Package, Info, CheckCircle2, X, ShoppingCart } from 'lucide-react';
+import { Trash2, MapPin, CreditCard, QrCode, Info, CheckCircle2, X, ShoppingCart, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { useRouter } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuthStore } from '@/lib/store';
 
 
-const initialServices = [
+const defaultServices = [
     {
         id: 1,
         image: 'https://cdn.thuvienphapluat.vn/uploads/laodongtienluong/20230301/LLT/08-03-25/Hinh-3243.jpg',
@@ -45,6 +45,40 @@ export default function CheckoutPage() {
     const [mounted, setMounted] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [quantity] = useState(1);
+    // ---- Appointment State ----
+    // appointmentMap: { [serviceId]: { date: string, time: string } }
+    const [appointmentMap, setAppointmentMap] = useState<Record<number, { date: string; time: string }>>({});
+
+    // Generate next 14 days (skip today to ensure booking in advance)
+    const availableDates = useMemo(() => {
+        const days: Date[] = [];
+        const now = new Date();
+        for (let i = 1; i <= 14; i++) {
+            const d = new Date(now);
+            d.setDate(now.getDate() + i);
+            if (d.getDay() !== 0) days.push(d); // skip Sunday
+        }
+        return days;
+    }, []);
+
+    const TIME_SLOTS = [
+        { label: '08:00 – 09:30', period: 'Sáng' },
+        { label: '10:00 – 11:30', period: 'Sáng' },
+        { label: '13:00 – 14:30', period: 'Chiều' },
+        { label: '15:00 – 16:30', period: 'Chiều' },
+        { label: '19:00 – 20:30', period: 'Tối' },
+        { label: '21:00 – 22:00', period: 'Tối' },
+    ];
+
+    const setAppointment = (serviceId: number, field: 'date' | 'time', value: string) => {
+        setAppointmentMap(prev => ({
+            ...prev,
+            [serviceId]: { ...prev[serviceId], [field]: value }
+        }));
+    };
+
+
+    const DAY_LABELS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
     const [userInfo, setUserInfo] = useState({
         name: '',
         dob: '',
@@ -59,16 +93,14 @@ export default function CheckoutPage() {
         setUserInfo({ ...tempInfo });
         setIsPopupOpen(false);
     };
-    const [services, setServices] = useState(initialServices);
+    const [services, setServices] = useState(defaultServices);
     const [quantities, setQuantities] = useState<Record<number, number>>(
-        initialServices.reduce((acc, s) => ({ ...acc, [s.id]: 1 }), {})
+        defaultServices.reduce((acc: Record<number, number>, s: { id: number }) => ({ ...acc, [s.id]: 1 }), {})
     );
     const updateQuantity = (id: number, delta: number) => {
-        setQuantities(prev => ({
-            ...prev,
-            [id]: Math.max(1, (prev[id] || 1) + delta) // Chỉ cập nhật ID tương ứng, tối thiểu là 1
-        }));
+        setQuantities(prev => ({ ...prev, [id]: Math.max(1, (prev[id] || 1) + delta) }));
     };
+    void updateQuantity; void quantities;
     // 4. Hàm xóa dịch vụ
     const removeService = (id: number) => {
         setServices(prev => prev.filter(service => service.id !== id));
@@ -92,15 +124,36 @@ export default function CheckoutPage() {
     useEffect(() => {
         setMounted(true);
 
+        // Pre-fill user info from localStorage (set by PersonalInfoModal on Service Detail page)
+        try {
+            const savedUserInfo = localStorage.getItem('checkout_user_info');
+            if (savedUserInfo) {
+                const parsed = JSON.parse(savedUserInfo);
+                setUserInfo(parsed);
+                setTempInfo(parsed);
+                localStorage.removeItem('checkout_user_info');
+            }
+            // Pre-load a booked service from Expert Detail page
+            const savedService = localStorage.getItem('checkout_service');
+            if (savedService) {
+                const svc = JSON.parse(savedService);
+                const bookedItem = {
+                    id: Date.now(),
+                    image: svc.image || '',
+                    name: svc.packageName || svc.name,
+                    category: svc.category || '',
+                    expert: svc.expert || svc.expertName || '',
+                    price: svc.price || 0,
+                };
+                setServices([bookedItem]);
+                setQuantities({ [bookedItem.id]: 1 });
+                localStorage.removeItem('checkout_service');
+            }
+        } catch (_) { }
+
         const handleResize = () => {
             const mobile = window.innerWidth < 768;
             setIsMobile(mobile);
-
-            // Nếu bạn muốn ép đóng sidebar khi vào checkout trên mobile:
-            // Chỉ gọi nếu bạn đã có quyền truy cập vào store của Sidebar
-            // if (mobile && typeof setSidebarCollapsed === 'function') {
-            //    setSidebarCollapsed(true);
-            // }
         };
 
         handleResize();
@@ -236,30 +289,92 @@ export default function CheckoutPage() {
                                     </div>
                                 </div>
 
-                                {/* PHẦN 2: Nhóm Thông tin giá  */}
-                                <div className="flex flex-col items-start gap-3 flex-shrink-0 min-w-[200px] md:pl-8 md:border-l md:border-gray-800/50">
-
+                                {/* PHẦN 2: Lịch hẹn */}
+                                <div className="flex flex-col gap-4 flex-shrink-0 min-w-[240px] md:pl-8 md:border-l md:border-gray-800/50">
                                     {/* Đơn giá */}
-                                    <div className="grid grid-cols-2 w-full gap-4 items-center text-gray-400">
+                                    <div className="flex items-center justify-between gap-4 text-gray-400">
                                         <span className="text-[10px] uppercase tracking-wider opacity-60">Đơn giá:</span>
-                                        <span className="text-sm font-medium text-gray-200">{service.price.toLocaleString()}đ</span>
+                                        <span className="text-sm font-medium text-yellow-400 font-bold">{service.price.toLocaleString()}đ</span>
                                     </div>
 
-                                    {/* Số lượng */}
-                                    <div className="grid grid-cols-2 w-full gap-4 items-center">
-                                        <span className="text-[10px] uppercase tracking-wider text-gray-400 opacity-60">Số lượng:</span>
-                                        <div className="flex items-center border border-gray-700 rounded-lg overflow-hidden bg-black/40 h-8 w-fit">
-                                            <button onClick={() => updateQuantity(service.id, -1)} className="w-7 h-full hover:bg-white/10 text-gray-400 transition-colors border-r border-gray-700">-</button>
-                                            <input type="text" readOnly value={quantities[service.id] || 1} className="w-8 text-center bg-transparent text-yellow-500 font-bold text-xs outline-none" />
-                                            <button onClick={() => updateQuantity(service.id, 1)} className="w-7 h-full hover:bg-white/10 text-gray-400 transition-colors border-l border-gray-700">+</button>
+                                    {/* ===== DATE PICKER ===== */}
+                                    <div>
+                                        <div className="flex items-center gap-1.5 mb-2">
+                                            <Calendar className="w-3.5 h-3.5 text-yellow-400" />
+                                            <span className="text-[10px] uppercase tracking-wider text-yellow-400/80 font-semibold">Chọn ngày hẹn</span>
+                                        </div>
+                                        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                                            {availableDates.map((d, i) => {
+                                                const dateStr = d.toISOString().split('T')[0];
+                                                const selected = appointmentMap[service.id]?.date === dateStr;
+                                                return (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setAppointment(service.id, 'date', dateStr)}
+                                                        className={`flex-shrink-0 flex flex-col items-center px-2 py-1.5 rounded-lg border transition-all text-center ${selected
+                                                            ? 'bg-yellow-500/20 border-yellow-500/60 text-yellow-300'
+                                                            : 'bg-white/5 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+                                                            }`}
+                                                    >
+                                                        <span className="text-[9px] font-medium">{DAY_LABELS[d.getDay()]}</span>
+                                                        <span className="text-sm font-bold leading-tight">{d.getDate()}</span>
+                                                        <span className="text-[9px]">{`Th${d.getMonth() + 1}`}</span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
+                                    {/* ===== TIME SLOT PICKER ===== */}
+                                    <div>
+                                        <div className="flex items-center gap-1.5 mb-2">
+                                            <Clock className="w-3.5 h-3.5 text-yellow-400" />
+                                            <span className="text-[10px] uppercase tracking-wider text-yellow-400/80 font-semibold">Chọn giờ</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-1.5">
+                                            {TIME_SLOTS.map((slot) => {
+                                                const selected = appointmentMap[service.id]?.time === slot.label;
+                                                return (
+                                                    <button
+                                                        key={slot.label}
+                                                        onClick={() => setAppointment(service.id, 'time', slot.label)}
+                                                        className={`px-2 py-1.5 rounded-lg border text-center transition-all ${selected
+                                                            ? 'bg-yellow-500/20 border-yellow-500/60 text-yellow-300'
+                                                            : 'bg-white/5 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+                                                            }`}
+                                                    >
+                                                        <span className="block text-[8px] text-gray-500 mb-0.5">{slot.period}</span>
+                                                        <span className="text-[11px] font-semibold">{slot.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* ===== SELECTED SUMMARY ===== */}
+                                    {(appointmentMap[service.id]?.date || appointmentMap[service.id]?.time) && (
+                                        <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-3 text-xs">
+                                            <p className="text-yellow-400 font-semibold mb-1">📅 Lịch đã chọn:</p>
+                                            {appointmentMap[service.id]?.date && (
+                                                <p className="text-gray-300">
+                                                    Ngày: <span className="text-white font-medium">
+                                                        {new Date(appointmentMap[service.id].date + 'T00:00:00').toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                    </span>
+                                                </p>
+                                            )}
+                                            {appointmentMap[service.id]?.time && (
+                                                <p className="text-gray-300 mt-0.5">
+                                                    Giờ: <span className="text-white font-medium">{appointmentMap[service.id].time}</span>
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Thành tiền */}
-                                    <div className="grid grid-cols-2 w-full gap-4 items-center pt-2 border-t border-gray-800/50">
+                                    <div className="flex items-center justify-between gap-4 pt-2 border-t border-gray-800/50">
                                         <span className="text-[10px] uppercase tracking-wider text-gray-500">Thành tiền:</span>
                                         <span className="text-xl font-bold text-yellow-500 leading-none">
-                                            {(service.price * quantities[service.id]).toLocaleString()}đ
+                                            {service.price.toLocaleString()}đ
                                         </span>
                                     </div>
                                 </div>
@@ -272,12 +387,12 @@ export default function CheckoutPage() {
                             </div>
                         )}
                         {/* Summary Bar */}
-                        <div className="bg-white/[0.03] p-6 flex justify-end items-center gap-4 flex">
+                        <div className="bg-white/[0.03] p-6 flex justify-end items-center gap-4">
                             <span className="text-gray-400 text-xs italic flex items-center gap-2">
-                                <Info className="w-4 h-4" /> Tổng số tiền ({quantity} dịch vụ):
+                                <Info className="w-4 h-4" /> Tổng số tiền ({services.length} dịch vụ):
                             </span>
                             <span className="md:text-xl text-3xl font-bold text-yellow-500">
-                                {(totalAllServices).toLocaleString()}đ
+                                {totalAllServices.toLocaleString()}đ
                             </span>
                         </div>
                     </motion.section>
