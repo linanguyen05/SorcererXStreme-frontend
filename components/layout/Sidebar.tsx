@@ -491,7 +491,7 @@ export const Sidebar = () => {
     return false;
   });
   const [isMobile, setIsMobile] = useState(false);
-
+  const [mounted, setMounted] = useState(false);
   const isVIP = user?.is_vip === true || user?.vipTier === VIPTier.VIP || user?.vipTier === 'VIP' || user?.vipTier === 'PREMIUM' || user?.vipTier === 'ULTIMATE';
   const vipExpiresAt = user?.vipExpiresAt ? new Date(user.vipExpiresAt) : null;
 
@@ -508,6 +508,12 @@ export const Sidebar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   const handleLogout = () => {
     logout();

@@ -42,6 +42,7 @@ export default function CheckoutPage() {
     const router = useRouter();
     const sidebarCollapsed = useSidebarCollapsed();
     const [isMobile, setIsMobile] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [quantity] = useState(1);
     const [userInfo, setUserInfo] = useState({
@@ -87,6 +88,27 @@ export default function CheckoutPage() {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useEffect(() => {
+        setMounted(true);
+
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+
+            // Nếu bạn muốn ép đóng sidebar khi vào checkout trên mobile:
+            // Chỉ gọi nếu bạn đã có quyền truy cập vào store của Sidebar
+            // if (mobile && typeof setSidebarCollapsed === 'function') {
+            //    setSidebarCollapsed(true);
+            // }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    if (!mounted) return null;
 
     return (
         <div className="flex h-screen overflow-hidden bg-black font-sans text-white"
