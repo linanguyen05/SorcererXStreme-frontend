@@ -157,7 +157,7 @@ export default function ExpertDashboard() {
                       <span className="text-gray-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {s.duration}</span>
                       <span className="font-bold text-red-400">{s.price}</span>
                     </div>
-                    {/* hiển thị trạng thái duyệt */}
+                    {/* Hiển thị trạng thái duyệt */}
                     <div className="mt-4 flex items-center gap-2">
                       <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-md ${
                         s.status === 'active' ? 'bg-green-500 text-black' : 'bg-yellow-500 text-black'
