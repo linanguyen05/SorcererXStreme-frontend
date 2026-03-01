@@ -370,25 +370,7 @@ function ExpertTile({ expert, index }: { expert: Expert; index: number }) {
                             whileTap={{ scale: 0.97 }}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                // Find the highlighted / cheapest package to pre-select
-                                const pkg = expert.packages.find(p => p.highlight) || expert.packages[0];
-                                const bookingData = {
-                                    packageId: pkg.id,
-                                    packageName: pkg.name,
-                                    duration: pkg.duration,
-                                    price: pkg.price,
-                                    originalPrice: pkg.originalPrice,
-                                    expertId: expert.id,
-                                    expertName: expert.name,
-                                    expertAvatar: expert.avatar,
-                                    expertCoverImage: expert.coverImage,
-                                    expertRating: expert.rating,
-                                    expertReviews: expert.reviewCount, 
-                                    expertLocation: expert.location,
-                                    expertSpecialties: expert.specialties,
-                                };
-                                localStorage.setItem('expert_checkout', JSON.stringify(bookingData));
-                                router.push('/checkout-expert');
+                                router.push(`/expert-listing/${expert.id}`);
                             }}
                             className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[11px] font-extrabold px-4 py-2 rounded-xl shadow-lg shadow-yellow-900/25 hover:from-yellow-300 hover:to-amber-400 transition-all"
                         >
