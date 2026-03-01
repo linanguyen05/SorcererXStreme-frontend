@@ -17,7 +17,8 @@ export interface ServicePackage {
     id: string;
     name: string;
     duration: string;   // e.g. "30 phút"
-    price: number;      // VND
+    price: number;      // VND (giá hiện tại / sau sale)
+    originalPrice?: number; // giá gốc (nếu đang sale)
     description: string;
     includes: string[];
     highlight?: boolean;
@@ -61,6 +62,7 @@ export interface Expert {
     availableOnline: boolean;
     location?: string;       // e.g. "Hà Nội"
     social?: SocialLinks;    // mạng xã hội
+    isPremium?: boolean;     // khung vàng đặc biệt cho thầy uy tín cao
 }
 
 // ============================================================
@@ -87,6 +89,7 @@ export const experts: Expert[] = [
         badges: ['Top Rated', 'Bestseller'],
         availableOnline: true,
         location: 'Hà Nội',
+        isPremium: true,
         social: {
             facebook: 'https://facebook.com',
             youtube: 'https://youtube.com',
@@ -108,6 +111,7 @@ export const experts: Expert[] = [
                 name: 'Tư Vấn Chuyên Sâu',
                 duration: '60 phút',
                 price: 450000,
+                originalPrice: 600000,
                 description: 'Phân tích toàn diện vận mệnh, phù hợp cho những quyết định quan trọng.',
                 includes: ['Luận giải 3 chủ đề tự chọn', 'Phân tích lá số toàn diện', 'Báo cáo chi tiết PDF', 'Hỗ trợ qua chat 7 ngày'],
                 highlight: true,
@@ -480,6 +484,216 @@ export const experts: Expert[] = [
             { id: 'an6', authorName: 'Hoàng Anh', authorAvatar: '👨', rating: 5, content: 'Sau 6 tháng làm việc với thầy An Nhiên, tôi nhận ra sự thay đổi rõ ràng trong cách nhìn nhận các vấn đề. Từ lo lắng phản ứng sang chủ động ứng phó.', date: '2 tháng trước', service: 'Tư Vấn Tâm Lý Tâm Linh' },
             { id: 'an7', authorName: 'Thanh Vy', authorAvatar: '👩', rating: 4, content: 'Buổi thiền hướng dẫn trực tiếp với thầy rất đặc biệt. Chất lượng âm thanh buổi online tốt và thầy có giọng rất bình an, dễ đi vào trạng thái thiền.', date: '3 tháng trước', service: 'Thiền Định Cá Nhân' },
             { id: 'an8', authorName: 'Gia Khang', authorAvatar: '👨', rating: 5, content: 'Kế hoạch chuyển hóa 60 ngày của thầy rất cụ thể và thực tế. Không chỉ là lý thuyết mà là từng hành động nhỏ mỗi ngày. 60 ngày sau tôi như người khác.', date: '5 tháng trước', service: 'Hành Trình Chuyển Hóa' },
+        ],
+    },
+
+    // ── NEW EXPERTS ──────────────────────────────────────────────
+
+    {
+        id: 'master-phuoc-an',
+        name: 'Master Phước An',
+        title: 'Chuyên gia Tử Vi & Kinh Dịch Cao Cấp',
+        specialties: ['Tử Vi', 'Chiêm Tinh', 'Phong Thủy'],
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '22 năm',
+        sessionsCompleted: 5102,
+        rating: 5.0,
+        reviewCount: 1204,
+        badges: ['MASTER', 'Top 1'],
+        availableOnline: true,
+        location: 'Huế',
+        isPremium: true,
+        social: { facebook: 'https://facebook.com', youtube: 'https://youtube.com', instagram: 'https://instagram.com' },
+        bio: 'Đại sư 22 năm tu học Tử Vi tại Huế — được phong danh "Nhà tiên tri của miền Trung". Hơn 5.000 buổi tư vấn với độ chính xác vượt trội.',
+        about: 'Master Phước An là đệ tử chân truyền của dòng phái Tử Vi Huế cổ truyền. Với 22 năm tu học và hành nghề, ông đã được cộng đồng huyền học tôn vinh là "Nhà tiên tri của miền Trung".',
+        packages: [
+            { id: 'pa-basic', name: 'Tư Vấn Cơ Bản', duration: '30 phút', price: 350000, description: 'Giải đáp 1-2 câu hỏi cụ thể.', includes: ['Xem 1 chủ đề', 'Phân tích lá số', 'Tóm tắt qua email'] },
+            { id: 'pa-adv', name: 'Luận Giải Toàn Diện', duration: '75 phút', price: 650000, originalPrice: 850000, description: 'Phân tích toàn bộ lá số tử vi, vận hạn năm, hướng phát triển.', includes: ['3 chủ đề tự chọn', 'Vận hạn 3 năm tới', 'Báo cáo PDF chi tiết', 'Hỗ trợ 14 ngày'], highlight: true },
+            { id: 'pa-vip', name: 'VIP Tọa Đàm Cùng Master', duration: '120 phút', price: 1200000, description: 'Buổi tọa đàm riêng tư, toàn diện nhất với Master Phước An.', includes: ['Không giới hạn chủ đề', 'Lập kế hoạch vận mệnh', 'Báo cáo PDF + Audio', 'Ưu tiên hỗ trợ 60 ngày'] },
+        ],
+        testimonials: [
+            { id: 'pa1', authorName: 'Ngô Vĩnh Phú', authorAvatar: '👨', rating: 5, content: 'Master Phước An xem chính xác đến mức tôi không thể tin được. Từng sự kiện ông nói đều xảy ra đúng như vậy. Thật sự là bậc thầy.', date: '1 tuần trước', service: 'VIP Tọa Đàm' },
+            { id: 'pa2', authorName: 'Lê Thu Hà', authorAvatar: '👩', rating: 5, content: '22 năm kinh nghiệm thể hiện rõ qua từng lời phân tích. Không có gì là mơ hồ — tất cả đều cụ thể và có cơ sở.', date: '2 tuần trước', service: 'Luận Giải Toàn Diện' },
+            { id: 'pa3', authorName: 'Trần Bảo Long', authorAvatar: '👨', rating: 5, content: 'Đặt lịch với Master Phước An là quyết định tốt nhất tôi đã làm năm nay. Thầy giúp tôi tránh được một quyết định sai lầm lớn về đầu tư.', date: '3 tuần trước', service: 'VIP Tọa Đàm' },
+        ],
+    },
+
+    {
+        id: 'co-van-anh',
+        name: 'Cô Vân Anh',
+        title: 'Tarot Master & Chiêm Tinh Học',
+        specialties: ['Tarot', 'Chiêm Tinh', 'Năng Lượng'],
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '10 năm',
+        sessionsCompleted: 3241,
+        rating: 4.9,
+        reviewCount: 876,
+        badges: ['Top Rated', 'Rising Star'],
+        availableOnline: true,
+        location: 'Đà Nẵng',
+        isPremium: true,
+        social: { instagram: 'https://instagram.com', tiktok: 'https://tiktok.com', threads: 'https://threads.net' },
+        bio: 'Tarot Master được đào tạo tại Pháp, kết hợp chiêm tinh Tây và năng lượng chữa lành. Nổi tiếng với khả năng đọc bài cực kỳ chính xác và nhân ái.',
+        about: 'Cô Vân Anh học Tarot và Chiêm Tinh tại Pháp trong 3 năm, sau đó trở về Đà Nẵng để mang kiến thức phương Tây kết hợp với văn hóa tâm linh Việt Nam.',
+        packages: [
+            { id: 'va-celtic', name: 'Celtic Cross Reading', duration: '45 phút', price: 299000, originalPrice: 399000, description: 'Trải bài Celtic Cross kinh điển, trả lời 1 câu hỏi chuyên sâu.', includes: ['10 lá bài Celtic Cross', 'Diễn giải chi tiết từng lá', 'Lời khuyên hành động', 'Ảnh lá bài qua Zalo/email'] },
+            { id: 'va-year', name: 'Xem Năm Tarot + Chiêm Tinh', duration: '60 phút', price: 499000, description: 'Kết hợp lá số chiêm tinh cá nhân với trải bài năm — toàn diện nhất.', includes: ['Lá số chiêm tinh sinh nhật', 'Trải bài 12 tháng', 'Các chu kỳ hành tinh quan trọng', 'Báo cáo PDF'], highlight: true },
+            { id: 'va-energy', name: 'Cleanse & Heal (Chữa lành)', duration: '50 phút', price: 380000, description: 'Khai thông năng lượng, giải phóng tâm lý, tìm lại cân bằng nội tâm.', includes: ['Đọc năng lượng cá nhân', 'Thiền hướng dẫn', 'Affirmation cá nhân hóa', 'Hỗ trợ 7 ngày'] },
+        ],
+        testimonials: [
+            { id: 'va1', authorName: 'Hoàng Diệu Linh', authorAvatar: '👩', rating: 5, content: 'Cô Vân Anh đọc bài Tarot quá chính xác! Chỉ 10 lá bài mà cô nói được tâm trạng thâm sâu của tôi mà bạn bè thân cũng không biết.', date: '3 ngày trước', service: 'Celtic Cross Reading' },
+            { id: 'va2', authorName: 'Minh Thy', authorAvatar: '👩', rating: 5, content: 'Buổi chữa lành với cô Vân Anh như được tắm trong ánh sáng vậy. Tôi về nhà cảm thấy nhẹ nhàng và rõ ràng hơn hẳn.', date: '1 tuần trước', service: 'Cleanse & Heal' },
+            { id: 'va3', authorName: 'Phi Hùng', authorAvatar: '👨', rating: 5, content: 'Lá số chiêm tinh kết hợp Tarot cho một cái nhìn rất toàn diện. Cô Vân Anh giải thích dễ hiểu ngay cả khi tôi không biết gì về chiêm tinh.', date: '2 tuần trước', service: 'Xem Năm Tarot + Chiêm Tinh' },
+        ],
+    },
+
+    {
+        id: 'thay-duc-minh',
+        name: 'Thầy Đức Minh',
+        title: 'Phong Thủy Dương Trạch & Âm Trạch',
+        specialties: ['Phong Thủy', 'Tử Vi', 'Tâm Linh'],
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1509773896068-7fd415d91e2e?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '17 năm',
+        sessionsCompleted: 1893,
+        rating: 4.8,
+        reviewCount: 423,
+        badges: ['Chuyên Gia', 'Best Value'],
+        availableOnline: false,
+        location: 'TP.HCM',
+        social: { facebook: 'https://facebook.com', youtube: 'https://youtube.com' },
+        bio: '17 năm tư vấn Phong Thủy nhà ở, văn phòng và mộ phần. Đã thiết kế phong thủy cho hàng trăm công trình lớn nhỏ tại TP.HCM.',
+        about: 'Thầy Đức Minh chuyên tư vấn phong thủy dương trạch (nhà ở, văn phòng, công ty) và âm trạch (mồ mả, gia tiên). Phương pháp của thầy kết hợp Bát Trạch, Phi Tinh và Loan Đầu Pháp.',
+        packages: [
+            { id: 'dm-house', name: 'Phong Thủy Nhà Ở', duration: '60 phút', price: 500000, originalPrice: 700000, description: 'Xem và tư vấn phong thủy cho nhà ở, căn hộ online qua ảnh/video.', includes: ['Phân tích hướng nhà', 'Xem vị trí các phòng', 'Khắc chế và bổ khuyết', 'Sơ đồ cải tạo PDF'], highlight: true },
+            { id: 'dm-office', name: 'Phong Thủy Văn Phòng', duration: '90 phút', price: 800000, description: 'Tư vấn phong thủy văn phòng, công ty để tăng tài lộc và sự nghiệp.', includes: ['Phân tích toàn bộ không gian', 'Vị trí bàn lãnh đạo', 'Hướng cổng, bếp tài lộc', 'Báo cáo chi tiết + bản vẽ'] },
+            { id: 'dm-land', name: 'Chọn Đất & Hướng Xây', duration: '45 phút', price: 350000, description: 'Tư vấn chọn đất, hướng xây phù hợp tuổi gia chủ.', includes: ['Phân tích lô đất qua ảnh', 'Hướng tốt theo tuổi', 'Thời điểm khởi công', 'Lời khuyên cụ thể'] },
+        ],
+        testimonials: [
+            { id: 'dm1', authorName: 'Nguyễn Quốc Thắng', authorAvatar: '👨', rating: 5, content: 'Sau khi tư vấn với thầy Đức Minh và chỉnh sửa phong thủy văn phòng, doanh thu công ty tăng đáng kể trong 3 tháng. Không phải trùng hợp!', date: '1 tháng trước', service: 'Phong Thủy Văn Phòng' },
+            { id: 'dm2', authorName: 'Bảo Châu', authorAvatar: '👩', rating: 5, content: 'Thầy xem phong thủy nhà rất tỉ mỉ, giải thích từng góc cạnh cụ thể. Sau khi điều chỉnh theo hướng dẫn, không khí gia đình hòa thuận hơn hẳn.', date: '2 tuần trước', service: 'Phong Thủy Nhà Ở' },
+        ],
+    },
+
+    {
+        id: 'co-thanh-thuy',
+        name: 'Cô Thanh Thủy',
+        title: 'Bói Bài & Thần Giao Cách Cảm',
+        specialties: ['Bói Bài', 'Tâm Linh', 'Năng Lượng'],
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '8 năm',
+        sessionsCompleted: 1567,
+        rating: 4.7,
+        reviewCount: 334,
+        badges: ['Rising Star'],
+        availableOnline: true,
+        location: 'Cần Thơ',
+        social: { facebook: 'https://facebook.com', tiktok: 'https://tiktok.com', threads: 'https://threads.net' },
+        bio: 'Chuyên đọc bài tây & oracle cards kết hợp thần giao cách cảm. Cô Thanh Thủy nổi tiếng với khả năng "cảm nhận" năng lượng người xem qua online với độ chính xác cao.',
+        about: 'Cô Thanh Thủy phát hiện năng khiếu bói bài từ năm 18 tuổi. Qua 8 năm luyện tập và học hỏi, cô đã phát triển khả năng thần giao cách cảm — có thể cảm nhận được cảm xúc và tình trạng năng lượng của khách hàng ngay cả qua màn hình.',
+        packages: [
+            { id: 'tt-quick', name: 'Quick Reading (3 lá)', duration: '20 phút', price: 150000, originalPrice: 200000, description: 'Đọc nhanh 3 lá bài cho 1 câu hỏi cụ thể — gọn, nhanh, chính xác.', includes: ['3 lá bài trực quan', 'Giải thích ngắn gọn', 'Lời khuyên hành động ngay'] },
+            { id: 'tt-love', name: 'Tình Duyên Reading', duration: '40 phút', price: 280000, description: 'Chuyên đọc về tình yêu, hôn nhân, mối quan hệ cảm xúc.', includes: ['7 lá tình duyên', 'Phân tích 2 chiều', 'Thời điểm và hướng đi', 'Ghi âm buổi xem'], highlight: true },
+            { id: 'tt-oracle', name: 'Oracle + Năng Lượng', duration: '45 phút', price: 320000, description: 'Kết hợp Oracle Cards với đọc năng lượng để tìm thông điệp vũ trụ.', includes: ['Oracle Cards', 'Đọc năng lượng', 'Affirmation cá nhân', 'Hỗ trợ 3 ngày'] },
+        ],
+        testimonials: [
+            { id: 'tt1', authorName: 'Kim Phụng', authorAvatar: '👩', rating: 5, content: 'Cô Thanh Thủy bói tình duyên cực kỳ chính xác! Cô nói đúng y chang tình trạng mối quan hệ của tôi mà không cần tôi kể gì cả.', date: '4 ngày trước', service: 'Tình Duyên Reading' },
+            { id: 'tt2', authorName: 'Việt Dũng', authorAvatar: '👨', rating: 5, content: 'Quick reading 3 lá mà cô giải thích rất sâu sắc. Đáng tiền hơn cả buổi dài ở chỗ khác. Sẽ book lại!', date: '1 tuần trước', service: 'Quick Reading' },
+        ],
+    },
+
+    {
+        id: 'thay-minh-duc',
+        name: 'Thầy Minh Đức',
+        title: 'Thần Số Học Pythagorean & Chaldean',
+        specialties: ['Thần Số Học', 'Chiêm Tinh', 'Tâm Linh'],
+        avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '12 năm',
+        sessionsCompleted: 2156,
+        rating: 4.8,
+        reviewCount: 589,
+        badges: ['Top Rated', 'Bestseller'],
+        availableOnline: true,
+        location: 'Hà Nội',
+        social: { facebook: 'https://facebook.com', youtube: 'https://youtube.com', instagram: 'https://instagram.com' },
+        bio: 'Chuyên gia Thần Số Học cả trường phái Pythagorean lẫn Chaldean. 12 năm giúp khách hàng khám phá sứ mệnh linh hồn và tối ưu vận hạn thông qua con số.',
+        about: 'Thầy Minh Đức là một trong số ít chuyên gia thần số học tại Việt Nam thành thạo cả hai trường phái Pythagorean (hiện đại) và Chaldean (cổ đại Babylon). Ông đã viết 2 cuốn sách về thần số học và dạy hơn 500 học viên.',
+        packages: [
+            { id: 'md-basic', name: 'Giải Mã Con Số Cá Nhân', duration: '45 phút', price: 280000, description: 'Phân tích số đường đời, số tên, số sinh ngày đầy đủ.', includes: ['Số chủ đạo đời người', 'Số tên + tên tiền định', 'Năm cá nhân hiện tại', 'Báo cáo tóm tắt'] },
+            { id: 'md-chart', name: 'Lập Bản Đồ Số Trọn Đời', duration: '75 phút', price: 480000, originalPrice: 580000, description: 'Bản đồ số đầy đủ — khám phá sứ mệnh linh hồn và chu kỳ vận hạn.', includes: ['Toàn bộ ma trận số', 'Các đỉnh và thách thức', 'Chu kỳ 9 năm', 'Sứ mệnh linh hồn', 'PDF 20+ trang'], highlight: true },
+            { id: 'md-couple', name: 'Hợp Số Cặp Đôi', duration: '60 phút', price: 399000, description: 'Phân tích sự tương hợp giữa hai người qua thần số học.', includes: ['Hợp số 2 người', 'Điểm mạnh & thách thức', 'Hướng phát triển mối quan hệ', 'Báo cáo PDF cặp đôi'] },
+        ],
+        testimonials: [
+            { id: 'md1', authorName: 'Quang Trung', authorAvatar: '👨', rating: 5, content: 'Thầy Minh Đức giải thích thần số học rất logic và khoa học. Không hề mơ hồ mà rất cụ thể, có bằng chứng lịch sử đi kèm.', date: '5 ngày trước', service: 'Lập Bản Đồ Số Trọn Đời' },
+            { id: 'md2', authorName: 'Thảo Nguyên', authorAvatar: '👩', rating: 5, content: 'Bản đồ số trọn đời của tôi chính xác đến rợn người. Từng giai đoạn trong cuộc đời thầy nói đều khớp với những gì tôi đã trải qua.', date: '2 tuần trước', service: 'Lập Bản Đồ Số Trọn Đời' },
+        ],
+    },
+
+    {
+        id: 'co-mai-huong',
+        name: 'Cô Mai Hương',
+        title: 'Oracle Cards & Chakra Healing',
+        specialties: ['Năng Lượng', 'Tarot', 'Tâm Linh'],
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '6 năm',
+        sessionsCompleted: 987,
+        rating: 4.6,
+        reviewCount: 212,
+        badges: ['New Expert'],
+        availableOnline: true,
+        location: 'Đà Lạt',
+        social: { instagram: 'https://instagram.com', threads: 'https://threads.net', tiktok: 'https://tiktok.com' },
+        bio: 'Chuyên gia Chakra Healing và Oracle Cards tại Đà Lạt. Cô Mai Hương giúp khách hàng khai thông năng lượng, cân bằng 7 luân xa và tìm lại sự bình an nội tâm.',
+        about: 'Cô Mai Hương bắt đầu hành trình tâm linh sau khi tự chữa lành chứng lo âu mạn tính bằng thiền định và Chakra Healing. Cô học tập tại trung tâm Yoga và Healing tại Bali trước khi về Đà Lạt mở studio chữa lành.',
+        packages: [
+            { id: 'mh-chakra', name: 'Chakra Scanning & Healing', duration: '50 phút', price: 320000, originalPrice: 420000, description: 'Đọc và cân bằng 7 luân xa qua năng lượng. Giải phóng năng lượng bế tắc.', includes: ['Đọc trạng thái 7 chakra', 'Cân bằng năng lượng', 'Affirmation cho từng chakra', 'Hướng dẫn tự chữa lành'] },
+            { id: 'mh-oracle', name: 'Oracle Card Reading', duration: '35 phút', price: 220000, description: 'Đọc thông điệp từ vũ trụ qua bộ bài Oracle đặc biệt.', includes: ['5-7 lá Oracle', 'Thông điệp tháng/năm', 'Hành động cần thực hiện ngay'], highlight: true },
+            { id: 'mh-full', name: 'Full Healing Session', duration: '90 phút', price: 550000, description: 'Phiên chữa lành toàn diện: Oracle + Chakra + Thiền hướng dẫn.', includes: ['Oracle Reading', 'Chakra Healing', 'Thiền có hướng dẫn (30 phút)', 'Hỗ trợ 14 ngày'] },
+        ],
+        testimonials: [
+            { id: 'mh1', authorName: 'Lan Phương', authorAvatar: '👩', rating: 5, content: 'Buổi Chakra Healing với cô Mai Hương như một liều thuốc tinh thần. Sau buổi xem tôi cảm thấy nhẹ nhõm và tràn đầy năng lượng tích cực.', date: '1 tuần trước', service: 'Chakra Scanning & Healing' },
+            { id: 'mh2', authorName: 'Hoàng Nam', authorAvatar: '👨', rating: 4, content: 'Không ngờ Oracle Cards lại cho kết quả chính xác như vậy. Cô giải thích rất dễ hiểu và mang tính hành động, không chỉ nói chung chung.', date: '3 tuần trước', service: 'Oracle Card Reading' },
+        ],
+    },
+
+    {
+        id: 'master-quang-vinh',
+        name: 'Master Quang Vinh',
+        title: 'Đại Sư Chiêm Tinh & Tử Vi Kết Hợp',
+        specialties: ['Chiêm Tinh', 'Tử Vi', 'Thần Số Học'],
+        avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=300&h=300&fit=crop&crop=face',
+        coverImage: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=1200&h=600&fit=crop',
+        gallery: [],
+        experience: '20 năm',
+        sessionsCompleted: 4320,
+        rating: 4.9,
+        reviewCount: 1050,
+        badges: ['MASTER', 'Top Rated'],
+        availableOnline: true,
+        location: 'TP.HCM',
+        isPremium: true,
+        social: { facebook: 'https://facebook.com', youtube: 'https://youtube.com', instagram: 'https://instagram.com', tiktok: 'https://tiktok.com' },
+        bio: '20 năm kết hợp Chiêm Tinh Tây, Tử Vi Đông Phương và Thần Số Học thành hệ thống Trí Tuệ Vũ Trụ độc đáo. Hơn 4.000 buổi tư vấn thành công.',
+        about: 'Master Quang Vinh là người tiên phong trong việc tổng hợp các hệ thống huyền học Đông - Tây tại Việt Nam. Ông xây dựng hệ thống "Trí Tuệ Vũ Trụ" độc đáo kết hợp chiêm tinh, tử vi và thần số học thành một thể thống nhất.',
+        packages: [
+            { id: 'qv-astro', name: 'Lá Số Chiêm Tinh Natal', duration: '60 phút', price: 450000, description: 'Giải mã lá số chiêm tinh từ lúc sinh — tính cách, sứ mệnh, vận hạn.', includes: ['Natal chart đầy đủ', '12 nhà chiêm tinh', 'Góc chiếu hành tinh', 'Báo cáo PDF'] },
+            { id: 'qv-combo', name: 'Combo Thiên - Địa - Nhân', duration: '100 phút', price: 899000, originalPrice: 1200000, description: 'Kết hợp đồng bộ Chiêm Tinh + Tử Vi + Thần Số Học — toàn diện nhất.', includes: ['Lá số chiêm tinh đầy đủ', 'Tử vi trọn đời', 'Ma trận thần số học', 'Sứ mệnh linh hồn', 'Báo cáo 30+ trang', 'Hỗ trợ ưu tiên 30 ngày'], highlight: true },
+            { id: 'qv-transit', name: 'Dự Báo Vận Hạn Năm', duration: '60 phút', price: 550000, description: 'Phân tích transit hành tinh và vận hạn chi tiết cho năm hiện tại.', includes: ['Transit các hành tinh lớn', 'Cách xảy đến theo tháng', 'Điểm mạnh + điểm cần cẩn thận', 'Chiến lược tối ưu vận hạn'] },
+        ],
+        testimonials: [
+            { id: 'qv1', authorName: 'Thanh Bình', authorAvatar: '👩', rating: 5, content: 'Master Quang Vinh đúng là bậc thầy! Combo Thiên - Địa - Nhân cho tôi một bức tranh toàn cảnh về cuộc đời. Tôi như được nhìn thấy bản đồ cuộc đời mình.', date: '1 tuần trước', service: 'Combo Thiên - Địa - Nhân' },
+            { id: 'qv2', authorName: 'Minh Khoa', authorAvatar: '👨', rating: 5, content: 'Dự báo vận hạn năm của thầy Quang Vinh chính xác đến từng tháng. Biết trước được các cột mốc giúp tôi chuẩn bị tốt hơn rất nhiều.', date: '3 tuần trước', service: 'Dự Báo Vận Hạn Năm' },
         ],
     },
 ];

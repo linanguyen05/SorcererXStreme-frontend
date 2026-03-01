@@ -477,7 +477,7 @@ const navigationItems = [
   { name: 'Cung Hoàng Đạo', href: '/astrology', icon: Star },
   { name: 'Tử Vi', href: '/fortune', icon: Moon },
   { name: 'Thần Số Học', href: '/numerology', icon: Hash },
-  { name: 'Dịch Vụ 1:1', href: '/services', icon: Briefcase },
+  { name: 'Dịch Vụ 1:1', href: '/expert-listing', icon: Briefcase },
   { name: 'Hồ Sơ', href: '/profile', icon: Settings }
 ];
 

@@ -246,7 +246,7 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
             <div className="flex h-screen bg-black text-white items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Không tìm thấy chuyên gia</h1>
-                    <Button onClick={() => router.push('/services')} className="bg-yellow-500 text-black">Quay lại danh sách</Button>
+                    <Button onClick={() => router.push('/expert-listing')} className="bg-yellow-500 text-black">Quay lại danh sách</Button>
                 </div>
             </div>
         );
@@ -273,7 +273,7 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                     <motion.button
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        onClick={() => router.push('/services')}
+                        onClick={() => router.push('/expert-listing')}
                         className="absolute top-6 left-6 flex items-center gap-2 text-white/80 hover:text-white bg-black/40 backdrop-blur-sm border border-white/10 px-3 py-2 rounded-full text-sm transition-all hover:bg-black/60"
                     >
                         <ChevronLeft className="w-4 h-4" />
@@ -415,7 +415,7 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                                 <motion.div
                                     key={e.id}
                                     whileHover={{ y: -3 }}
-                                    onClick={() => router.push(`/services/${e.id}`)}
+                                    onClick={() => router.push(`/expert-listing/${e.id}`)}
                                     className="bg-gray-900/50 border border-gray-700/40 hover:border-yellow-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 flex items-center gap-3"
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
