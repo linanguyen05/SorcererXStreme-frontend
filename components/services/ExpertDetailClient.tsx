@@ -253,8 +253,23 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
     }
 
     const handleSelectPackage = (pkg: ServicePackage) => {
-        setSelectedPackage(pkg);
-        setIsModalOpen(true);
+        const bookingData = {
+            packageId: pkg.id,
+            packageName: pkg.name,
+            duration: pkg.duration,
+            price: pkg.price,
+            originalPrice: pkg.originalPrice,
+            expertId: expert.id,
+            expertName: expert.name,
+            expertAvatar: expert.avatar,
+            expertCoverImage: expert.coverImage,
+            expertRating: expert.rating,
+            expertReviews: expert.reviewCount,
+            expertLocation: expert.location,
+            expertSpecialties: expert.specialties,
+        };
+        localStorage.setItem('expert_checkout', JSON.stringify(bookingData));
+        router.push('/checkout-expert');
     };
 
     return (

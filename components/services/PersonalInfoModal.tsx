@@ -30,7 +30,6 @@ export function PersonalInfoModal({ isOpen, onClose, expert, selectedPackage }: 
         note: '',
     });
     const [errors, setErrors] = useState<Partial<UserInfo>>({});
-    const [step, setStep] = useState<1 | 2>(1);
 
     const validate = (): boolean => {
         const newErrors: Partial<UserInfo> = {};
@@ -45,33 +44,30 @@ export function PersonalInfoModal({ isOpen, onClose, expert, selectedPackage }: 
         return Object.keys(newErrors).length === 0;
     };
 
+    // Validate → save → go to /checkout-expert (chọn giờ + thanh toán ở đó)
     const handleNext = () => {
-        if (validate()) setStep(2);
-    };
-
-    const handleConfirm = () => {
-        // Save to localStorage and navigate to checkout
-        const checkoutData = {
+        if (!validate()) return;
+        const bookingData = {
+            packageId: selectedPackage.id,
+            packageName: selectedPackage.name,
+            duration: selectedPackage.duration,
+            price: selectedPackage.price,
+            originalPrice: (selectedPackage as ServicePackage & { originalPrice?: number }).originalPrice,
+            expertId: expert.id,
+            expertName: expert.name,
+            expertAvatar: expert.avatar,
+            expertCoverImage: expert.coverImage,
+            expertRating: expert.rating,
+            expertLocation: expert.location,
+            expertSpecialties: expert.specialties,
+            // user info pre-filled from this form
             userInfo,
-            service: {
-                expertId: expert.id,
-                expertName: expert.name,
-                packageId: selectedPackage.id,
-                packageName: selectedPackage.name,
-                price: selectedPackage.price,
-                duration: selectedPackage.duration,
-                image: expert.avatar,
-                category: expert.title,
-                expert: expert.name,
-            },
         };
-        localStorage.setItem('checkout_user_info', JSON.stringify(userInfo));
-        localStorage.setItem('checkout_service', JSON.stringify(checkoutData.service));
-        window.location.href = '/checkout';
+        localStorage.setItem('expert_checkout', JSON.stringify(bookingData));
+        window.location.href = '/checkout-expert';
     };
 
     const handleClose = () => {
-        setStep(1);
         setErrors({});
         onClose();
     };
@@ -120,217 +116,135 @@ export function PersonalInfoModal({ isOpen, onClose, expert, selectedPackage }: 
                                 <div className="flex items-center gap-2 mb-1">
                                     <Sparkles className="w-4 h-4 text-yellow-400" />
                                     <span className="text-yellow-400 text-xs font-medium uppercase tracking-wider">
-                                        Bước {step}/2
+                                        Bước 1/3 — Thông tin cá nhân
                                     </span>
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">
-                                    {step === 1 ? 'Thông tin cá nhân' : 'Xác nhận đặt lịch'}
-                                </h2>
+                                <h2 className="text-2xl font-bold text-white">Thông tin cá nhân</h2>
                                 <p className="text-gray-400 text-sm mt-1">
-                                    {step === 1
-                                        ? 'Điền thông tin để chuyên gia chuẩn bị tốt nhất cho bạn'
-                                        : 'Kiểm tra lại thông tin trước khi tiến hành thanh toán'}
+                                    Điền thông tin để chuyên gia chuẩn bị tốt nhất cho bạn
                                 </p>
                             </div>
 
-                            {/* Step indicator */}
+                            {/* Step progress (3 bars) */}
                             <div className="flex items-center gap-2 mb-7">
-                                {[1, 2].map((s) => (
+                                {[1, 2, 3].map((s) => (
                                     <div
                                         key={s}
-                                        className={`h-1.5 rounded-full transition-all duration-300 ${s <= step
-                                                ? 'bg-gradient-to-r from-yellow-400 to-amber-500 flex-1'
-                                                : 'bg-gray-700 flex-1'
+                                        className={`h-1.5 rounded-full transition-all duration-300 flex-1 ${s === 1
+                                            ? 'bg-gradient-to-r from-yellow-400 to-amber-500'
+                                            : 'bg-gray-700'
                                             }`}
                                     />
                                 ))}
                             </div>
 
-                            {/* Step 1: Personal Info Form */}
-                            {step === 1 && (
-                                <div className="space-y-4">
-                                    {/* Name */}
+                            {/* Package mini-summary */}
+                            <div className="flex items-center justify-between bg-white/[0.03] border border-yellow-500/15 rounded-xl px-4 py-2.5 mb-6">
+                                <div className="flex items-center gap-2.5">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={expert.avatar} alt={expert.name}
+                                        className="w-8 h-8 rounded-full object-cover border border-yellow-500/30" />
                                     <div>
-                                        <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
-                                            <User className="w-3.5 h-3.5" /> Họ và tên <span className="text-red-400">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="Nguyễn Văn A"
-                                            value={userInfo.name}
-                                            onChange={(e) => {
-                                                setUserInfo({ ...userInfo, name: e.target.value });
-                                                if (errors.name) setErrors({ ...errors, name: undefined });
-                                            }}
-                                            className={inputClass('name')}
-                                        />
-                                        {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
-                                    </div>
-
-                                    {/* Phone */}
-                                    <div>
-                                        <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
-                                            <Phone className="w-3.5 h-3.5" /> Số điện thoại <span className="text-red-400">*</span>
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            placeholder="0901 234 567"
-                                            value={userInfo.phone}
-                                            onChange={(e) => {
-                                                setUserInfo({ ...userInfo, phone: e.target.value });
-                                                if (errors.phone) setErrors({ ...errors, phone: undefined });
-                                            }}
-                                            className={inputClass('phone')}
-                                        />
-                                        {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
-                                    </div>
-
-                                    {/* Email */}
-                                    <div>
-                                        <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
-                                            <Mail className="w-3.5 h-3.5" /> Email <span className="text-red-400">*</span>
-                                        </label>
-                                        <input
-                                            type="email"
-                                            placeholder="email@example.com"
-                                            value={userInfo.email}
-                                            onChange={(e) => {
-                                                setUserInfo({ ...userInfo, email: e.target.value });
-                                                if (errors.email) setErrors({ ...errors, email: undefined });
-                                            }}
-                                            className={inputClass('email')}
-                                        />
-                                        {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
-                                    </div>
-
-                                    {/* DOB */}
-                                    <div>
-                                        <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
-                                            <CalendarDays className="w-3.5 h-3.5" /> Ngày sinh{' '}
-                                            <span className="text-gray-500 font-normal">(Không bắt buộc)</span>
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={userInfo.dob}
-                                            onChange={(e) => setUserInfo({ ...userInfo, dob: e.target.value })}
-                                            className={`${inputClass('dob')} [color-scheme:dark]`}
-                                        />
-                                    </div>
-
-                                    {/* Note */}
-                                    <div>
-                                        <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
-                                            <MessageSquare className="w-3.5 h-3.5" /> Câu hỏi / Ghi chú{' '}
-                                            <span className="text-gray-500 font-normal">(Không bắt buộc)</span>
-                                        </label>
-                                        <textarea
-                                            rows={3}
-                                            placeholder="Bạn muốn hỏi về điều gì? (tình cảm, sự nghiệp, tài lộc...)"
-                                            value={userInfo.note}
-                                            onChange={(e) => setUserInfo({ ...userInfo, note: e.target.value })}
-                                            className={`${inputClass('note')} resize-none`}
-                                        />
-                                    </div>
-
-                                    <Button
-                                        onClick={handleNext}
-                                        className="w-full mt-2 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2"
-                                    >
-                                        Tiếp theo
-                                        <ChevronRight className="w-5 h-5" />
-                                    </Button>
-                                </div>
-                            )}
-
-                            {/* Step 2: Confirmation */}
-                            {step === 2 && (
-                                <div className="space-y-5">
-                                    {/* Expert + Package Summary */}
-                                    <div className="bg-white/5 border border-yellow-500/20 rounded-2xl p-5">
-                                        <p className="text-xs text-yellow-400 uppercase tracking-wider mb-3 font-medium">Chi tiết buổi xem</p>
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <img
-                                                src={expert.avatar}
-                                                alt={expert.name}
-                                                className="w-12 h-12 rounded-full object-cover border-2 border-yellow-500/30"
-                                            />
-                                            <div>
-                                                <p className="font-bold text-white">{expert.name}</p>
-                                                <p className="text-gray-400 text-sm">{expert.title}</p>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Gói dịch vụ:</span>
-                                                <span className="text-white font-medium">{selectedPackage.name}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Thời lượng:</span>
-                                                <span className="text-white">{selectedPackage.duration}</span>
-                                            </div>
-                                            <div className="flex justify-between pt-2 border-t border-gray-700/50">
-                                                <span className="text-gray-300 font-medium">Tổng thanh toán:</span>
-                                                <span className="text-yellow-400 font-bold text-lg">{formatPrice(selectedPackage.price)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* User Info Summary */}
-                                    <div className="bg-white/5 border border-gray-700/50 rounded-2xl p-5">
-                                        <p className="text-xs text-gray-400 uppercase tracking-wider mb-3 font-medium">Thông tin khách hàng</p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Họ tên:</span>
-                                                <span className="text-white">{userInfo.name}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">SĐT:</span>
-                                                <span className="text-white">{userInfo.phone}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Email:</span>
-                                                <span className="text-white">{userInfo.email}</span>
-                                            </div>
-                                            {userInfo.dob && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">Ngày sinh:</span>
-                                                    <span className="text-white">{userInfo.dob}</span>
-                                                </div>
-                                            )}
-                                            {userInfo.note && (
-                                                <div className="mt-2 pt-2 border-t border-gray-700/50">
-                                                    <span className="text-gray-400 text-xs">Ghi chú: </span>
-                                                    <span className="text-gray-300 text-xs italic">{userInfo.note}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={() => setStep(1)}
-                                            className="text-blue-400 hover:text-blue-300 text-xs mt-3 transition-colors"
-                                        >
-                                            Chỉnh sửa thông tin
-                                        </button>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <Button
-                                            onClick={() => setStep(1)}
-                                            className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl"
-                                        >
-                                            Quay lại
-                                        </Button>
-                                        <div className="relative group flex-1">
-                                            <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-xl blur opacity-30 group-hover:opacity-70 transition duration-300" />
-                                            <Button
-                                                onClick={handleConfirm}
-                                                className="relative w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-gray-900 font-bold py-3 rounded-xl transition-all"
-                                            >
-                                                Xác nhận & Thanh toán
-                                            </Button>
-                                        </div>
+                                        <p className="text-white text-xs font-semibold leading-tight">{expert.name}</p>
+                                        <p className="text-gray-500 text-[10px]">{selectedPackage.name}</p>
                                     </div>
                                 </div>
-                            )}
+                                <span className="text-yellow-400 font-bold text-sm">{formatPrice(selectedPackage.price)}</span>
+                            </div>
+
+                            {/* Form */}
+                            <div className="space-y-4">
+                                {/* Name */}
+                                <div>
+                                    <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
+                                        <User className="w-3.5 h-3.5" /> Họ và tên <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Nguyễn Văn A"
+                                        value={userInfo.name}
+                                        onChange={(e) => {
+                                            setUserInfo({ ...userInfo, name: e.target.value });
+                                            if (errors.name) setErrors({ ...errors, name: undefined });
+                                        }}
+                                        className={inputClass('name')}
+                                    />
+                                    {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+                                </div>
+
+                                {/* Phone */}
+                                <div>
+                                    <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
+                                        <Phone className="w-3.5 h-3.5" /> Số điện thoại <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        placeholder="0901 234 567"
+                                        value={userInfo.phone}
+                                        onChange={(e) => {
+                                            setUserInfo({ ...userInfo, phone: e.target.value });
+                                            if (errors.phone) setErrors({ ...errors, phone: undefined });
+                                        }}
+                                        className={inputClass('phone')}
+                                    />
+                                    {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
+                                </div>
+
+                                {/* Email */}
+                                <div>
+                                    <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
+                                        <Mail className="w-3.5 h-3.5" /> Email <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        placeholder="email@example.com"
+                                        value={userInfo.email}
+                                        onChange={(e) => {
+                                            setUserInfo({ ...userInfo, email: e.target.value });
+                                            if (errors.email) setErrors({ ...errors, email: undefined });
+                                        }}
+                                        className={inputClass('email')}
+                                    />
+                                    {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                                </div>
+
+                                {/* DOB */}
+                                <div>
+                                    <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
+                                        <CalendarDays className="w-3.5 h-3.5" /> Ngày sinh{' '}
+                                        <span className="text-gray-500 font-normal">(Không bắt buộc)</span>
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={userInfo.dob}
+                                        onChange={(e) => setUserInfo({ ...userInfo, dob: e.target.value })}
+                                        className={`${inputClass('dob')} [color-scheme:dark]`}
+                                    />
+                                </div>
+
+                                {/* Note */}
+                                <div>
+                                    <label className="flex items-center gap-2 text-sm text-gray-400 mb-1.5 font-medium">
+                                        <MessageSquare className="w-3.5 h-3.5" /> Câu hỏi / Ghi chú{' '}
+                                        <span className="text-gray-500 font-normal">(Không bắt buộc)</span>
+                                    </label>
+                                    <textarea
+                                        rows={3}
+                                        placeholder="Bạn muốn hỏi về điều gì? (tình cảm, sự nghiệp, tài lộc...)"
+                                        value={userInfo.note}
+                                        onChange={(e) => setUserInfo({ ...userInfo, note: e.target.value })}
+                                        className={`${inputClass('note')} resize-none`}
+                                    />
+                                </div>
+
+                                <Button
+                                    onClick={handleNext}
+                                    className="w-full mt-2 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-gray-900 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2"
+                                >
+                                    Tiếp theo — Chọn lịch hẹn
+                                    <ChevronRight className="w-5 h-5" />
+                                </Button>
+                            </div>
                         </div>
                     </motion.div>
                 </div>
