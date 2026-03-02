@@ -471,13 +471,13 @@ const notifySidebarListeners = (collapsed: boolean) => {
 };
 
 const navigationItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Trang Chủ', href: '/dashboard', icon: Home },
   { name: 'AI Chat', href: '/chat', icon: MessageCircle },
   { name: 'Tarot', href: '/tarot', icon: Sparkles },
   { name: 'Cung Hoàng Đạo', href: '/astrology', icon: Star },
   { name: 'Tử Vi', href: '/fortune', icon: Moon },
   { name: 'Thần Số Học', href: '/numerology', icon: Hash },
-  { name: 'Dịch Vụ 1:1', href: '/expert-listing', icon: Briefcase },
+  { name: 'Tìm Kiếm Chuyên Gia', href: '/expert-listing', icon: Briefcase },
   { name: 'Hồ Sơ', href: '/profile', icon: Settings }
 ];
 
