@@ -10,6 +10,7 @@ import {
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { Footer } from '@/components/layout/Footer';
+import ContentHeader from "@/components/layout/ContentHeader";
 import { experts, Expert, ExpertSpecialty, SocialLinks, formatPrice } from '@/lib/services-data';
 
 // ─── Specialty config ───────────────────────────────────────────────────────
@@ -420,7 +421,12 @@ export default function ServicesPage() {
             <main className="flex-1 relative z-10 overflow-auto transition-all duration-200"
                 style={{ marginLeft: isMobile ? '0' : (sidebarCollapsed ? '80px' : '280px') }}>
 
-                {/* Hero */}
+                <ContentHeader
+                    title="Chuyên Gia Huyền Học"
+                    description="Tư vấn 1:1 trực tiếp với chuyên gia hàng đầu"
+                />
+
+                {/* Hero
                 <section className="relative border-b border-white/[0.06] py-14 md:py-20 overflow-hidden">
                     <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-yellow-500/[0.04] rounded-full blur-[120px] pointer-events-none" />
                     <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-violet-500/[0.04] rounded-full blur-[120px] pointer-events-none" />
@@ -456,7 +462,7 @@ export default function ServicesPage() {
                             />
                         </motion.div>
                     </div>
-                </section>
+                </section> */}
 
                 {/* Filter bar */}
                 <div className="max-w-5xl mx-auto px-6 py-5">
