@@ -9,7 +9,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
 
     // List of paths that have the fixed Sidebar
     // On these pages, we will render the Footer manually inside the page content to avoid overlap
-    const sidebarPaths = ['/vip', '/dashboard', '/profile', '/chat', '/tarot', '/astrology', '/numerology', '/fortune', '/blog', '/expert-listing'];
+    const sidebarPaths = ['/vip', '/dashboard', '/profile', '/chat', '/tarot', '/astrology', '/numerology', '/fortune', '/blog', '/expert-listing', '/service-listing'];
     const shouldHideGlobalFooter = sidebarPaths.some(path => pathname?.startsWith(path));
 
     if (shouldHideGlobalFooter && !forceRender) {

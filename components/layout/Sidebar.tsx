@@ -432,7 +432,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Briefcase
+  Briefcase,
+  Search
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -477,6 +478,7 @@ const navigationItems = [
   { name: 'Cung Hoàng Đạo', href: '/astrology', icon: Star },
   { name: 'Tử Vi', href: '/fortune', icon: Moon },
   { name: 'Thần Số Học', href: '/numerology', icon: Hash },
+  { name: 'Tìm Kiếm Dịch Vụ', href: '/service-listing', icon: Search },
   { name: 'Tìm Kiếm Chuyên Gia', href: '/expert-listing', icon: Briefcase },
   { name: 'Hồ Sơ', href: '/profile', icon: Settings }
 ];
@@ -548,7 +550,6 @@ export const Sidebar = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            // onClick={() => setIsCollapsed(true)}
             onClick={toggleSidebar}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           />
@@ -558,8 +559,6 @@ export const Sidebar = () => {
       <motion.div
         initial={false}
         animate={{
-          // width: isCollapsed ? (isMobile ? 0 : 80) : 280,
-          // x: isMobile && isCollapsed ? -280 : 0,
           x: isMobile ? (isCollapsed ? "-100%" : "0%") : 0,
           width: isMobile ? 280 : (isCollapsed ? 80 : 280),
           opacity: isMobile && isCollapsed ? 0 : 1
@@ -568,14 +567,6 @@ export const Sidebar = () => {
           fontFamily: 'Be Vietnam Pro, sans-serif',
           pointerEvents: isMobile && isCollapsed ? 'none' : 'auto'
         }}
-
-        // transition={{ duration: 0.3, ease: "easeInOut" }}
-        // className={cn(
-        //   "h-screen backdrop-blur-xl border-r flex flex-col shadow-2xl fixed left-0 top-0 z-[50]",
-        //   isVIP
-        //     ? "bg-black/90 border-yellow-500/20 shadow-yellow-500/10"
-        //     : "bg-black/90 border-white/10",
-        // )}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className={cn(
           "h-screen fixed left-0 top-0 z-[60] shadow-2xl", // z-index cao hơn để đè lên content
@@ -626,7 +617,7 @@ export const Sidebar = () => {
           </button>
         </div>
 
-        {/* Navigation - Giữ nguyên toàn bộ style/nội dung */}
+        {/* Navigation */}
         <nav className="flex-1 p-3 overflow-y-auto overflow-x-hidden custom-scrollbar">
           <div className="space-y-1">
             {navigationItems.map((item) => {
@@ -653,7 +644,7 @@ export const Sidebar = () => {
               );
             })}
           </div>
-          {/* VIP Upgrade Box - Giữ nguyên style */}
+          {/* VIP Upgrade Box */}
           <div className="mt-6">
             {isVIP ? (
               <div className={cn("relative rounded-2xl p-4 overflow-hidden border", isCollapsed ? "p-2 border-none" : "bg-gradient-to-br from-yellow-900/40 to-black border-yellow-500/30")}>
@@ -683,7 +674,7 @@ export const Sidebar = () => {
           </div>
         </nav>
 
-        {/* User Section - Giữ nguyên style */}
+        {/* User Section */}
         <div className={cn(
           "border-t flex-shrink-0 backdrop-blur-md p-4",
           isVIP ? "border-yellow-500/20 bg-yellow-900/5" : "border-white/10 bg-black/20",
