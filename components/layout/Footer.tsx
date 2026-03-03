@@ -66,6 +66,9 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                             <li>
                                 <Link href="/blog" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Blog</Link>
                             </li>
+                            <li>
+                                <Link href="/expert-listing" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Tìm Kiếm Chuyên Gia</Link>
+                            </li>
                         </ul>
                     </div>
 
