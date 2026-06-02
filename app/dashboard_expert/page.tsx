@@ -21,11 +21,36 @@ export default function ExpertDashboard() {
   // Dữ liệu gốc từ "Server" (giả lập)
   const [profileData, setProfileData] = useState({ 
     name: "Master Lina", 
+    title: "Chuyên gia Tarot & Chiêm tinh học",
+    bio: "Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân.",
     experience: "5 năm nghiên cứu Tarot...",
+    avatar: null as string | null,
     specs: ['Tarot'] 
   });
-  const [tempData, setTempData] = useState({ ...profileData });
-  const [isProfileChanged, setIsProfileChanged] = useState(false);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('expert-profile-data');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.profile) {
+            setProfileData({
+              name: parsed.profile.name || "Master Lina",
+              title: parsed.profile.title || "Chuyên gia Tarot & Chiêm tinh học",
+              bio: parsed.profile.bio || "",
+              experience: parsed.profile.experience || "",
+              avatar: parsed.avatar || null,
+              specs: parsed.profile.specs || ['Tarot']
+            });
+          }
+        } catch (e) {
+          console.error("Error loading localStorage data in dashboard", e);
+        }
+      }
+    }
+  }, []);
 
   const [services] = useState([
     { id: 1, name: 'Trải bài Tarot định hướng sự nghiệp', price: '200.000đ', duration: '30 phút', status: 'active' },
@@ -34,31 +59,6 @@ export default function ExpertDashboard() {
 
   const appointmentRef = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
-  const specialties = ['Tarot', 'Astrology', 'Numerology', 'Tử vi'];
-
-  useEffect(() => {
-    const isNameChanged = tempData.name !== profileData.name;
-    const isExpChanged = tempData.experience !== profileData.experience;
-    const isSpecsChanged = JSON.stringify([...tempData.specs].sort()) !== JSON.stringify([...profileData.specs].sort());
-
-    setIsProfileChanged(isNameChanged || isExpChanged || isSpecsChanged);
-  }, [tempData, profileData]);
-
-  const toggleSpec = (spec: string) => {
-    setTempData(prev => ({
-      ...prev,
-      specs: prev.specs.includes(spec) 
-        ? prev.specs.filter(s => s !== spec) 
-        : [...prev.specs, spec]
-    }));
-  };
-
-  const handleUpdateProfile = () => {
-    if (window.confirm("Xác nhận cập nhật thay đổi hồ sơ?")) {
-      setProfileData({ ...tempData });
-      toast.success("Cập nhật thành công!");
-    }
-  };
 
   const scrollTo = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,30 +111,78 @@ export default function ExpertDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* LEFT: PROFILE */}
+            {/* LEFT: PROFILE SUMMARY */}
             <div className="lg:col-span-4 space-y-6">
-              <section className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8 shadow-2xl">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2"><User className="w-5 h-5 text-red-500" /> Hồ sơ năng lực</h2>
-                  <Link href="/dashboard_expert/verify" className={`text-[10px] px-3 py-1.5 rounded-full font-black uppercase transition-all border ${isVerified ? "bg-green-500/10 text-green-400 border-green-500/30" : "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500 hover:text-white"}`}>
-                    {isVerified ? 'Verified' : 'Verify Now'}
-                  </Link>
-                </div>
-                <div className="space-y-6">
-                  <Input label="Tên" value={tempData.name} onChange={(e) => setTempData({...tempData, name: e.target.value})} />
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-gray-300">Lĩnh vực chuyên môn (Có thể chọn nhiều)</label>
-                    <div className="flex flex-wrap gap-2">
-                      {specialties.map(tag => (
-                        <button key={tag} onClick={() => toggleSpec(tag)} className={`text-xs px-4 py-2 rounded-xl border transition-all ${tempData.specs.includes(tag) ? "bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20" : "bg-white/5 border-white/10 text-gray-400 hover:border-white/30"}`}>{tag}</button>
-                      ))}
+              <section className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl relative">
+                {/* Profile Cover Banner Header */}
+                <div className="h-28 bg-gradient-to-r from-purple-900/40 to-red-900/40 w-full relative" />
+                
+                {/* Main Profile Info */}
+                <div className="p-8 pt-0 relative">
+                  {/* Overlap Avatar */}
+                  <div className="absolute top-[-40px] left-8">
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-900 shadow-2xl bg-gray-800 flex items-center justify-center">
+                      {profileData.avatar ? (
+                        <img src={profileData.avatar} alt="Expert Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-8 h-8 text-gray-500" />
+                      )}
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-300">Kinh nghiệm</label>
-                    <textarea className="w-full px-4 py-3 rounded-2xl bg-gray-800/50 border border-gray-700 text-white text-sm focus:ring-2 focus:ring-red-500/50 h-32 outline-none transition-all" value={tempData.experience} onChange={(e) => setTempData({...tempData, experience: e.target.value})} />
+
+                  {/* Verification Badge */}
+                  <div className="flex justify-end pt-4">
+                    <Link href="/dashboard_expert/verify" className={`text-[10px] px-3 py-1.5 rounded-full font-black uppercase transition-all border ${isVerified ? "bg-green-500/10 text-green-400 border-green-500/30" : "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500 hover:text-white"}`}>
+                      {isVerified ? 'Verified' : 'Verify Now'}
+                    </Link>
                   </div>
-                  <Button variant={isProfileChanged ? "primary" : "secondary"} className={`w-full py-4 rounded-2xl transition-all ${!isProfileChanged ? "opacity-40 cursor-not-allowed grayscale" : "shadow-red-500/20 shadow-xl scale-[1.02]"}`} disabled={!isProfileChanged} onClick={handleUpdateProfile}>Cập nhật thông tin</Button>
+
+                  <div className="mt-4 space-y-5">
+                    <div>
+                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        {profileData.name}
+                      </h3>
+                      <p className="text-xs text-red-400 font-semibold mt-1">{profileData.title}</p>
+                    </div>
+
+                    {/* Bio */}
+                    {profileData.bio && (
+                      <p className="text-xs text-gray-300 italic bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed">
+                        "{profileData.bio}"
+                      </p>
+                    )}
+
+                    {/* Specialties */}
+                    <div className="space-y-2">
+                      <p className="text-[10px] text-gray-500 uppercase font-black tracking-wider">Chuyên môn</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {profileData.specs.map(tag => (
+                          <span key={tag} className="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 px-2.5 py-1 rounded-lg font-bold">
+                            🔮 {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quick Stats list */}
+                    <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-4 text-center">
+                      <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
+                        <p className="text-xs font-black text-yellow-400">⭐ 4.9</p>
+                        <p className="text-[8px] text-gray-500 uppercase font-black tracking-wider mt-0.5">Đánh giá</p>
+                      </div>
+                      <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
+                        <p className="text-xs font-black text-purple-400">5 năm</p>
+                        <p className="text-[8px] text-gray-500 uppercase font-black tracking-wider mt-0.5">Kinh nghiệm</p>
+                      </div>
+                    </div>
+
+                    {/* Edit button */}
+                    <Link href="/dashboard_expert/profile" className="block pt-2">
+                      <Button variant="primary" className="w-full py-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-red-500/20">
+                        <Edit3 className="w-4 h-4" /> Thiết lập trang cá nhân
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </section>
             </div>
