@@ -106,16 +106,16 @@ export default function DashboardPage() {
   //   }
   // }, [isAuthenticated, user, router]);
 
-  if (!isAuthenticated || !user?.isProfileComplete) {
-    return null;
-  }
+  // if (!isAuthenticated || !user?.isProfileComplete) {
+  //   return null;
+  // }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
       <AnimatedBackground />
       <Sidebar />
 
-      <main 
+      <main
         className="flex-1 relative z-10 overflow-auto transition-all duration-200"
         style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
       >
@@ -133,7 +133,7 @@ export default function DashboardPage() {
               <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent" style={{ fontFamily: 'Pacifico, cursive' }}>
                 Chào mừng trở lại,
               </span>{' '}
-              <span className="text-white">{user.name}!</span> 🌟
+              <span className="text-white">{user?.name || 'Khách'}!</span> 🌟
             </h1>
             <p className="text-gray-400 text-lg font-light">
               Hôm nay các vì sao đang nói gì về bạn?

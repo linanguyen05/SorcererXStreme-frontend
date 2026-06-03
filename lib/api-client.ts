@@ -123,10 +123,10 @@ export const authApi = {
   },
 
   resetPassword: async (email: string, code: string, newPassword: string) => {
-    return await confirmResetPassword({ 
-      username: email, 
-      confirmationCode: code, 
-      newPassword 
+    return await confirmResetPassword({
+      username: email,
+      confirmationCode: code,
+      newPassword
     });
   },
 
@@ -134,7 +134,7 @@ export const authApi = {
     await signOut();
   }
 };
-  
+
 
 export const profileApi = {
   get: (token: string) =>

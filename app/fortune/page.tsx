@@ -92,23 +92,23 @@ export default function FortunePage() {
     const apiTargetDate = formatDateApi(dailyInput.targetDate);
 
     try {
-      if (!token || !isAuthenticated) {
-        toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
-        setIsDailyLoading(false);
-        return;
-      }
+      // if (!token || !isAuthenticated) {
+      //   toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
+      //   setIsDailyLoading(false);
+      //   return;
+      // }
 
-      if (!user?.birth_time) {
-        toast.error('Vui lòng cập nhật giờ sinh trong hồ sơ cá nhân');
-        setIsDailyLoading(false);
-        return;
-      }
+      // if (!user?.birth_time) {
+      //   toast.error('Vui lòng cập nhật giờ sinh trong hồ sơ cá nhân');
+      //   setIsDailyLoading(false);
+      //   return;
+      // }
 
-      if (!user?.birth_place) {
-        toast.error('Vui lòng cập nhật nơi sinh trong hồ sơ cá nhân');
-        setIsDailyLoading(false);
-        return;
-      }
+      // if (!user?.birth_place) {
+      //   toast.error('Vui lòng cập nhật nơi sinh trong hồ sơ cá nhân');
+      //   setIsDailyLoading(false);
+      //   return;
+      // }
 
       if (!dailyInput.targetDate) {
         toast.error('Vui lòng chọn ngày xem tử vi');
@@ -131,8 +131,8 @@ export default function FortunePage() {
 
       console.log('[Fortune Daily] Sending request:', {
         target_date: apiTargetDate,
-        birth_time: user.birth_time,
-        birth_place: user.birth_place
+        birth_time: user?.birth_time || '12:00',
+        birth_place: user?.birth_place || 'Hanoi'
       });
 
       // Call daily horoscope API
@@ -140,16 +140,16 @@ export default function FortunePage() {
         domain: 'horoscope',
         feature_type: 'daily',
         user_context: {
-          name: user.name || 'User',
-          gender: user.gender || 'male',
-          birth_date: formatBirthDate(user.birth_date || ''),
-          birth_time: user.birth_time,  // ✅ REQUIRED
-          birth_place: user.birth_place  // ✅ REQUIRED
+          name: user?.name || 'User',
+          gender: user?.gender || 'male',
+          birth_date: formatBirthDate(user?.birth_date || '1990-01-01'),
+          birth_time: user?.birth_time || '12:00',  // ✅ REQUIRED
+          birth_place: user?.birth_place || 'Hanoi'  // ✅ REQUIRED
         },
         data: {
           target_date: dailyInput.targetDate  // ✅ REQUIRED for daily
         }
-      }, token);
+      }, token || '');
 
       // Parse giống như Tarot - backend trả về: { analysis: {...} }
       let analysis = '';
@@ -245,11 +245,11 @@ export default function FortunePage() {
         user: user?.email
       });
 
-      if (!token || !isAuthenticated) {
-        toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
-        setIsLoading(false);
-        return;
-      }
+      // if (!token || !isAuthenticated) {
+      //   toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
+      //   setIsLoading(false);
+      //   return;
+      // }
 
       // Validate required fields
       if (!tuviInput.name || !tuviInput.birthDate) {
@@ -259,18 +259,18 @@ export default function FortunePage() {
       }
 
       // ⚠️ CRITICAL: birth_time and birth_place REQUIRED for horoscope
-      if (!tuviInput.birthTime) {
-        toast.error('Vui lòng nhập giờ sinh (bắt buộc cho Tử Vi)');
-        setIsLoading(false);
-        return;
-      }
+      // if (!tuviInput.birthTime) {
+      //   toast.error('Vui lòng nhập giờ sinh (bắt buộc cho Tử Vi)');
+      //   setIsLoading(false);
+      //   return;
+      // }
 
 
-      if (!tuviInput.birthPlace) {
-        toast.error('Vui lòng nhập nơi sinh (bắt buộc cho Tử Vi)');
-        setIsLoading(false);
-        return;
-      }
+      // if (!tuviInput.birthPlace) {
+      //   toast.error('Vui lòng nhập nơi sinh (bắt buộc cho Tử Vi)');
+      //   setIsLoading(false);
+      //   return;
+      // }
 
 
       // Format birth_date from dd/mm/yyyy to YYYY-MM-DD for backend
@@ -298,8 +298,8 @@ export default function FortunePage() {
 
       console.log('[Fortune] Sending natal chart request:', {
         birth_date: formattedBirthDate,
-        birth_time: tuviInput.birthTime,
-        birth_place: tuviInput.birthPlace
+        birth_time: tuviInput.birthTime || '12:00',
+        birth_place: tuviInput.birthPlace || 'Hanoi'
       });
 
 
@@ -311,11 +311,11 @@ export default function FortunePage() {
           name: tuviInput.name,
           gender: tuviInput.gender,
           birth_date: formattedBirthDate,
-          birth_time: tuviInput.birthTime,  // ✅ REQUIRED
-          birth_place: tuviInput.birthPlace  // ✅ REQUIRED
+          birth_time: tuviInput.birthTime || '12:00',  // ✅ REQUIRED
+          birth_place: tuviInput.birthPlace || 'Hanoi'  // ✅ REQUIRED
         }
         // ❌ NO data.target_date for natal chart
-      }, token);
+      }, token || '');
 
 
       // Parse giống như Tarot
@@ -383,9 +383,9 @@ export default function FortunePage() {
     }
   };
 
-  if (!isAuthenticated || !user?.isProfileComplete) {
-    return null;
-  }
+  // if (!isAuthenticated || !user?.isProfileComplete) {
+  //   return null;
+  // }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
@@ -505,7 +505,7 @@ export default function FortunePage() {
                   className="space-y-8 relative" // Thêm relative để định vị lớp phủ
                 >
                   {/* LỚP PHỦ KHÓA TÍNH NĂNG */}
-                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-[2px] rounded-3xl border border-white/10">
+                  {/* <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-[2px] rounded-3xl border border-white/10">
                     <div className="bg-black/80 p-8 rounded-2xl border border-yellow-500/30 shadow-2xl shadow-yellow-500/10 text-center max-w-md mx-4 transform hover:scale-105 transition-transform duration-300">
                       <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Lock className="w-8 h-8 text-yellow-400" />
@@ -515,7 +515,7 @@ export default function FortunePage() {
                         Hệ thống đang được nâng cấp để mang đến những lời giải đoán chính xác nhất. Vui lòng quay lại sau!
                       </p>
                     </div>
-                  </div>
+                  </div> */}
                   {!dailyResult ? (
                     <div className="max-w-2xl mx-auto">
                       <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl">
@@ -526,7 +526,7 @@ export default function FortunePage() {
 
 
                         {/* Check if user has birth_time and birth_place */}
-                        {(!user?.birth_time || !user?.birth_place) && (
+                        {/* {(!user?.birth_time || !user?.birth_place) && (
                           <div className="mb-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
                             <div className="flex items-start">
                               <Star className="w-5 h-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
@@ -539,7 +539,7 @@ export default function FortunePage() {
                               </div>
                             </div>
                           </div>
-                        )}
+                        )} */}
 
 
                         <form onSubmit={handleDailySubmit} className="space-y-6">
@@ -587,7 +587,7 @@ export default function FortunePage() {
                           <Button
                             type="submit"
                             isLoading={isDailyLoading}
-                            disabled={!user?.birth_time || !user?.birth_place}
+                            // disabled={!user?.birth_time || !user?.birth_place}
                             className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 py-4 text-lg shadow-lg shadow-yellow-500/25"
                           >
                             <Star className="w-5 h-5 mr-2" />

@@ -238,9 +238,9 @@ export default function ChatPage() {
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  // if (!isAuthenticated) {
+  //   return null;
+  // }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
@@ -372,7 +372,7 @@ export default function ChatPage() {
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                isLoading={isLoading} 
+                isLoading={isLoading}
                 className="px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 rounded-xl transition-all hover:scale-105 active:scale-95"
               >
                 <Send className="w-5 h-5" />
