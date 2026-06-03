@@ -105,7 +105,9 @@ export default function ExpertDashboard() {
           {/* STATS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard icon={<DollarSign className="text-green-400" />} label="Doanh thu" value="1.250.000đ" />
-            <StatCard icon={<Calendar className="text-purple-400" />} label="Lịch hẹn mới" value="03" onClick={() => scrollTo(appointmentRef)} isClickable />
+            <Link href="/dashboard_expert/schedule">
+              <StatCard icon={<Calendar className="text-purple-400" />} label="Lịch hẹn mới" value="03" isClickable />
+            </Link>
             <StatCard icon={<Star className="text-yellow-400" />} label="Đánh giá TB" value="4.9" />
             <StatCard icon={<MessageSquare className="text-blue-400" />} label="Phản hồi" value="12" onClick={() => scrollTo(feedbackRef)} isClickable />
           </div>
@@ -236,6 +238,9 @@ export default function ExpertDashboard() {
                   <div className="flex gap-2">
                     <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" /><input className="bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs outline-none focus:border-red-500" placeholder="Tìm tên khách..." /></div>
                     <Button variant="secondary" size="sm" className="px-3"><Filter className="w-4 h-4" /></Button>
+                    <Link href="/dashboard_expert/schedule">
+                      <Button variant="primary" size="sm" className="px-4 whitespace-nowrap"><Calendar className="w-4 h-4 mr-1" /> Lịch &amp; Giờ rảnh</Button>
+                    </Link>
                   </div>
                 </div>
                 <div className="overflow-hidden rounded-2xl border border-white/5 bg-black/20 text-sm">
