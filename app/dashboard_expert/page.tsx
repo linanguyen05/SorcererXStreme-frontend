@@ -167,25 +167,12 @@ export default function ExpertDashboard() {
           <StatCard icon={<Star className="text-yellow-400 w-6 h-6" />} label="Đánh giá TB" value="4.9" />
           <StatCard icon={<MessageSquare className="text-blue-400 w-6 h-6" />} label="Phản hồi" value="12" onClick={() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
         </div>
-
-<<<<<<< HEAD
-          {/* STATS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={<DollarSign className="text-green-400" />} label="Doanh thu" value="1.250.000đ" />
-            <Link href="/dashboard_expert/schedule">
-              <StatCard icon={<Calendar className="text-purple-400" />} label="Lịch hẹn mới" value="03" isClickable />
-            </Link>
-            <StatCard icon={<Star className="text-yellow-400" />} label="Đánh giá TB" value="4.9" />
-            <StatCard icon={<MessageSquare className="text-blue-400" />} label="Phản hồi" value="12" onClick={() => scrollTo(feedbackRef)} isClickable />
-          </div>
-=======
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT: PROFILE SUMMARY */}
           <div className="lg:col-span-4 space-y-6">
             <section className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
               {/* Profile Cover Banner Header */}
               <div className="h-28 bg-gradient-to-r from-purple-900/40 to-red-900/40 w-full relative" />
->>>>>>> dev
 
               {/* Main Profile Info */}
               <div className="p-8 pt-0 relative">
@@ -281,22 +268,6 @@ export default function ExpertDashboard() {
                         <button className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
-<<<<<<< HEAD
-                  ))}
-                </div>
-              </section>
-
-              {/* APPOINTMENTS */}
-              <section ref={appointmentRef} className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                  <h2 className="text-2xl font-bold text-white flex items-center gap-3"><Calendar className="w-6 h-6 text-red-500" /> Quản lý lịch hẹn</h2>
-                  <div className="flex gap-2">
-                    <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" /><input className="bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs outline-none focus:border-red-500" placeholder="Tìm tên khách..." /></div>
-                    <Button variant="secondary" size="sm" className="px-3"><Filter className="w-4 h-4" /></Button>
-                    <Link href="/dashboard_expert/schedule">
-                      <Button variant="primary" size="sm" className="px-4 whitespace-nowrap"><Calendar className="w-4 h-4 mr-1" /> Lịch &amp; Giờ rảnh</Button>
-                    </Link>
-=======
                     <h3 className="font-bold text-white text-lg">{s.name}</h3>
                     <div className="flex items-center gap-4 mt-3 text-sm">
                       <span className="text-gray-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {s.duration}</span>
@@ -309,7 +280,6 @@ export default function ExpertDashboard() {
                         {s.status === 'active' ? 'Đang hoạt động' : 'Chờ Admin duyệt'}
                       </span>
                     </div>
->>>>>>> dev
                   </div>
                 ))}
               </div>
@@ -329,6 +299,9 @@ export default function ExpertDashboard() {
                 <input className="bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white outline-none focus:border-red-500 transition-colors" placeholder="Tìm tên khách..." />
               </div>
               <Button variant="secondary" size="sm" className="px-3 hover:bg-white/15 transition-colors border border-white/10"><Filter className="w-4 h-4" /></Button>
+              <Link href="/dashboard_expert/schedule">
+                <Button variant="primary" size="sm" className="px-4 whitespace-nowrap"><Calendar className="w-4 h-4 mr-1" /> Lịch &amp; Giờ rảnh</Button>
+              </Link>
             </div>
           </div>
           <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/30">
