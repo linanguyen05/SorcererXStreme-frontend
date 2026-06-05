@@ -18,11 +18,24 @@ export default function ExpertProfilePage() {
   const [coverColor, setCoverColor] = useState<string>('from-purple-900/60 to-red-900/60');
   const [savedCoverColor, setSavedCoverColor] = useState<string>('from-purple-900/60 to-red-900/60');
 
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<{
+    name: string;
+    title: string;
+    bio: string;
+    experience: string;
+    yoe: number | '';
+    email: string;
+    phone: string;
+    facebook: string;
+    instagram: string;
+    specs: string[];
+    price: string;
+  }>({
     name: 'Master Lina',
     title: 'Chuyên gia Tarot & Chiêm tinh học',
     bio: 'Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân. Hơn 5 năm kinh nghiệm thấu cảm.',
     experience: 'Tôi đã có hơn 5 năm nghiên cứu và thực hành Tarot chuyên sâu kết hợp với Chiêm tinh học phương Tây. Đã giúp đỡ hơn 1000 khách hàng tìm lại định hướng trong cuộc sống, hàn gắn các mối quan hệ đổ vỡ và định hình lộ trình sự nghiệp tương lai.',
+    yoe: 5,
     email: 'lina.mystic@gmail.com',
     phone: '0987.654.321',
     facebook: 'fb.com/master.lina.tarot',
@@ -277,6 +290,15 @@ export default function ExpertProfilePage() {
                   placeholder="Ví dụ: Chuyên gia Tarot & Chiêm tinh học"
                 />
 
+                <Input
+                  label="Số năm kinh nghiệm"
+                  type="number"
+                  min="0"
+                  value={tempProfile.yoe !== undefined ? tempProfile.yoe : ''}
+                  onChange={(e) => setTempProfile({ ...tempProfile, yoe: e.target.value === '' ? '' : parseInt(e.target.value) || 0 })}
+                  placeholder="Ví dụ: 5"
+                />
+
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-semibold text-gray-200">Tiểu sử ngắn (Bio)</label>
@@ -426,7 +448,7 @@ export default function ExpertProfilePage() {
                     <div className="space-y-1 border-x border-white/5">
                       <div className="text-white text-sm font-black flex items-center justify-center gap-1">
                         <Award className="w-4 h-4 text-red-500" />
-                        <span>5 Năm</span>
+                        <span>{tempProfile.yoe !== undefined ? tempProfile.yoe : 0} Năm</span>
                       </div>
                       <p className="text-[9px] text-gray-500 uppercase font-black tracking-wider">Kinh Nghiệm</p>
                     </div>

@@ -360,3 +360,25 @@ export const paymentApi = {
       token,
     }),
 };
+
+export const adminApi = {
+  getPendingExperts: (token: string) =>
+    apiRequest('/api/admin/pending-experts', { token }),
+
+  getPendingServices: (token: string) =>
+    apiRequest('/api/admin/pending-services', { token }),
+
+  approveExpert: (id: string, action: 'approve' | 'reject', token: string) =>
+    apiRequest(`/api/admin/experts/${id}/status`, {
+      method: 'PATCH',
+      body: { status: action === 'approve' ? 'active' : 'rejected' },
+      token,
+    }),
+
+  approveService: (id: string, action: 'approve' | 'reject', token: string) =>
+    apiRequest(`/api/admin/services/${id}/status`, {
+      method: 'PATCH',
+      body: { status: action === 'approve' ? 'active' : 'rejected' },
+      token,
+    }),
+};
