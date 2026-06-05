@@ -89,6 +89,7 @@ export default function ExpertDashboard() {
     title: "Chuyên gia Tarot & Chiêm tinh học",
     bio: "Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân.",
     experience: "5 năm nghiên cứu Tarot...",
+    yoe: 5,
     avatar: null as string | null,
     specs: ['Tarot']
   });
@@ -146,6 +147,7 @@ export default function ExpertDashboard() {
               title: parsed.profile.title || "Chuyên gia Tarot & Chiêm tinh học",
               bio: parsed.profile.bio || "",
               experience: parsed.profile.experience || "",
+              yoe: parsed.profile.yoe !== undefined ? parsed.profile.yoe : 5,
               avatar: parsed.avatar || null,
               specs: parsed.profile.specs || ['Tarot']
             });
@@ -439,7 +441,7 @@ export default function ExpertDashboard() {
                       <p className="text-[8px] text-gray-500 uppercase font-black tracking-wider mt-0.5">Đánh giá</p>
                     </div>
                     <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
-                      <p className="text-xs font-black text-purple-400">{profileData.experience ? profileData.experience.split(' ')[0] : '5'} năm</p>
+                      <p className="text-xs font-black text-purple-400">{profileData.yoe !== undefined ? profileData.yoe : 5} năm</p>
                       <p className="text-[8px] text-gray-500 uppercase font-black tracking-wider mt-0.5">Kinh nghiệm</p>
                     </div>
                   </div>
