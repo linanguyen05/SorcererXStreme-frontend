@@ -360,3 +360,57 @@ export const paymentApi = {
       token,
     }),
 };
+
+// ─── Catalog chuyên gia (public, có UUID thật để đặt lịch) ───────────────────
+export interface CatalogService {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  duration: number; // phút
+}
+export interface CatalogExpert {
+  expertId: string;
+  name: string | null;
+  specialty: string | null;
+  experienceYears: number;
+  rating: number;
+  bio: string | null;
+  services: CatalogService[];
+}
+
+export const expertApi = {
+  // GET /api/experts -> { success, data: CatalogExpert[] }
+  list: async (): Promise<CatalogExpert[]> => {
+    const res = await apiRequest('/api/experts');
+    return res?.data ?? [];
+  },
+};
+
+// ─── Đặt lịch + thanh toán (QR SePay, webhook đối soát giống VIP) ────────────
+export const appointmentApi = {
+  // Tạo lịch hẹn (PENDING). 409 nếu trùng khung giờ của chuyên gia.
+  createBooking: (
+    data: { expert_id: string; service_id: string; start_time: string; notes?: string },
+    token: string
+  ) =>
+    apiRequest('/api/appointments', {
+      method: 'POST',
+      body: data,
+      token,
+    }),
+
+  // Sinh QR thanh toán cho lịch hẹn -> { data: { transactionCode, amount, qrUrl, bank } }
+  createPayment: (appointmentId: string, token: string) =>
+    apiRequest(`/api/appointments/${appointmentId}/payment`, {
+      method: 'POST',
+      token,
+    }),
+
+  // Poll trạng thái thanh toán -> { status, isPaid }
+  checkPaymentStatus: (appointmentId: string, token: string) =>
+    apiRequest(`/api/appointments/${appointmentId}/payment-status`, {
+      method: 'GET',
+      token,
+    }),
+};

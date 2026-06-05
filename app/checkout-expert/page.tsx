@@ -5,7 +5,7 @@ import {
     User, Star, Clock, Calendar, CreditCard, QrCode,
     CheckCircle2, ArrowLeft, MapPin, Phone, Mail,
     Shield, Sparkles, MessageSquare, ChevronLeft, ChevronRight,
-    Zap,
+    Zap, Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { useEffect, useState, useMemo } from 'react';
+import { useAuthStore } from '@/lib/store';
+import { expertApi, appointmentApi } from '@/lib/api-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface BookedPackage {
@@ -311,6 +313,16 @@ export default function CheckoutExpertPage() {
     const [selectedTime, setSelectedTime] = useState('');
     const [paid, setPaid] = useState(false);
 
+    // ── Thanh toán thật: QR SePay + đối soát qua webhook (giống VIP) ──
+    const token = useAuthStore((s) => s.token);
+    const [appointmentId, setAppointmentId] = useState<string | null>(null);
+    const [qrUrl, setQrUrl] = useState('');
+    const [txCode, setTxCode] = useState('');
+    const [payAmount, setPayAmount] = useState<number | null>(null);
+    const [payStage, setPayStage] = useState<'idle' | 'loading' | 'ready' | 'confirming' | 'error'>('idle');
+    const [payError, setPayError] = useState('');
+    const [retryKey, setRetryKey] = useState(0);
+
     // derive display values
     const formattedDate = useMemo(() =>
         selectedDate?.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) ?? '',
@@ -341,6 +353,85 @@ export default function CheckoutExpertPage() {
         } catch (_) { }
         return () => window.removeEventListener('resize', resize);
     }, []);
+
+    // ── Tự tạo booking thật + sinh QR khi bước vào màn Thanh toán (step 2) ──
+    useEffect(() => {
+        if (step !== 2 || payStage !== 'idle') return;
+        let cancelled = false;
+        (async () => {
+            setPayStage('loading');
+            setPayError('');
+            try {
+                if (!token) throw new Error('Vui lòng đăng nhập để đặt lịch và thanh toán.');
+                if (!selectedDate || !selectedTime) throw new Error('Thiếu ngày/giờ hẹn.');
+
+                // 1. Lấy catalog thật -> chọn 1 chuyên gia có dịch vụ ACTIVE (UUID thật)
+                const catalog = await expertApi.list();
+                const expert = catalog.find((e) => e.services.length > 0);
+                const service = expert?.services[0];
+                if (!expert || !service) throw new Error('Hiện chưa có dịch vụ khả dụng để đặt lịch.');
+
+                // 2. Ghép start_time ISO từ ngày + giờ đã chọn
+                const hhmm = selectedTime.split(/[–-]/)[0].trim(); // "08:00"
+                const [hh, mm] = hhmm.split(':').map(Number);
+                const dt = new Date(selectedDate);
+                dt.setHours(hh || 0, mm || 0, 0, 0);
+
+                // 3. Tạo booking thật (PENDING) — 409 nếu trùng khung giờ
+                const bookingRes = await appointmentApi.createBooking(
+                    {
+                        expert_id: expert.expertId,
+                        service_id: service.id,
+                        start_time: dt.toISOString(),
+                        notes: userInfo.note || undefined,
+                    },
+                    token
+                );
+                const apptId = bookingRes?.appointment?.id;
+                if (!apptId) throw new Error('Không tạo được lịch hẹn.');
+
+                // 4. Sinh QR thanh toán SePay
+                const payRes = await appointmentApi.createPayment(apptId, token);
+                const d = payRes?.data;
+                if (!d?.qrUrl) throw new Error('Không tạo được mã thanh toán.');
+
+                if (cancelled) return;
+                setAppointmentId(apptId);
+                setQrUrl(d.qrUrl);
+                setTxCode(d.transactionCode || '');
+                setPayAmount(typeof d.amount === 'number' ? d.amount : null);
+                setPayStage('ready');
+            } catch (err: any) {
+                if (cancelled) return;
+                setPayError(err?.message || 'Có lỗi khi tạo thanh toán.');
+                setPayStage('error');
+            }
+        })();
+        return () => { cancelled = true; };
+        // payStage CỐ TÌNH không nằm trong deps: setPayStage('loading') ngay đầu effect
+        // sẽ khiến effect tự chạy lại và cleanup huỷ async đang chạy -> kẹt mãi ở loading.
+        // Nút "Thử lại" kích hoạt lại qua retryKey.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [step, retryKey, token, selectedDate, selectedTime, userInfo.note]);
+
+    // ── Sau khi bấm "Tôi đã chuyển khoản": poll trạng thái cho tới khi CONFIRMED ──
+    useEffect(() => {
+        if (payStage !== 'confirming' || !appointmentId || !token) return;
+        let active = true;
+        const timer = setInterval(async () => {
+            try {
+                const res = await appointmentApi.checkPaymentStatus(appointmentId, token);
+                const isPaid = res?.isPaid === true || res?.status === 'CONFIRMED';
+                if (isPaid && active) {
+                    clearInterval(timer);
+                    setPaid(true);
+                }
+            } catch {
+                /* lỗi mạng tạm thời -> tiếp tục poll */
+            }
+        }, 4000);
+        return () => { active = false; clearInterval(timer); };
+    }, [payStage, appointmentId, token]);
 
     if (!mounted) return null;
 
@@ -586,14 +677,26 @@ export default function CheckoutExpertPage() {
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
-                                        {/* QR */}
+                                        {/* QR thật (SePay) */}
                                         <div className="flex-shrink-0 flex flex-col items-center">
-                                            <div className="bg-white p-3 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.08)]">
-                                                <QrCode className="w-36 h-36 text-black" strokeWidth={1.5} />
+                                            <div className="bg-white p-3 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.08)] w-[168px] h-[168px] flex items-center justify-center">
+                                                {qrUrl ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img src={qrUrl} alt="QR thanh toán" className="w-full h-full object-contain" />
+                                                ) : payStage === 'loading' ? (
+                                                    <Loader2 className="w-12 h-12 text-gray-400 animate-spin" />
+                                                ) : (
+                                                    <QrCode className="w-36 h-36 text-gray-300" strokeWidth={1.5} />
+                                                )}
                                             </div>
                                             <p className="text-gray-600 text-[10px] text-center mt-2 leading-relaxed">
                                                 Quét QR bằng<br />App Ngân hàng / Ví điện tử
                                             </p>
+                                            {txCode && (
+                                                <p className="text-[10px] text-gray-500 mt-1 text-center">
+                                                    Nội dung CK: <span className="text-yellow-400 font-mono font-semibold">{txCode}</span>
+                                                </p>
+                                            )}
                                         </div>
 
                                         {/* Price + CTA */}
@@ -601,14 +704,8 @@ export default function CheckoutExpertPage() {
                                             <div className="space-y-2 text-sm mb-5">
                                                 <div className="flex justify-between text-gray-400">
                                                     <span>{booked.packageName}</span>
-                                                    <span>{formatPrice(booked.price)}</span>
+                                                    <span>{formatPrice(payAmount ?? booked.price)}</span>
                                                 </div>
-                                                {booked.originalPrice && (
-                                                    <div className="flex justify-between text-gray-500 text-xs">
-                                                        <span>Giảm giá</span>
-                                                        <span className="text-green-400">-{formatPrice(booked.originalPrice - booked.price)}</span>
-                                                    </div>
-                                                )}
                                                 <div className="flex justify-between text-gray-500 text-xs">
                                                     <span>Phí dịch vụ</span>
                                                     <span className="text-green-400">Miễn phí</span>
@@ -616,23 +713,42 @@ export default function CheckoutExpertPage() {
                                                 <div className="pt-3 border-t border-gray-800 flex justify-between items-center">
                                                     <span className="text-gray-200 font-semibold">Tổng thanh toán</span>
                                                     <span className="text-2xl font-bold text-yellow-400 tabular-nums">
-                                                        {formatPrice(booked.price)}
+                                                        {formatPrice(payAmount ?? booked.price)}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-start gap-2 text-xs text-gray-500 mb-4">
                                                 <Shield className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                                                Nhấn xác nhận đồng nghĩa bạn đồng ý điều khoản dịch vụ của SorcererXStreme.
+                                                Chuyển đúng số tiền & nội dung trên. Hệ thống tự xác nhận khi nhận được tiền.
                                             </div>
 
-                                            <div className="relative group">
-                                                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-xl blur opacity-25 group-hover:opacity-60 transition duration-500" />
-                                                <Button onClick={() => setPaid(true)}
-                                                    className="relative w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-gray-900 font-bold py-4 rounded-xl text-sm shadow-lg uppercase tracking-wider transition-all">
-                                                    Xác nhận
+                                            {payError && (
+                                                <div className="mb-3 text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+                                                    {payError}
+                                                </div>
+                                            )}
+
+                                            {payStage === 'confirming' ? (
+                                                <div className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm font-semibold">
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Đang xác nhận thanh toán...
+                                                </div>
+                                            ) : payStage === 'error' ? (
+                                                <Button onClick={() => { setPayStage('idle'); setRetryKey((k) => k + 1); }}
+                                                    className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20 py-4 rounded-xl text-sm font-bold">
+                                                    Thử lại
                                                 </Button>
-                                            </div>
+                                            ) : (
+                                                <div className="relative group">
+                                                    <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-xl blur opacity-25 group-hover:opacity-60 transition duration-500" />
+                                                    <Button onClick={() => setPayStage('confirming')}
+                                                        disabled={payStage !== 'ready'}
+                                                        className="relative w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-gray-900 font-bold py-4 rounded-xl text-sm shadow-lg uppercase tracking-wider transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                                                        {payStage === 'loading' ? 'Đang tạo mã QR...' : 'Tôi đã chuyển khoản'}
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
