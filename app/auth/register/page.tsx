@@ -28,6 +28,7 @@ export default function RegisterPage() {
     email: false 
   });
   
+  const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
   const [isTouched, setIsTouched] = useState(false);
 
   const { register, confirmRegistration } = useAuthStore();
@@ -55,7 +56,7 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const success = await register(email, password);
+      const success = await register(email, password, role);
       if (success) {
         toast.success('Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận.');
         setStep('verify');
@@ -176,6 +177,59 @@ export default function RegisterPage() {
           {step === 'register' ? (
             <form onSubmit={handleRegister} className="space-y-5 relative">
               
+              {/* Role Slider Selection */}
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="space-y-2"
+              >
+                <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block mb-1">
+                  Chọn vai trò của bạn
+                </label>
+                <div className="relative flex bg-white/5 p-1 rounded-2xl border border-white/10 shadow-inner overflow-hidden">
+                  {/* Sliding Background */}
+                  <motion.div
+                    className="absolute top-1 bottom-1 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 rounded-xl shadow-lg shadow-red-600/30"
+                    style={{
+                      width: 'calc(33.333% - 6px)',
+                      left: '4px',
+                    }}
+                    animate={{
+                      x: role === 'USER' ? '0%' : role === 'EXPERT' ? 'calc(100% + 6px)' : 'calc(200% + 12px)'
+                    }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  />
+
+                  {(['USER', 'EXPERT', 'ADMIN'] as const).map((r) => {
+                    const isActive = role === r;
+                    const displayLabel = r === 'USER' ? 'Người dùng' : r === 'EXPERT' ? 'Chuyên gia' : 'Admin';
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`relative flex-1 py-3 text-xs sm:text-sm font-bold rounded-xl z-10 transition-colors duration-300 ${
+                          isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                        }`}
+                      >
+                        {displayLabel}
+                      </button>
+                    );
+                  })}
+                </div>
+                <motion.p
+                  key={role}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-xs text-center text-gray-400 mt-2 font-medium tracking-wide italic min-h-[20px]"
+                >
+                  {role === 'USER' && '🔮 Vai trò Người dùng: Tìm kiếm tư vấn Tử Vi, Tarot, Chiêm Tinh & Thần Số Học.'}
+                  {role === 'EXPERT' && '💼 Vai trò Chuyên gia: Đăng ký tư vấn và thiết lập các gói dịch vụ huyền học.'}
+                  {role === 'ADMIN' && '🛡️ Vai trò Quản trị viên: Quản trị hệ thống, phê duyệt hồ sơ chuyên gia & dịch vụ.'}
+                </motion.p>
+              </motion.div>
+
               {/* Email Input */}
               <motion.div
                 initial={{ x: -20, opacity: 0 }}

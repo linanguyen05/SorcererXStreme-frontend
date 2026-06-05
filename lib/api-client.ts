@@ -54,7 +54,7 @@ export const authApi = {
     return await confirmSignUp({ username: email, confirmationCode: code });
   },
 
-  register: async (email: string, password: string) => {
+  register: async (email: string, password: string, role: string) => {
     // 1. Create user in Cognito (No Backend Sync)
     try {
       const { userId } = await signUp({
@@ -63,6 +63,7 @@ export const authApi = {
         options: {
           userAttributes: {
             email,
+            'custom:role': role,
           },
         },
       });
@@ -363,22 +364,58 @@ export const paymentApi = {
 
 export const adminApi = {
   getPendingExperts: (token: string) =>
-    apiRequest('/api/admin/pending-experts', { token }),
+    apiRequest('/api/admin/experts?status=PENDING', { token }),
 
   getPendingServices: (token: string) =>
-    apiRequest('/api/admin/pending-services', { token }),
+    apiRequest('/api/admin/services?status=PENDING', { token }),
 
   approveExpert: (id: string, action: 'approve' | 'reject', token: string) =>
-    apiRequest(`/api/admin/experts/${id}/status`, {
-      method: 'PATCH',
-      body: { status: action === 'approve' ? 'active' : 'rejected' },
+    apiRequest(`/api/experts/${id}/status`, {
+      method: 'PUT',
+      body: { status: action === 'approve' ? 'APPROVED' : 'REJECTED' },
       token,
     }),
 
   approveService: (id: string, action: 'approve' | 'reject', token: string) =>
-    apiRequest(`/api/admin/services/${id}/status`, {
-      method: 'PATCH',
-      body: { status: action === 'approve' ? 'active' : 'rejected' },
+    apiRequest(`/api/services/${id}/status`, {
+      method: 'PUT',
+      body: { status: action === 'approve' ? 'APPROVED' : 'REJECTED' },
+      token,
+    }),
+
+  getExperts: (token: string, status?: string) => {
+    const url = status ? `/api/admin/experts?status=${status}` : '/api/admin/experts';
+    return apiRequest(url, { token });
+  },
+
+  updateExpertStatus: (expertId: string, status: string, token: string) =>
+    apiRequest(`/api/experts/${expertId}/status`, {
+      method: 'PUT',
+      body: { status },
+      token,
+    }),
+
+  deleteExpert: (expertId: string, token: string) =>
+    apiRequest(`/api/experts/${expertId}`, {
+      method: 'DELETE',
+      token,
+    }),
+
+  getServices: (token: string, status?: string) => {
+    const url = status ? `/api/admin/services?status=${status}` : '/api/admin/services';
+    return apiRequest(url, { token });
+  },
+
+  updateServiceStatus: (serviceId: string, status: string, token: string) =>
+    apiRequest(`/api/services/${serviceId}/status`, {
+      method: 'PUT',
+      body: { status },
+      token,
+    }),
+
+  deleteService: (serviceId: string, token: string) =>
+    apiRequest(`/api/services/${serviceId}`, {
+      method: 'DELETE',
       token,
     }),
 };

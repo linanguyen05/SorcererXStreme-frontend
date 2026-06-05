@@ -13,7 +13,7 @@ import { useAuthStore } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Mock data for demo fallback
-const mockPendingExperts = [
+const mockExperts = [
   {
     id: "exp-1",
     name: "Master Alistair",
@@ -21,7 +21,7 @@ const mockPendingExperts = [
     email: "alistair.numerology@gmail.com",
     experience: "7 năm kinh nghiệm",
     specs: ["Tarot", "Thần Số Học"],
-    status: "pending",
+    status: "PENDING",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
   },
   {
@@ -31,7 +31,7 @@ const mockPendingExperts = [
     email: "celine.astrology@outlook.com",
     experience: "4 năm kinh nghiệm",
     specs: ["Chiêm Tinh"],
-    status: "pending",
+    status: "PENDING",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
   },
   {
@@ -41,19 +41,19 @@ const mockPendingExperts = [
     email: "minhtue.tuvi@vietnam.vn",
     experience: "12 năm kinh nghiệm",
     specs: ["Tử Vi", "Kinh Dịch"],
-    status: "pending",
+    status: "APPROVED",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"
   }
 ];
 
-const mockPendingServices = [
+const mockServices = [
   {
     id: "ser-1",
     name: "Tư vấn tình duyên chuyên sâu qua Thần Số Học",
     expertName: "Master Alistair",
     price: "450.000đ",
     duration: "45 phút",
-    status: "pending"
+    status: "PENDING"
   },
   {
     id: "ser-2",
@@ -61,7 +61,7 @@ const mockPendingServices = [
     expertName: "Astrologer Celine",
     price: "750.000đ",
     duration: "90 phút",
-    status: "pending"
+    status: "PENDING"
   },
   {
     id: "ser-3",
@@ -69,7 +69,7 @@ const mockPendingServices = [
     expertName: "Thầy Minh Tuệ",
     price: "1.200.000đ",
     duration: "120 phút",
-    status: "pending"
+    status: "APPROVED"
   }
 ];
 
@@ -78,11 +78,18 @@ export default function AdminDashboard() {
 
   // --- STATES ---
   const [showNotifications, setShowNotifications] = useState(false);
-  const [pendingExperts, setPendingExperts] = useState<any[]>([]);
-  const [pendingServices, setPendingServices] = useState<any[]>([]);
-  const [loadingPending, setLoadingPending] = useState(true);
+  const [experts, setExperts] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeApprovalTab, setActiveApprovalTab] = useState<'experts' | 'services'>('experts');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED'>('PENDING');
   const [pendingSearch, setPendingSearch] = useState('');
+
+  // Stats for cards (uses total pending across mock local storage)
+  const [stats, setStats] = useState({
+    pendingExpertsCount: 0,
+    pendingServicesCount: 0
+  });
 
   // Notifications simulation state
   const [notifications, setNotifications] = useState([
@@ -93,147 +100,247 @@ export default function AdminDashboard() {
   // Helper functions for mock persistence
   const getMockExpertsFromLocalStorage = () => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('mock-pending-experts');
+      const stored = localStorage.getItem('mock-admin-experts');
       if (stored) return JSON.parse(stored);
-      localStorage.setItem('mock-pending-experts', JSON.stringify(mockPendingExperts));
+      localStorage.setItem('mock-admin-experts', JSON.stringify(mockExperts));
     }
-    return mockPendingExperts;
+    return mockExperts;
   };
 
   const getMockServicesFromLocalStorage = () => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('mock-pending-services');
+      const stored = localStorage.getItem('mock-admin-services');
       if (stored) return JSON.parse(stored);
-      localStorage.setItem('mock-pending-services', JSON.stringify(mockPendingServices));
+      localStorage.setItem('mock-admin-services', JSON.stringify(mockServices));
     }
-    return mockPendingServices;
+    return mockServices;
   };
 
-  // Load from localStorage & APIs on mount
-  useEffect(() => {
-    const fetchPendingData = async () => {
-      setLoadingPending(true);
-      try {
-        let expertsData = [];
-        let servicesData = [];
-        if (token) {
-          try {
-            expertsData = await adminApi.getPendingExperts(token);
-          } catch (e) {
-            expertsData = getMockExpertsFromLocalStorage();
-          }
-          try {
-            servicesData = await adminApi.getPendingServices(token);
-          } catch (e) {
-            servicesData = getMockServicesFromLocalStorage();
-          }
-        } else {
-          expertsData = getMockExpertsFromLocalStorage();
-          servicesData = getMockServicesFromLocalStorage();
+  // Load and fetch data
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      let expertsData = [];
+      let servicesData = [];
+      const statusParam = statusFilter === 'ALL' ? undefined : statusFilter;
+
+      if (token) {
+        try {
+          expertsData = await adminApi.getExperts(token, statusParam);
+        } catch (e) {
+          console.warn("API getExperts failed, fallback to local updating.", e);
+          const allMocks = getMockExpertsFromLocalStorage();
+          expertsData = statusParam ? allMocks.filter((e: any) => e.status === statusParam) : allMocks;
         }
+        try {
+          servicesData = await adminApi.getServices(token, statusParam);
+        } catch (e) {
+          console.warn("API getServices failed, fallback to local updating.", e);
+          const allMocks = getMockServicesFromLocalStorage();
+          servicesData = statusParam ? allMocks.filter((s: any) => s.status === statusParam) : allMocks;
+        }
+      } else {
+        const allMocksExp = getMockExpertsFromLocalStorage();
+        expertsData = statusParam ? allMocksExp.filter((e: any) => e.status === statusParam) : allMocksExp;
 
-        setPendingExperts(expertsData);
-        setPendingServices(servicesData);
-      } catch (error) {
-        console.error("Error loading pending queue:", error);
-      } finally {
-        setLoadingPending(false);
+        const allMocksSer = getMockServicesFromLocalStorage();
+        servicesData = statusParam ? allMocksSer.filter((s: any) => s.status === statusParam) : allMocksSer;
       }
-    };
 
-    fetchPendingData();
-  }, [token]);
+      setExperts(expertsData);
+      setServices(servicesData);
 
-  // Handle Approve / Reject Expert via PATCH
-  const handleApproveExpert = async (id: string, action: 'approve' | 'reject') => {
-    const expert = pendingExperts.find(e => e.id === id);
-    if (!expert) return;
+      // Update total pending stats counts from local mock list for consistency
+      const allMockExp = getMockExpertsFromLocalStorage();
+      const allMockSer = getMockServicesFromLocalStorage();
+      setStats({
+        pendingExpertsCount: allMockExp.filter((e: any) => e.status === 'PENDING').length,
+        pendingServicesCount: allMockSer.filter((s: any) => s.status === 'PENDING').length
+      });
+    } catch (error) {
+      console.error("Error loading admin dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const actionText = action === 'approve' ? 'phê duyệt' : 'từ chối';
+  useEffect(() => {
+    fetchData();
+  }, [token, statusFilter]);
+
+  // Handle status update (Approve or send to Pending)
+  const handleUpdateExpertStatus = async (id: string, newStatus: 'PENDING' | 'APPROVED') => {
+    const allMocks = getMockExpertsFromLocalStorage();
+    const expert = allMocks.find((e: any) => e.id === id);
+    const displayName = expert ? expert.name : id;
+    const actionText = newStatus === 'APPROVED' ? 'phê duyệt' : 'chuyển về chờ duyệt';
 
     toast.promise(
       (async () => {
         if (token) {
           try {
-            await adminApi.approveExpert(id, action, token);
+            await adminApi.updateExpertStatus(id, newStatus, token);
           } catch (e) {
-            console.warn("API PATCH failed, fallback to local updating.", e);
+            console.warn("API updateExpertStatus failed, fallback to local updating.", e);
           }
         }
 
-        // Update local state and persist
-        const updated = pendingExperts.filter(e => e.id !== id);
-        setPendingExperts(updated);
-        localStorage.setItem('mock-pending-experts', JSON.stringify(updated));
+        // Update local mock list
+        const updated = allMocks.map((e: any) => e.id === id ? { ...e, status: newStatus } : e);
+        localStorage.setItem('mock-admin-experts', JSON.stringify(updated));
+
+        // Refetch data to show correct filter view
+        await fetchData();
 
         // Add simulation notification
         const newNotif = {
           id: Date.now(),
-          title: action === 'approve' ? 'Duyệt chuyên gia thành công' : 'Đã từ chối chuyên gia',
-          desc: `Chuyên gia ${expert.name} đã được ${actionText}.`,
+          title: newStatus === 'APPROVED' ? 'Duyệt chuyên gia thành công' : 'Chuyển về chờ duyệt',
+          desc: `Chuyên gia ${displayName} đã được ${actionText}.`,
           time: 'Vừa xong',
-          icon: action === 'approve' ? <CheckCircle className="w-4 h-4 text-green-400" /> : <AlertCircle className="w-4 h-4 text-red-400" />
+          icon: newStatus === 'APPROVED' ? <CheckCircle className="w-4 h-4 text-green-400" /> : <AlertCircle className="w-4 h-4 text-yellow-400" />
         };
         setNotifications(prev => [newNotif, ...prev]);
       })(),
       {
         loading: `Đang thực hiện ${actionText} chuyên gia...`,
-        success: `Đã ${actionText} chuyên gia ${expert.name}!`,
+        success: `Đã ${actionText} chuyên gia ${displayName}!`,
         error: `Có lỗi xảy ra khi cập nhật chuyên gia.`,
       }
     );
   };
 
-  // Handle Approve / Reject Service via PATCH
-  const handleApproveService = async (id: string, action: 'approve' | 'reject') => {
-    const service = pendingServices.find(s => s.id === id);
-    if (!service) return;
+  // Handle delete expert
+  const handleDeleteExpert = async (id: string) => {
+    const allMocks = getMockExpertsFromLocalStorage();
+    const expert = allMocks.find((e: any) => e.id === id);
+    const displayName = expert ? expert.name : id;
 
-    const actionText = action === 'approve' ? 'phê duyệt' : 'từ chối';
+    if (!confirm(`Bạn có chắc chắn muốn xóa chuyên gia ${displayName}?`)) return;
 
     toast.promise(
       (async () => {
         if (token) {
           try {
-            await adminApi.approveService(id, action, token);
+            await adminApi.deleteExpert(id, token);
           } catch (e) {
-            console.warn("API PATCH failed, fallback to local updating.", e);
+            console.warn("API deleteExpert failed, fallback to local updating.", e);
           }
         }
 
-        // Update local state and persist
-        const updated = pendingServices.filter(s => s.id !== id);
-        setPendingServices(updated);
-        localStorage.setItem('mock-pending-services', JSON.stringify(updated));
+        // Update local mock list
+        const updated = allMocks.filter((e: any) => e.id !== id);
+        localStorage.setItem('mock-admin-experts', JSON.stringify(updated));
 
-        // Add simulation notification
+        await fetchData();
+
         const newNotif = {
           id: Date.now(),
-          title: action === 'approve' ? 'Duyệt dịch vụ thành công' : 'Đã từ chối dịch vụ',
-          desc: `Dịch vụ "${service.name}" của ${service.expertName} đã được ${actionText}.`,
+          title: 'Đã xóa chuyên gia',
+          desc: `Chuyên gia ${displayName} đã bị xóa khỏi hệ thống.`,
           time: 'Vừa xong',
-          icon: action === 'approve' ? <CheckCircle className="w-4 h-4 text-green-400" /> : <AlertCircle className="w-4 h-4 text-red-400" />
+          icon: <X className="w-4 h-4 text-red-400" />
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+      })(),
+      {
+        loading: `Đang xóa chuyên gia...`,
+        success: `Đã xóa chuyên gia ${displayName}!`,
+        error: `Có lỗi xảy ra khi xóa chuyên gia.`,
+      }
+    );
+  };
+
+  // Handle status update for Service
+  const handleUpdateServiceStatus = async (id: string, newStatus: 'PENDING' | 'APPROVED') => {
+    const allMocks = getMockServicesFromLocalStorage();
+    const service = allMocks.find((s: any) => s.id === id);
+    const displayName = service ? service.name : id;
+    const actionText = newStatus === 'APPROVED' ? 'phê duyệt' : 'chuyển về chờ duyệt';
+
+    toast.promise(
+      (async () => {
+        if (token) {
+          try {
+            await adminApi.updateServiceStatus(id, newStatus, token);
+          } catch (e) {
+            console.warn("API updateServiceStatus failed, fallback to local updating.", e);
+          }
+        }
+
+        // Update local mock list
+        const updated = allMocks.map((s: any) => s.id === id ? { ...s, status: newStatus } : s);
+        localStorage.setItem('mock-admin-services', JSON.stringify(updated));
+
+        await fetchData();
+
+        const newNotif = {
+          id: Date.now(),
+          title: newStatus === 'APPROVED' ? 'Duyệt dịch vụ thành công' : 'Chuyển về chờ duyệt',
+          desc: `Dịch vụ "${displayName}" đã được ${actionText}.`,
+          time: 'Vừa xong',
+          icon: newStatus === 'APPROVED' ? <CheckCircle className="w-4 h-4 text-green-400" /> : <AlertCircle className="w-4 h-4 text-yellow-400" />
         };
         setNotifications(prev => [newNotif, ...prev]);
       })(),
       {
         loading: `Đang thực hiện ${actionText} dịch vụ...`,
-        success: `Đã ${actionText} dịch vụ "${service.name}"!`,
+        success: `Đã ${actionText} dịch vụ "${displayName}"!`,
         error: `Có lỗi xảy ra khi cập nhật dịch vụ.`,
       }
     );
   };
 
+  // Handle delete service
+  const handleDeleteService = async (id: string) => {
+    const allMocks = getMockServicesFromLocalStorage();
+    const service = allMocks.find((s: any) => s.id === id);
+    const displayName = service ? service.name : id;
+
+    if (!confirm(`Bạn có chắc chắn muốn xóa dịch vụ "${displayName}"?`)) return;
+
+    toast.promise(
+      (async () => {
+        if (token) {
+          try {
+            await adminApi.deleteService(id, token);
+          } catch (e) {
+            console.warn("API deleteService failed, fallback to local updating.", e);
+          }
+        }
+
+        const updated = allMocks.filter((s: any) => s.id !== id);
+        localStorage.setItem('mock-admin-services', JSON.stringify(updated));
+
+        await fetchData();
+
+        const newNotif = {
+          id: Date.now(),
+          title: 'Đã xóa dịch vụ',
+          desc: `Dịch vụ "${displayName}" đã bị xóa khỏi hệ thống.`,
+          time: 'Vừa xong',
+          icon: <X className="w-4 h-4 text-red-400" />
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+      })(),
+      {
+        loading: `Đang xóa dịch vụ...`,
+        success: `Đã xóa dịch vụ "${displayName}"!`,
+        error: `Có lỗi xảy ra khi xóa dịch vụ.`,
+      }
+    );
+  };
+
   // Search filter implementation
-  const filteredExperts = pendingExperts.filter(e =>
+  const filteredExperts = experts.filter(e =>
     e.name.toLowerCase().includes(pendingSearch.toLowerCase()) ||
     e.email.toLowerCase().includes(pendingSearch.toLowerCase()) ||
     e.title.toLowerCase().includes(pendingSearch.toLowerCase())
   );
 
-  const filteredServices = pendingServices.filter(s =>
+  const filteredServices = services.filter(s =>
     s.name.toLowerCase().includes(pendingSearch.toLowerCase()) ||
-    s.expertName.toLowerCase().includes(pendingSearch.toLowerCase())
+    (s.expertName && s.expertName.toLowerCase().includes(pendingSearch.toLowerCase()))
   );
 
   return (
@@ -320,9 +427,9 @@ export default function AdminDashboard() {
 
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <StatCard icon={<Users className="text-purple-400 w-6 h-6" />} label="Chuyên gia chờ duyệt" value={pendingExperts.length.toString()} />
-          <StatCard icon={<Briefcase className="text-yellow-400 w-6 h-6" />} label="Dịch vụ chờ duyệt" value={pendingServices.length.toString()} />
-          <StatCard icon={<BarChart3 className="text-green-400 w-6 h-6" />} label="Tổng yêu cầu tồn đọng" value={(pendingExperts.length + pendingServices.length).toString()} />
+          <StatCard icon={<Users className="text-purple-400 w-6 h-6" />} label="Chuyên gia chờ duyệt" value={stats.pendingExpertsCount.toString()} />
+          <StatCard icon={<Briefcase className="text-yellow-400 w-6 h-6" />} label="Dịch vụ chờ duyệt" value={stats.pendingServicesCount.toString()} />
+          <StatCard icon={<BarChart3 className="text-green-400 w-6 h-6" />} label="Tổng yêu cầu tồn đọng" value={(stats.pendingExpertsCount + stats.pendingServicesCount).toString()} />
         </div>
 
         {/* FULL WIDTH: DATA TABLE APPROVAL QUEUE */}
@@ -333,25 +440,49 @@ export default function AdminDashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
             <div className="space-y-1">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <ShieldCheck className="w-6 h-6 text-red-500" /> Yêu cầu đang chờ phê duyệt
+                <ShieldCheck className="w-6 h-6 text-red-500" /> Quản lý tài nguyên
               </h2>
-              <p className="text-gray-400 text-xs">Phê duyệt hoặc từ chối các Chuyên gia và Dịch vụ mới đăng ký trên hệ thống</p>
+              <p className="text-gray-400 text-xs">Phê duyệt, thu hồi hoặc xóa các Chuyên gia và Dịch vụ trên hệ thống</p>
             </div>
 
-            {/* Switch tabs */}
-            <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 self-start md:self-auto">
-              <button
-                onClick={() => { setActiveApprovalTab('experts'); setPendingSearch(''); }}
-                className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'experts' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'}`}
-              >
-                <UserCheck className="w-3.5 h-3.5" /> Chuyên gia ({pendingExperts.length})
-              </button>
-              <button
-                onClick={() => { setActiveApprovalTab('services'); setPendingSearch(''); }}
-                className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'services' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'}`}
-              >
-                <Briefcase className="w-3.5 h-3.5" /> Dịch vụ ({pendingServices.length})
-              </button>
+            {/* Switch tabs & Status Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Type Switcher */}
+              <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10">
+                <button
+                  onClick={() => { setActiveApprovalTab('experts'); setPendingSearch(''); }}
+                  className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'experts' ? 'bg-white/10 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                  <UserCheck className="w-3.5 h-3.5" /> Chuyên gia
+                </button>
+                <button
+                  onClick={() => { setActiveApprovalTab('services'); setPendingSearch(''); }}
+                  className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'services' ? 'bg-white/10 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                >
+                  <Briefcase className="w-3.5 h-3.5" /> Dịch vụ
+                </button>
+              </div>
+
+              {/* Status Switcher */}
+              <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 gap-1">
+                {(['PENDING', 'APPROVED', 'ALL'] as const).map((status) => {
+                  const isActive = statusFilter === status;
+                  const label = status === 'PENDING' ? 'Chờ duyệt' : status === 'APPROVED' ? 'Đã duyệt' : 'Tất cả';
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={`px-3 py-2 text-xs font-bold rounded-xl transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg shadow-red-600/20'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -380,10 +511,10 @@ export default function AdminDashboard() {
 
           {/* TABLE CONTAINER */}
           <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/30">
-            {loadingPending ? (
+            {isLoading ? (
               <div className="text-center py-20">
                 <div className="w-10 h-10 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-sm text-gray-400">Đang tải danh sách chờ duyệt...</p>
+                <p className="text-sm text-gray-400">Đang tải danh sách dữ liệu...</p>
               </div>
             ) : activeApprovalTab === 'experts' ? (
               /* EXPERTS TABLE */
@@ -424,24 +555,45 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                            <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
-                            Chờ duyệt
-                          </span>
+                          {exp.status === 'PENDING' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
+                              Chờ duyệt
+                            </span>
+                          ) : exp.status === 'APPROVED' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                              Đã duyệt
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
+                              Từ chối
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
+                            {exp.status === 'PENDING' && (
+                              <button
+                                onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-green-500/20"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Phê duyệt
+                              </button>
+                            )}
+                            {exp.status === 'APPROVED' && (
+                              <button
+                                onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-yellow-500/20"
+                              >
+                                <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                              </button>
+                            )}
                             <button
-                              onClick={() => handleApproveExpert(exp.id, 'approve')}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1"
+                              onClick={() => handleDeleteExpert(exp.id)}
+                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm hover:shadow-red-500/20"
                             >
-                              <CheckCircle className="w-3.5 h-3.5" /> Phê duyệt
-                            </button>
-                            <button
-                              onClick={() => handleApproveExpert(exp.id, 'reject')}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1"
-                            >
-                              <X className="w-3.5 h-3.5" /> Từ chối
+                              <X className="w-3.5 h-3.5" /> Xóa
                             </button>
                           </div>
                         </td>
@@ -452,7 +604,7 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-16">
                   <UserCheck className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 font-medium text-sm">Không tìm thấy chuyên gia nào chờ duyệt.</p>
+                  <p className="text-gray-400 font-medium text-sm">Không tìm thấy chuyên gia nào phù hợp.</p>
                 </div>
               )
             ) : (
@@ -488,24 +640,45 @@ export default function AdminDashboard() {
                           {ser.price}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                            <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
-                            Chờ duyệt
-                          </span>
+                          {ser.status === 'PENDING' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
+                              Chờ duyệt
+                            </span>
+                          ) : ser.status === 'APPROVED' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                              Đã duyệt
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
+                              Từ chiết
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
+                            {ser.status === 'PENDING' && (
+                              <button
+                                onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-green-500/20"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Phê duyệt
+                              </button>
+                            )}
+                            {ser.status === 'APPROVED' && (
+                              <button
+                                onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-yellow-500/20"
+                              >
+                                <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                              </button>
+                            )}
                             <button
-                              onClick={() => handleApproveService(ser.id, 'approve')}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1"
+                              onClick={() => handleDeleteService(ser.id)}
+                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm hover:shadow-red-500/20"
                             >
-                              <CheckCircle className="w-3.5 h-3.5" /> Phê duyệt
-                            </button>
-                            <button
-                              onClick={() => handleApproveService(ser.id, 'reject')}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1"
-                            >
-                              <X className="w-3.5 h-3.5" /> Từ chối
+                              <X className="w-3.5 h-3.5" /> Xóa
                             </button>
                           </div>
                         </td>
@@ -516,7 +689,7 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-16">
                   <Briefcase className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 font-medium text-sm">Không tìm thấy dịch vụ nào chờ duyệt.</p>
+                  <p className="text-gray-400 font-medium text-sm">Không tìm thấy dịch vụ nào phù hợp.</p>
                 </div>
               )
             )}
