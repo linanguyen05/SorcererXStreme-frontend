@@ -10,8 +10,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { experts } from '@/lib/services-data';
 
-export default function ExpertProfilePage() {
+export default function ExpertProfilePage({ id }: { id: string }) {
   // --- STATES ---
   const [avatar, setAvatar] = useState<string | null>(null);
   const [savedAvatar, setSavedAvatar] = useState<string | null>(null);
@@ -50,16 +51,55 @@ export default function ExpertProfilePage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load from localStorage on mount
+  // Load from mock data & localStorage on mount
   useEffect(() => {
+    // 1. First set mock data based on ID
+    const expertInfo = experts.find(e => e.id === id);
+    let initialProfile = {
+      name: 'Master Lina',
+      title: 'Chuyên gia Tarot & Chiêm tinh học',
+      bio: 'Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân. Hơn 5 năm kinh nghiệm thấu cảm.',
+      experience: 'Tôi đã có hơn 5 năm nghiên cứu và thực hành Tarot chuyên sâu kết hợp với Chiêm tinh học phương Tây. Đã giúp đỡ hơn 1000 khách hàng tìm lại định hướng trong cuộc sống, hàn gắn các mối quan hệ đổ vỡ và định hình lộ trình sự nghiệp tương lai.',
+      yoe: 5 as number | '',
+      email: 'lina.mystic@gmail.com',
+      phone: '0987.654.321',
+      facebook: 'fb.com/master.lina.tarot',
+      instagram: 'instagr.am/lina.mystic',
+      specs: ['Tarot', 'Astrology'],
+      price: '200.000đ',
+    };
+
+    if (expertInfo) {
+      initialProfile = {
+        name: expertInfo.name,
+        title: expertInfo.title,
+        bio: expertInfo.bio || "",
+        experience: expertInfo.about || "",
+        yoe: parseInt(expertInfo.experience) || 5,
+        email: `${expertInfo.id}@gmail.com`,
+        phone: '0987.654.321',
+        facebook: expertInfo.social?.facebook || 'fb.com',
+        instagram: expertInfo.social?.threads || 'instagr.am',
+        specs: expertInfo.specialties || ['Tarot'],
+        price: expertInfo.packages?.[0] ? `${expertInfo.packages[0].price.toLocaleString()}đ` : '200.000đ',
+      };
+      setAvatar(expertInfo.avatar || null);
+      setSavedAvatar(expertInfo.avatar || null);
+    }
+
+    setProfile(initialProfile);
+    setTempProfile(initialProfile);
+
+    // 2. Override with localStorage if exists
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('expert-profile-data');
+      const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
           if (parsed.profile) {
-            setProfile(parsed.profile);
-            setTempProfile(parsed.profile);
+            const mergedProfile = { ...initialProfile, ...parsed.profile };
+            setProfile(mergedProfile);
+            setTempProfile(mergedProfile);
           }
           if (parsed.avatar) {
             setAvatar(parsed.avatar);
@@ -74,7 +114,7 @@ export default function ExpertProfilePage() {
         }
       }
     }
-  }, []);
+  }, [id]);
 
   // Check for changes
   useEffect(() => {
@@ -117,18 +157,12 @@ export default function ExpertProfilePage() {
     setHasChanges(false);
 
     if (typeof window !== 'undefined') {
-      localStorage.setItem('expert-profile-data', JSON.stringify({
+      localStorage.setItem(`expert-profile-data-${id}`, JSON.stringify({
         profile: tempProfile,
         avatar,
         coverColor
       }));
     }
-    /* 
-    Ảnh được chuyển thành chuỗi Data URL (base64) thông qua FileReader.
-    Chuỗi base64 này được lưu trong state React avatar (và savedAvatar).
-    Khi người dùng nhấn Lưu thay đổi, chuỗi base64 cùng với các dữ liệu khác được ghi vào localStorage của trình duyệt (key expert-profile-data).
-    Giao diện hiển thị avatar từ avatar state (xem trước tức thì) hoặc từ savedAvatar sau khi đã lưu thành công.
-    */
 
     toast.success("Đã cập nhật trang cá nhân thành công!");
   };
@@ -152,7 +186,7 @@ export default function ExpertProfilePage() {
         {/* Navigation & Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
           <div className="space-y-2">
-            <Link href="/dashboard_expert" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-2 group">
+            <Link href={`/experts/${id}/dashboard`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-2 group">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Quay lại Workspace
             </Link>
             <h1 className="text-4xl font-bold font-['Pacifico'] tracking-wide">
@@ -468,8 +502,8 @@ export default function ExpertProfilePage() {
                       {tempProfile.specs.length > 0 ? (
                         tempProfile.specs.map(s => (
                           <span
-                            key={s}
-                            className="bg-purple-500/10 border border-purple-500/20 text-purple-300 px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1"
+                              key={s}
+                              className="bg-purple-500/10 border border-purple-500/20 text-purple-300 px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1"
                           >
                             🔮 {s}
                           </span>
