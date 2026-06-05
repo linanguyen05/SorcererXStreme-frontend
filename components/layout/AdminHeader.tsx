@@ -4,16 +4,16 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, Bell, Sparkles, Shield, Layout, ArrowLeft } from 'lucide-react';
+import { Menu, X, User, LogOut, Bell, Shield, Layout } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { Button } from '@/components/ui/Button';
 
-interface ExpertHeaderProps {
+interface AdminHeaderProps {
   onScrollToSection?: (sectionId: string) => void;
   onShowNotifications?: () => void;
 }
 
-export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertHeaderProps) {
+export function AdminHeader({ onScrollToSection, onShowNotifications }: AdminHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, isAuthenticated } = useAuthStore();
@@ -32,14 +32,11 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
   };
 
   const navLinks = [
-    { name: 'Tổng quan', id: 'overview', href: '/dashboard_expert#overview' },
-    { name: 'Gói dịch vụ', id: 'services', href: '/dashboard_expert#services' },
-    { name: 'Quản lý lịch hẹn', id: 'appointments', href: '/dashboard_expert#appointments' },
-    { name: 'Phản hồi', id: 'feedback', href: '/dashboard_expert#feedback' },
+    { name: 'Duyệt yêu cầu', id: 'approval-table', href: '/dashboard_admin#approval-table' },
   ];
 
   const handleLinkClick = (e: React.MouseEvent, link: typeof navLinks[0]) => {
-    if (pathname === '/dashboard_expert' && onScrollToSection) {
+    if (pathname === '/dashboard_admin' && onScrollToSection) {
       e.preventDefault();
       onScrollToSection(link.id);
       setIsMobileMenuOpen(false);
@@ -60,7 +57,7 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
               </h1>
             </Link>
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-[10px] font-black uppercase tracking-wider">
-              <Shield className="w-3 h-3" /> Expert Hub
+              <Shield className="w-3 h-3" /> Admin Hub
             </div>
           </div>
 
@@ -82,20 +79,6 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
           {/* Right Section */}
           <div className="flex items-center gap-3 md:gap-4">
             
-            {/* Subpages shortcuts */}
-            <div className="hidden md:flex items-center gap-2">
-              <Link href="/dashboard_expert/profile">
-                <Button variant="ghost" size="sm" className="text-xs hover:bg-white/5 border border-transparent hover:border-white/10 text-gray-300">
-                  Hồ sơ
-                </Button>
-              </Link>
-              <Link href="/dashboard_expert/verify">
-                <Button variant="ghost" size="sm" className="text-xs hover:bg-white/5 border border-transparent hover:border-white/10 text-gray-300">
-                  Xác thực
-                </Button>
-              </Link>
-            </div>
-
             {/* Notification Bell */}
             {onShowNotifications && (
               <button
@@ -131,7 +114,7 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
                       className="absolute right-0 mt-3 w-56 bg-gray-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[100] space-y-1"
                     >
                       <div className="px-4 py-3 border-b border-white/5">
-                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Tài khoản</p>
+                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Tài khoản Admin</p>
                         <p className="text-sm font-bold text-white truncate mt-0.5">{user.name}</p>
                         <p className="text-xs text-gray-400 truncate mt-0.5">{user.email}</p>
                       </div>
@@ -142,11 +125,6 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
                           Trang chủ khách hàng
                         </Link>
                         
-                        <Link href="/dashboard_expert/profile" className="flex md:hidden items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                          <User className="w-4 h-4 text-red-400" />
-                          Thiết lập trang cá nhân
-                        </Link>
-
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all text-left"
@@ -200,21 +178,6 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
                     {link.name}
                   </a>
                 ))}
-              </div>
-              
-              <div className="h-[1px] bg-white/10 my-4" />
-
-              <div className="grid grid-cols-2 gap-2">
-                <Link href="/dashboard_expert/profile" className="w-full">
-                  <Button variant="secondary" className="w-full justify-center text-xs py-3 rounded-xl">
-                    Hồ sơ chuyên gia
-                  </Button>
-                </Link>
-                <Link href="/dashboard_expert/verify" className="w-full">
-                  <Button variant="secondary" className="w-full justify-center text-xs py-3 rounded-xl">
-                    Xác thực danh tính
-                  </Button>
-                </Link>
               </div>
             </div>
           </motion.div>
