@@ -167,7 +167,6 @@ export default function ExpertDashboard() {
           <StatCard icon={<Star className="text-yellow-400 w-6 h-6" />} label="Đánh giá TB" value="4.9" />
           <StatCard icon={<MessageSquare className="text-blue-400 w-6 h-6" />} label="Phản hồi" value="12" onClick={() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT: PROFILE SUMMARY */}
           <div className="lg:col-span-4 space-y-6">
@@ -300,6 +299,9 @@ export default function ExpertDashboard() {
                 <input className="bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white outline-none focus:border-red-500 transition-colors" placeholder="Tìm tên khách..." />
               </div>
               <Button variant="secondary" size="sm" className="px-3 hover:bg-white/15 transition-colors border border-white/10"><Filter className="w-4 h-4" /></Button>
+              <Link href="/dashboard_expert/schedule">
+                <Button variant="primary" size="sm" className="px-4 whitespace-nowrap"><Calendar className="w-4 h-4 mr-1" /> Lịch &amp; Giờ rảnh</Button>
+              </Link>
             </div>
           </div>
           <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/30">
