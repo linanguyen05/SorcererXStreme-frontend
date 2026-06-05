@@ -382,3 +382,61 @@ export const adminApi = {
       token,
     }),
 };
+
+// ─── Quản lý Chuyên gia (dashboard expert) ───────────────────────────────────
+// expertId = chính chủ đang đăng nhập (= user.id = token.sub). Backend gác bằng
+// authorizeExpertOwner nên expertId truyền vào BẮT BUỘC là id của chính mình.
+export interface ExpertProfilePayload {
+  bio?: string;
+  specialty?: string;
+  experience_years?: number;
+}
+export interface ServicePayload {
+  name?: string;
+  description?: string;
+  price?: number;
+  duration?: number; // phút
+}
+export interface SlotPayload {
+  start_time: string; // ISO 8601
+  end_time: string;   // ISO 8601
+}
+
+export const expertManagementApi = {
+  // Trang cá nhân
+  getProfile: (expertId: string, token: string) =>
+    apiRequest(`/api/experts/${expertId}/profile`, { token }),
+
+  updateProfile: (expertId: string, data: ExpertProfilePayload, token: string) =>
+    apiRequest(`/api/experts/${expertId}/profile`, { method: 'PATCH', body: data, token }),
+
+  // Gói dịch vụ
+  listServices: (expertId: string, token: string, status?: 'PENDING' | 'ACTIVE' | 'REJECTED') =>
+    apiRequest(`/api/experts/${expertId}/services${status ? `?status=${status}` : ''}`, { token }),
+
+  createService: (expertId: string, data: ServicePayload, token: string) =>
+    apiRequest(`/api/experts/${expertId}/services`, { method: 'POST', body: data, token }),
+
+  updateService: (expertId: string, serviceId: string, data: ServicePayload, token: string) =>
+    apiRequest(`/api/experts/${expertId}/services/${serviceId}`, { method: 'PATCH', body: data, token }),
+
+  deleteService: (expertId: string, serviceId: string, token: string) =>
+    apiRequest(`/api/experts/${expertId}/services/${serviceId}`, { method: 'DELETE', token }),
+
+  // Lịch trình / khung giờ rảnh
+  listAppointments: (
+    expertId: string,
+    token: string,
+    status?: 'AVAILABLE' | 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED',
+  ) =>
+    apiRequest(`/api/experts/${expertId}/appointments${status ? `?status=${status}` : ''}`, { token }),
+
+  createSlot: (expertId: string, data: SlotPayload, token: string) =>
+    apiRequest(`/api/experts/${expertId}/appointments`, { method: 'POST', body: data, token }),
+
+  updateSlot: (expertId: string, appointmentId: string, data: SlotPayload | { status: 'COMPLETED' }, token: string) =>
+    apiRequest(`/api/experts/${expertId}/appointments/${appointmentId}`, { method: 'PATCH', body: data, token }),
+
+  deleteSlot: (expertId: string, appointmentId: string, token: string) =>
+    apiRequest(`/api/experts/${expertId}/appointments/${appointmentId}`, { method: 'DELETE', token }),
+};

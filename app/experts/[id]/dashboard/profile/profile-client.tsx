@@ -11,8 +11,16 @@ import {
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { experts } from '@/lib/services-data';
+import { useAuthStore } from '@/lib/store';
+import { expertManagementApi } from '@/lib/api-client';
 
 export default function ExpertProfilePage({ id }: { id: string }) {
+  // Token + id chính chủ (= token.sub). expertId cho API LUÔN là userId, KHÔNG
+  // phải route [id] (vốn là mock id từ generateStaticParams).
+  const token = useAuthStore((s) => s.token);
+  const userId = useAuthStore((s) => s.user?.id);
+  const [saving, setSaving] = useState(false);
+
   // --- STATES ---
   const [avatar, setAvatar] = useState<string | null>(null);
   const [savedAvatar, setSavedAvatar] = useState<string | null>(null);
@@ -116,6 +124,35 @@ export default function ExpertProfilePage({ id }: { id: string }) {
     }
   }, [id]);
 
+  // Prefill các trường CÓ THẬT trong DB (bio, experience_years, specialty) từ
+  // backend. Các trường khác (title, email, social, price, avatar...) vẫn dùng
+  // mock/localStorage vì DB không có cột tương ứng.
+  useEffect(() => {
+    if (!token || !userId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await expertManagementApi.getProfile(userId, token);
+        const data = res?.data;
+        if (!data || cancelled) return;
+        const patch = {
+          bio: data.bio ?? '',
+          yoe: (typeof data.experienceYears === 'number' ? data.experienceYears : '') as number | '',
+          specs: data.specialty
+            ? String(data.specialty).split(',').map((s: string) => s.trim()).filter(Boolean)
+            : [] as string[],
+        };
+        setProfile((prev) => ({ ...prev, ...patch }));
+        setTempProfile((prev) => ({ ...prev, ...patch }));
+      } catch (e) {
+        // Chưa có hồ sơ expert / lỗi mạng -> giữ nguyên mock, không chặn UI.
+        console.warn('Prefill expert profile failed:', e);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, userId]);
+
   // Check for changes
   useEffect(() => {
     const isChanged =
@@ -150,12 +187,8 @@ export default function ExpertProfilePage({ id }: { id: string }) {
     }));
   };
 
-  const handleSave = () => {
-    setProfile({ ...tempProfile });
-    setSavedAvatar(avatar);
-    setSavedCoverColor(coverColor);
-    setHasChanges(false);
-
+  const handleSave = async () => {
+    // 1. Lưu localStorage cho toàn bộ field (gồm cả field không có ở DB).
     if (typeof window !== 'undefined') {
       localStorage.setItem(`expert-profile-data-${id}`, JSON.stringify({
         profile: tempProfile,
@@ -164,7 +197,33 @@ export default function ExpertProfilePage({ id }: { id: string }) {
       }));
     }
 
-    toast.success("Đã cập nhật trang cá nhân thành công!");
+    // 2. Đẩy các field CÓ THẬT trong DB lên backend (bio, specialty, experience_years).
+    if (token && userId) {
+      setSaving(true);
+      try {
+        await expertManagementApi.updateProfile(
+          userId,
+          {
+            bio: tempProfile.bio,
+            specialty: tempProfile.specs.join(', '),
+            experience_years: tempProfile.yoe === '' ? 0 : Number(tempProfile.yoe),
+          },
+          token,
+        );
+        toast.success('Đã cập nhật trang cá nhân (đã lưu lên hệ thống).');
+      } catch (e: any) {
+        toast.error(e?.message || 'Lưu lên hệ thống thất bại (đã lưu cục bộ).');
+      } finally {
+        setSaving(false);
+      }
+    } else {
+      toast.success('Đã lưu cục bộ. Đăng nhập tài khoản chuyên gia để đồng bộ hệ thống.');
+    }
+
+    setProfile({ ...tempProfile });
+    setSavedAvatar(avatar);
+    setSavedCoverColor(coverColor);
+    setHasChanges(false);
   };
 
   const specialties = ['Tarot', 'Astrology', 'Numerology', 'Tử vi', 'Phong thủy'];
@@ -217,11 +276,11 @@ export default function ExpertProfilePage({ id }: { id: string }) {
             <Button
               variant={hasChanges ? 'primary' : 'secondary'}
               onClick={handleSave}
-              disabled={!hasChanges}
-              className={`py-3 px-6 rounded-xl text-sm font-bold shadow-2xl transition-all ${!hasChanges ? 'opacity-40 cursor-not-allowed' : 'shadow-red-500/20 hover:scale-105'
+              disabled={!hasChanges || saving}
+              className={`py-3 px-6 rounded-xl text-sm font-bold shadow-2xl transition-all ${!hasChanges || saving ? 'opacity-40 cursor-not-allowed' : 'shadow-red-500/20 hover:scale-105'
                 }`}
             >
-              Lưu thay đổi
+              {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
             </Button>
           </div>
         </div>

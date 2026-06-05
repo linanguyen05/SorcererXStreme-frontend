@@ -20,6 +20,8 @@ import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { experts } from '@/lib/services-data';
+import { useAuthStore } from '@/lib/store';
+import { expertManagementApi } from '@/lib/api-client';
 
 // CSS gốc của thư viện + addon kéo/thả + override dark theme
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -178,20 +180,74 @@ function persistAvailability(id: string, slots: CalendarEvent[]) {
   localStorage.setItem(`${AVAILABILITY_STORAGE_KEY}-${id}`, JSON.stringify(payload));
 }
 
+// ──────────────────────────────────────────────────────────
+// Map dữ liệu thật từ backend (GET /experts/:id/appointments) -> CalendarEvent
+// ──────────────────────────────────────────────────────────
+// Server status -> status hiển thị trên lịch (CONFIRMED = đã thanh toán = PAID).
+const SERVER_STATUS_MAP: Record<string, AppointmentStatus> = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'PAID',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+};
+
+function mapServerAppointment(a: any): CalendarEvent {
+  const start = new Date(a.startTime);
+  const end = new Date(a.endTime);
+  if (a.status === 'AVAILABLE') {
+    return { id: a.id, type: 'availability', title: 'Khung giờ rảnh', start, end };
+  }
+  const customer = a.customer?.name ?? 'Khách hàng';
+  const service = a.service?.name ?? 'Dịch vụ';
+  return {
+    id: a.id,
+    type: 'appointment',
+    status: SERVER_STATUS_MAP[a.status] ?? 'PENDING',
+    customer,
+    service,
+    title: `${customer} · ${service}`,
+    start,
+    end,
+  };
+}
+
 export default function ExpertSchedulePage({ id }: { id: string }) {
   const isCollapsed = useSidebarCollapsed();
   const [mounted, setMounted] = useState(false);
 
+  // expertId cho API = chính chủ đang đăng nhập (token.sub), KHÔNG phải route [id].
+  const token = useAuthStore((s) => s.token);
+  const userId = useAuthStore((s) => s.user?.id);
+  const liveMode = Boolean(token && userId); // true: dùng backend thật
+
   const [availability, setAvailability] = useState<CalendarEvent[]>([]);
-  const [appointments] = useState<CalendarEvent[]>(() => buildSeedAppointments());
+  const [appointments, setAppointments] = useState<CalendarEvent[]>([]);
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState<Date>(new Date());
   const [dirty, setDirty] = useState(false);
 
+  // Tải dữ liệu thật từ backend; nếu chưa đăng nhập -> fallback localStorage + seed.
+  const reload = useCallback(async () => {
+    if (!liveMode || !userId || !token) {
+      setAvailability(loadAvailability(id));
+      setAppointments(buildSeedAppointments());
+      return;
+    }
+    try {
+      const res = await expertManagementApi.listAppointments(userId, token);
+      const all: any[] = res?.data ?? [];
+      const events = all.map(mapServerAppointment);
+      setAvailability(events.filter((e) => e.type === 'availability'));
+      setAppointments(events.filter((e) => e.type === 'appointment'));
+    } catch (e: any) {
+      toast.error(e?.message || 'Không tải được lịch từ hệ thống.');
+    }
+  }, [liveMode, userId, token, id]);
+
   useEffect(() => {
     setMounted(true);
-    setAvailability(loadAvailability(id));
-  }, [id]);
+    reload();
+  }, [reload]);
 
   const events = useMemo<CalendarEvent[]>(
     () => [...appointments, ...availability],
@@ -203,12 +259,30 @@ export default function ExpertSchedulePage({ id }: { id: string }) {
   const maxTime = useMemo(() => { const d = new Date(); d.setHours(23, 0, 0, 0); return d; }, []);
 
   // Kéo chọn vùng trống → tạo khung giờ rảnh mới
-  const handleSelectSlot = useCallback((slot: { start: Date; end: Date }) => {
+  const handleSelectSlot = useCallback(async (slot: { start: Date; end: Date }) => {
     let { start, end } = slot;
     // Click đơn (month view hoặc click 1 ô) → mặc định 1 giờ
     if (end.getTime() - start.getTime() < 30 * 60 * 1000) {
       end = new Date(start.getTime() + 60 * 60 * 1000);
     }
+
+    // Chế độ live: POST ngay để có id thật + được backend kiểm chồng lấn.
+    if (liveMode && userId && token) {
+      try {
+        const res = await expertManagementApi.createSlot(
+          userId,
+          { start_time: start.toISOString(), end_time: end.toISOString() },
+          token,
+        );
+        if (res?.data) setAvailability((prev) => [...prev, mapServerAppointment(res.data)]);
+        toast.success('Đã thêm khung giờ rảnh.');
+      } catch (e: any) {
+        toast.error(e?.message || 'Không tạo được khung giờ (có thể trùng giờ).');
+      }
+      return;
+    }
+
+    // Fallback cục bộ (chưa đăng nhập): thêm tạm, chờ "Gửi khung giờ".
     const newSlot: CalendarEvent = {
       id: `slot-${Date.now()}`,
       type: 'availability',
@@ -219,29 +293,57 @@ export default function ExpertSchedulePage({ id }: { id: string }) {
     setAvailability((prev) => [...prev, newSlot]);
     setDirty(true);
     toast.success('Đã thêm khung giờ rảnh. Nhớ bấm "Gửi khung giờ" để lưu.');
-  }, []);
+  }, [liveMode, userId, token]);
 
   // Kéo/thả di chuyển hoặc thay đổi kích thước
   const handleEventChange = useCallback(
-    ({ event, start, end }: { event: CalendarEvent; start: Date; end: Date }) => {
+    async ({ event, start, end }: { event: CalendarEvent; start: Date; end: Date }) => {
       if (event.type !== 'availability') {
         toast.error('Không thể chỉnh sửa lịch hẹn của khách trực tiếp trên lịch.');
         return;
       }
+      // Cập nhật lạc quan trên UI trước cho mượt.
       setAvailability((prev) =>
         prev.map((s) => (s.id === event.id ? { ...s, start, end } : s)),
       );
+
+      if (liveMode && userId && token) {
+        try {
+          await expertManagementApi.updateSlot(
+            userId,
+            event.id,
+            { start_time: start.toISOString(), end_time: end.toISOString() },
+            token,
+          );
+          toast.success('Đã cập nhật khung giờ.');
+        } catch (e: any) {
+          toast.error(e?.message || 'Không cập nhật được (có thể trùng giờ). Đang tải lại...');
+          reload(); // revert về trạng thái server
+        }
+        return;
+      }
       setDirty(true);
     },
-    [],
+    [liveMode, userId, token, reload],
   );
 
-  const handleSelectEvent = useCallback((event: CalendarEvent) => {
+  const handleSelectEvent = useCallback(async (event: CalendarEvent) => {
     if (event.type === 'availability') {
-      if (window.confirm('Xóa khung giờ rảnh này?')) {
-        setAvailability((prev) => prev.filter((s) => s.id !== event.id));
-        setDirty(true);
+      if (!window.confirm('Xóa khung giờ rảnh này?')) return;
+
+      if (liveMode && userId && token) {
+        try {
+          await expertManagementApi.deleteSlot(userId, event.id, token);
+          setAvailability((prev) => prev.filter((s) => s.id !== event.id));
+          toast.success('Đã xóa khung giờ rảnh.');
+        } catch (e: any) {
+          toast.error(e?.message || 'Không xóa được khung giờ.');
+        }
+        return;
       }
+
+      setAvailability((prev) => prev.filter((s) => s.id !== event.id));
+      setDirty(true);
       return;
     }
     const cfg = event.status ? STATUS_CONFIG[event.status] : null;
@@ -249,7 +351,7 @@ export default function ExpertSchedulePage({ id }: { id: string }) {
       `${event.customer}\n${event.service}\nTrạng thái: ${cfg?.label ?? ''}`,
       { icon: '🔮', duration: 4000 },
     );
-  }, []);
+  }, [liveMode, userId, token]);
 
   const eventPropGetter = useCallback((event: CalendarEvent) => {
     const hex = event.type === 'availability'
@@ -266,19 +368,40 @@ export default function ExpertSchedulePage({ id }: { id: string }) {
     };
   }, []);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
+    if (liveMode && userId && token) {
+      // Live mode: mỗi slot đã được lưu ngay khi tạo -> nút này chỉ đồng bộ lại.
+      await reload();
+      setDirty(false);
+      toast.success('Đã đồng bộ khung giờ với hệ thống.');
+      return;
+    }
     persistAvailability(id, availability);
     setDirty(false);
     toast.success(`Đã gửi ${availability.length} khung giờ rảnh tới hệ thống.`);
-  }, [id, availability]);
+  }, [liveMode, userId, token, reload, id, availability]);
 
-  const handleClearAll = useCallback(() => {
+  const handleClearAll = useCallback(async () => {
     if (availability.length === 0) return;
-    if (window.confirm('Xóa toàn bộ khung giờ rảnh chưa lưu?')) {
-      setAvailability([]);
-      setDirty(true);
+    if (!window.confirm('Xóa toàn bộ khung giờ rảnh?')) return;
+
+    if (liveMode && userId && token) {
+      try {
+        await Promise.all(
+          availability.map((s) => expertManagementApi.deleteSlot(userId, s.id, token)),
+        );
+        setAvailability([]);
+        toast.success('Đã xóa toàn bộ khung giờ rảnh.');
+      } catch (e: any) {
+        toast.error(e?.message || 'Có lỗi khi xóa, đang tải lại...');
+        reload();
+      }
+      return;
     }
-  }, [availability.length]);
+
+    setAvailability([]);
+    setDirty(true);
+  }, [availability, liveMode, userId, token, reload]);
 
   // Lịch hẹn sắp tới (từ hiện tại trở đi), sắp xếp tăng dần
   const upcoming = useMemo(() => {
