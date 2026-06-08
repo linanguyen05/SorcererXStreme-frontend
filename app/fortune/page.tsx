@@ -97,18 +97,18 @@ export default function FortunePage() {
         setIsDailyLoading(false);
         return;
       }
+      
+      if (!user?.birth_time) {
+        toast.error('Vui lòng cập nhật giờ sinh trong hồ sơ cá nhân');
+        setIsDailyLoading(false);
+        return;
+      }
 
-      // if (!user?.birth_time) {
-      //   toast.error('Vui lòng cập nhật giờ sinh trong hồ sơ cá nhân');
-      //   setIsDailyLoading(false);
-      //   return;
-      // }
-
-      // if (!user?.birth_place) {
-      //   toast.error('Vui lòng cập nhật nơi sinh trong hồ sơ cá nhân');
-      //   setIsDailyLoading(false);
-      //   return;
-      // }
+      if (!user?.birth_place) {
+        toast.error('Vui lòng cập nhật nơi sinh trong hồ sơ cá nhân');
+        setIsDailyLoading(false);
+        return;
+      }
 
       if (!dailyInput.targetDate) {
         toast.error('Vui lòng chọn ngày xem tử vi');
@@ -257,18 +257,18 @@ export default function FortunePage() {
       }
 
       // ⚠️ CRITICAL: birth_time and birth_place REQUIRED for horoscope
-      // if (!tuviInput.birthTime) {
-      //   toast.error('Vui lòng nhập giờ sinh (bắt buộc cho Tử Vi)');
-      //   setIsLoading(false);
-      //   return;
-      // }
+      if (!tuviInput.birthTime) {
+        toast.error('Vui lòng nhập giờ sinh (bắt buộc cho Tử Vi)');
+        setIsLoading(false);
+        return;
+      }
 
 
-      // if (!tuviInput.birthPlace) {
-      //   toast.error('Vui lòng nhập nơi sinh (bắt buộc cho Tử Vi)');
-      //   setIsLoading(false);
-      //   return;
-      // }
+      if (!tuviInput.birthPlace) {
+        toast.error('Vui lòng nhập nơi sinh (bắt buộc cho Tử Vi)');
+        setIsLoading(false);
+        return;
+      }
 
 
       // Format birth_date from dd/mm/yyyy to YYYY-MM-DD for backend
@@ -524,7 +524,7 @@ export default function FortunePage() {
 
 
                         {/* Check if user has birth_time and birth_place */}
-                        {/* {(!user?.birth_time || !user?.birth_place) && (
+                        {(!user?.birth_time || !user?.birth_place) && (
                           <div className="mb-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
                             <div className="flex items-start">
                               <Star className="w-5 h-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
@@ -537,7 +537,7 @@ export default function FortunePage() {
                               </div>
                             </div>
                           </div>
-                        )} */}
+                        )}
 
 
                         <form onSubmit={handleDailySubmit} className="space-y-6">
@@ -585,7 +585,7 @@ export default function FortunePage() {
                           <Button
                             type="submit"
                             isLoading={isDailyLoading}
-                            // disabled={!user?.birth_time || !user?.birth_place}
+                            disabled={!user?.birth_time || !user?.birth_place}
                             className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 py-4 text-lg shadow-lg shadow-yellow-500/25"
                           >
                             <Star className="w-5 h-5 mr-2" />

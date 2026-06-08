@@ -13,7 +13,6 @@ import { Footer } from '@/components/layout/Footer';
 import ContentHeader from "@/components/layout/ContentHeader";
 import { experts, Expert, ExpertSpecialty, SocialLinks, formatPrice } from '@/lib/services-data';
 import { useAuthStore } from '@/lib/store';
-import router from 'next/router';
 
 // ─── Specialty config ───────────────────────────────────────────────────────
 const ALL_SPECIALTIES: ExpertSpecialty[] = [
@@ -392,6 +391,7 @@ function ExpertTile({ expert, index }: { expert: Expert; index: number }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function ServicesPage() {
     const sidebarCollapsed = useSidebarCollapsed();
+    const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [query, setQuery] = useState('');
