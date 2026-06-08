@@ -160,13 +160,13 @@ export default function ComprehensiveFortunePage() {
 
       // Parse giống như Tarot
       let analysisText = '';
-      
+
       try {
         if (response.analysis) {
           if (typeof response.analysis === 'object') {
             if (response.analysis.body) {
-              const bodyData = typeof response.analysis.body === 'string' 
-                ? JSON.parse(response.analysis.body) 
+              const bodyData = typeof response.analysis.body === 'string'
+                ? JSON.parse(response.analysis.body)
                 : response.analysis.body;
               analysisText = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
             } else {
@@ -183,12 +183,12 @@ export default function ComprehensiveFortunePage() {
             : response.body;
           analysisText = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || JSON.stringify(bodyData, null, 2);
         }
-        
+
       } catch (parseError) {
         console.error('[Comprehensive Fortune] Parse error:', parseError);
         analysisText = 'Có lỗi khi xử lý kết quả. Vui lòng thử lại.';
       }
-      
+
       if (!analysisText || analysisText.trim() === '') {
         toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
         setIsAnalyzing(false);
@@ -199,14 +199,14 @@ export default function ComprehensiveFortunePage() {
       const mockChartData = generateMockTuViData();
       setChartData(mockChartData);
       setShowChart(true);
-      
+
       // Use real API analysis
       setAnalysis(analysisText);
-      
+
       toast.success('Đã hoàn tất lập lá số Tử Vi chi tiết!');
     } catch (error: any) {
       console.error('[Comprehensive Fortune] Error:', error);
-      
+
       if (error.message && error.message.includes('LIMIT_REACHED')) {
         toast.error('Đã hết lượt sử dụng');
         setAnalysis(`⚠️ **Đã hết lượt sử dụng**\n\n` +
@@ -428,7 +428,6 @@ export default function ComprehensiveFortunePage() {
   };
 
   useEffect(() => {
-    // Remove auto rotation effect - keep chart static for better readability
   }, []);
 
   if (!isAuthenticated) {
@@ -580,11 +579,10 @@ export default function ComprehensiveFortunePage() {
                           <motion.button
                             key={index}
                             onClick={() => setSelectedCung(selectedCung === cung.name ? null : cung.name)}
-                            className={`bg-gray-800/60 hover:bg-gray-700/60 rounded-lg p-4 border transition-all cursor-pointer ${
-                              selectedCung === cung.name
-                                ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-400/30'
-                                : 'border-gray-600/30 hover:border-gray-500/50'
-                            }`}
+                            className={`bg-gray-800/60 hover:bg-gray-700/60 rounded-lg p-4 border transition-all cursor-pointer ${selectedCung === cung.name
+                              ? 'border-yellow-400 shadow-lg ring-2 ring-yellow-400/30'
+                              : 'border-gray-600/30 hover:border-gray-500/50'
+                              }`}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                           >

@@ -53,11 +53,11 @@ export default function FortunePage() {
   const [isDailyLoading, setIsDailyLoading] = useState(false);
 
   // Redirect to login if not authenticated or profile incomplete
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user?.isProfileComplete) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, user, router]);
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
 
   // Sync user data to form when user loads
   useEffect(() => {
@@ -92,11 +92,11 @@ export default function FortunePage() {
     const apiTargetDate = formatDateApi(dailyInput.targetDate);
 
     try {
-      // if (!token || !isAuthenticated) {
-      //   toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
-      //   setIsDailyLoading(false);
-      //   return;
-      // }
+      if (!token || !isAuthenticated) {
+        toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
+        setIsDailyLoading(false);
+        return;
+      }
 
       // if (!user?.birth_time) {
       //   toast.error('Vui lòng cập nhật giờ sinh trong hồ sơ cá nhân');
@@ -193,8 +193,6 @@ export default function FortunePage() {
       }
 
       if (!analysis || analysis.trim() === '') {
-        toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
-        setIsDailyLoading(false);
         toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
         setIsDailyLoading(false);
         return;

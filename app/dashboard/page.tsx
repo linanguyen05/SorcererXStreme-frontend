@@ -100,15 +100,15 @@ export default function DashboardPage() {
   const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
 
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user?.isProfileComplete) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, user, router]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, router]);
 
-  // if (!isAuthenticated || !user?.isProfileComplete) {
-  //   return null;
-  // }
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
