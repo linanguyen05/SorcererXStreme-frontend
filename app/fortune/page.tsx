@@ -381,9 +381,9 @@ export default function FortunePage() {
     }
   };
 
-  // if (!isAuthenticated || !user?.isProfileComplete) {
-  //   return null;
-  // }
+  if (!isAuthenticated || !user?.isProfileComplete) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
