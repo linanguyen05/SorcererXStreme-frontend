@@ -398,11 +398,11 @@ export default function ServicesPage() {
     const [filter, setFilter] = useState<ExpertSpecialty | 'all'>('all');
     const { isAuthenticated } = useAuthStore();
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push('/auth/login');
-        }
-    }, [isAuthenticated, router]);
+    // useEffect(() => {
+    //     if (!isAuthenticated) {
+    //         router.push('/auth/login');
+    //     }
+    // }, [isAuthenticated, router]);
 
     useEffect(() => {
         setMounted(true);
@@ -412,7 +412,7 @@ export default function ServicesPage() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    if (!isAuthenticated) return null;
+    // if (!isAuthenticated) return null;
     if (!mounted) return null;
 
     const filtered = experts.filter(e => {

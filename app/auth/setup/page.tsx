@@ -2,18 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { User, Calendar, MapPin, Clock, ArrowRight, Sparkles, Star, Moon } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Calendar, MapPin, Clock, ArrowRight, Sparkles, Star, Moon, Camera, Facebook, Instagram, Award, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import toast from 'react-hot-toast';
+import { updateUserAttribute, fetchAuthSession } from 'aws-amplify/auth';
+
+const availableSpecialties = ['Tarot', 'Astrology', 'Numerology', 'Tử vi', 'Phong thủy'];
 
 export default function SetupPage() {
     const router = useRouter();
     const { completeProfile, user, token } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
 
+    // Core Profile Form State
     const [formData, setFormData] = useState({
         name: '',
         gender: 'male',
@@ -22,12 +25,62 @@ export default function SetupPage() {
         birthPlace: ''
     });
 
+    // Role state
+    const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
+
+    // Expert Info Form State
+    const [bio, setBio] = useState('');
+    const [experienceYears, setExperienceYears] = useState<number | ''>('');
+    const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+    const [facebook, setFacebook] = useState('');
+    const [instagram, setInstagram] = useState('');
+    const [avatar, setAvatar] = useState<string | null>(null);
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error("Kích thước ảnh tối đa là 2MB");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatar(reader.result as string);
+                toast.success("Tải ảnh đại diện thành công!");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const toggleSpec = (spec: string) => {
+        setSelectedSpecs(prev =>
+            prev.includes(spec) ? prev.filter(s => s !== spec) : [...prev, spec]
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Standard validation
         if (!formData.name || !formData.birthDate || !formData.birthTime || !formData.birthPlace) {
-            toast.error('Vui lòng điền đầy đủ thông tin');
+            toast.error('Vui lòng điền đầy đủ thông tin cá nhân');
             return;
+        }
+
+        // Expert-specific validation
+        if (role === 'EXPERT') {
+            if (!bio.trim()) {
+                toast.error('Vui lòng nhập Giới thiệu bản thân (Bio)');
+                return;
+            }
+            if (experienceYears === '' || Number(experienceYears) < 0) {
+                toast.error('Vui lòng nhập Số năm kinh nghiệm hợp lệ');
+                return;
+            }
+            if (selectedSpecs.length === 0) {
+                toast.error('Vui lòng chọn ít nhất 1 Chuyên môn');
+                return;
+            }
         }
 
         if (!token) {
@@ -38,6 +91,7 @@ export default function SetupPage() {
 
         setIsLoading(true);
         try {
+            // 1. Submit Core Profile to Backend Database
             await completeProfile(
                 formData.name,
                 formData.gender,
@@ -46,8 +100,65 @@ export default function SetupPage() {
                 formData.birthPlace,
                 token
             );
+
+            // 2. Update Cognito Attribute
+            try {
+                await updateUserAttribute({
+                    userAttribute: {
+                        attributeKey: 'custom:role',
+                        value: role
+                    }
+                });
+                // Force session refresh so tokens are updated with the custom:role claim
+                await fetchAuthSession({ forceRefresh: true });
+            } catch (cognitoError) {
+                console.error("Cognito attribute update failed:", cognitoError);
+            }
+
+            // 3. Update Zustand Store user object role
+            const currentUser = useAuthStore.getState().user;
+            const userId = currentUser?.id || user?.id || 'temp-id';
+
+            useAuthStore.setState({
+                user: currentUser ? {
+                    ...currentUser,
+                    role: role,
+                    isProfileComplete: true
+                } : null
+            });
+
+            // 4. Save Expert Details locally if Expert role is selected
+            if (role === 'EXPERT') {
+                const expertProfilePayload = {
+                    profile: {
+                        name: formData.name,
+                        title: `Chuyên gia ` + selectedSpecs.join(" & "),
+                        bio: bio,
+                        experience: `Tôi đã có hơn ${experienceYears} năm nghiên cứu và thực hành chuyên sâu. Đã giúp đỡ nhiều khách hàng tìm lại định hướng trong cuộc sống.`,
+                        yoe: Number(experienceYears),
+                        email: user?.email || currentUser?.email || '',
+                        phone: '0987.654.321',
+                        facebook: facebook || 'fb.com',
+                        instagram: instagram || 'instagr.am',
+                        specs: selectedSpecs,
+                        price: '200.000đ'
+                    },
+                    avatar: avatar,
+                    coverColor: 'from-purple-900/60 to-red-900/60'
+                };
+
+                localStorage.setItem(`expert-profile-data-${userId}`, JSON.stringify(expertProfilePayload));
+                localStorage.setItem('expert-profile-data', JSON.stringify(expertProfilePayload));
+            }
+
             toast.success('Cập nhật hồ sơ thành công!');
-            router.push('/profile');
+
+            // 5. Redirect based on role
+            if (role === 'EXPERT') {
+                router.push(`/experts/${userId}/dashboard`);
+            } else {
+                router.push('/profile');
+            }
         } catch (error) {
             toast.error('Có lỗi xảy ra, vui lòng thử lại');
             console.error(error);
@@ -82,7 +193,7 @@ export default function SetupPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative z-10 w-full max-w-lg"
+                className="relative z-10 w-full max-w-lg my-8"
             >
                 {/* Card Container */}
                 <div className="relative backdrop-blur-xl bg-black/30 rounded-3xl p-8 border border-white/10 shadow-[0_0_50px_-12px_rgba(255,0,0,0.25)] overflow-hidden">
@@ -119,6 +230,59 @@ export default function SetupPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
+
+                        {/* Role Selection Slider */}
+                        <motion.div
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.45 }}
+                            className="space-y-2"
+                        >
+                            <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block mb-1">
+                                Vai trò của bạn
+                            </label>
+                            <div className="relative flex bg-white/5 p-1 rounded-2xl border border-white/10 shadow-inner overflow-hidden">
+                                {/* Sliding Background */}
+                                <motion.div
+                                    className="absolute top-1 bottom-1 bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-600 rounded-xl shadow-lg shadow-purple-600/30"
+                                    style={{
+                                        width: 'calc(33.333% - 6px)',
+                                        left: '4px',
+                                    }}
+                                    animate={{
+                                        x: role === 'USER' ? '0%' : role === 'EXPERT' ? 'calc(100% + 6px)' : 'calc(200% + 12px)'
+                                    }}
+                                    transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                                />
+
+                                {(['USER', 'EXPERT', 'ADMIN'] as const).map((r) => {
+                                    const isActive = role === r;
+                                    const displayLabel = r === 'USER' ? 'Người dùng' : r === 'EXPERT' ? 'Chuyên gia' : 'Admin';
+                                    return (
+                                        <button
+                                            key={r}
+                                            type="button"
+                                            onClick={() => setRole(r)}
+                                            className={`relative flex-1 py-3 text-xs sm:text-sm font-bold rounded-xl z-10 transition-colors duration-300 ${isActive ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                                                }`}
+                                        >
+                                            {displayLabel}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <motion.p
+                                key={role}
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-xs text-center text-purple-300 mt-2 font-medium tracking-wide italic min-h-[20px]"
+                            >
+                                {role === 'USER' && '🔮 Vai trò Người dùng: Tìm kiếm tư vấn Tử Vi, Tarot, Chiêm Tinh & Thần Số Học.'}
+                                {role === 'EXPERT' && '💼 Vai trò Chuyên gia: Thiết lập hồ sơ cá nhân và tư vấn các gói huyền học.'}
+                                {role === 'ADMIN' && '🛡️ Vai trò Quản trị viên: Quản trị hệ thống, duyệt hồ sơ & quản lý người dùng.'}
+                            </motion.p>
+                        </motion.div>
+
                         {/* Name Input */}
                         <motion.div
                             initial={{ x: -20, opacity: 0 }}
@@ -156,8 +320,8 @@ export default function SetupPage() {
                                         type="button"
                                         onClick={() => setFormData({ ...formData, gender: g })}
                                         className={`flex-1 py-3 rounded-xl border transition-all ${formData.gender === g
-                                                ? 'bg-purple-500/20 border-purple-500/50 text-purple-200'
-                                                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                                            ? 'bg-purple-500/20 border-purple-500/50 text-purple-200'
+                                            : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
                                             }`}
                                     >
                                         {g === 'male' ? 'Nam' : g === 'female' ? 'Nữ' : 'Khác'}
@@ -231,6 +395,123 @@ export default function SetupPage() {
                                 />
                             </div>
                         </motion.div>
+
+                        {/* Conditional Expert Fields */}
+                        <AnimatePresence>
+                            {role === 'EXPERT' && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0, y: -20 }}
+                                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                    exit={{ opacity: 0, height: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="space-y-5 border-t border-white/10 pt-5 mt-5 overflow-hidden"
+                                >
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-purple-300 flex items-center gap-2">
+                                        <Award size={18} />
+                                        Thông tin Chuyên gia
+                                    </h3>
+
+                                    {/* Avatar Upload */}
+                                    <div className="flex flex-col items-center gap-3">
+                                        <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                                            Ảnh đại diện
+                                        </label>
+                                        <div className="relative group/avatar cursor-pointer">
+                                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/20 hover:border-purple-500 flex items-center justify-center overflow-hidden bg-white/5 transition-all">
+                                                {avatar ? (
+                                                    <img src={avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Camera className="w-8 h-8 text-gray-400 group-hover/avatar:text-purple-400 transition-colors" />
+                                                )}
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleAvatarChange}
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Bio Textarea */}
+                                    <div className="group relative">
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1 ml-1">Giới thiệu ngắn (Bio)</label>
+                                        <textarea
+                                            value={bio}
+                                            onChange={(e) => setBio(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all min-h-[80px]"
+                                            placeholder="Định hướng sự nghiệp, tình duyên thông qua..."
+                                        />
+                                    </div>
+
+                                    {/* Experience Years */}
+                                    <div className="group relative">
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1 ml-1">Số năm kinh nghiệm</label>
+                                        <input
+                                            type="number"
+                                            value={experienceYears}
+                                            onChange={(e) => setExperienceYears(e.target.value === '' ? '' : Number(e.target.value))}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+                                            placeholder="Ví dụ: 5"
+                                        />
+                                    </div>
+
+                                    {/* Specialties Selection */}
+                                    <div className="group relative">
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2 ml-1">Chuyên môn</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableSpecialties.map(spec => {
+                                                const isSelected = selectedSpecs.includes(spec);
+                                                return (
+                                                    <button
+                                                        key={spec}
+                                                        type="button"
+                                                        onClick={() => toggleSpec(spec)}
+                                                        className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${isSelected
+                                                            ? 'bg-purple-500/20 border-purple-500/50 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.2)]'
+                                                            : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20'
+                                                            }`}
+                                                    >
+                                                        {spec}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Social Links */}
+                                    <div className="space-y-3">
+                                        <label className="block text-xs uppercase tracking-wider text-gray-400 ml-1">Liên kết Mạng xã hội</label>
+
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-purple-400 transition-colors">
+                                                <Facebook size={18} />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={facebook}
+                                                onChange={(e) => setFacebook(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+                                                placeholder="Link Facebook (Ví dụ: www.facebook.com/yourname)"
+                                            />
+                                        </div>
+
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-purple-400 transition-colors">
+                                                <Instagram size={18} />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={instagram}
+                                                onChange={(e) => setInstagram(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+                                                placeholder="Link Instagram (Ví dụ: www.instagram.com/yourname)"
+                                            />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         <motion.div
                             initial={{ y: 20, opacity: 0 }}

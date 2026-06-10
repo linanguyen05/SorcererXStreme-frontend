@@ -109,10 +109,11 @@ export const authApi = {
         throw new Error('Failed to retrieve access token from Cognito session');
       }
 
+      const role = session.tokens?.idToken?.payload?.['custom:role'] as string || 'USER';
       return {
         token,
         sub: session.userSub,
-        user: { email }
+        user: { email, role }
       };
     }
 

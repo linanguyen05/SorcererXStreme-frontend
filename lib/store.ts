@@ -5,6 +5,7 @@ import { authApi, profileApi, partnerApi } from './api-client';
 interface User {
   id: string;
   email: string;
+  role?: string;
   name?: string;
   gender?: string;
   birth_date?: string;
@@ -64,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
           const mappedUser: User = {
             id: fullUser.id || 'temp-id',
             email: fullUser.email,
+            role: user.role || 'USER',
             name: fullUser.name,
             gender: fullUser.gender,
             birth_date: fullUser.birth_date,
