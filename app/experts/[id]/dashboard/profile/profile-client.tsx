@@ -11,8 +11,12 @@ import {
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { experts } from '@/lib/services-data';
+import { expertApi } from '@/lib/api-client';
+import { useAuthStore } from '@/lib/store';
 
 export default function ExpertProfilePage({ id }: { id: string }) {
+  const { token } = useAuthStore();
+
   // --- STATES ---
   const [avatar, setAvatar] = useState<string | null>(null);
   const [savedAvatar, setSavedAvatar] = useState<string | null>(null);
@@ -51,70 +55,100 @@ export default function ExpertProfilePage({ id }: { id: string }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load from mock data & localStorage on mount
+  // Load from backend, mock data & localStorage on mount
   useEffect(() => {
-    // 1. First set mock data based on ID
-    const expertInfo = experts.find(e => e.id === id);
-    let initialProfile = {
-      name: 'Master Lina',
-      title: 'Chuyên gia Tarot & Chiêm tinh học',
-      bio: 'Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân. Hơn 5 năm kinh nghiệm thấu cảm.',
-      experience: 'Tôi đã có hơn 5 năm nghiên cứu và thực hành Tarot chuyên sâu kết hợp với Chiêm tinh học phương Tây. Đã giúp đỡ hơn 1000 khách hàng tìm lại định hướng trong cuộc sống, hàn gắn các mối quan hệ đổ vỡ và định hình lộ trình sự nghiệp tương lai.',
-      yoe: 5 as number | '',
-      email: 'lina.mystic@gmail.com',
-      phone: '0987.654.321',
-      facebook: 'fb.com/master.lina.tarot',
-      instagram: 'instagr.am/lina.mystic',
-      specs: ['Tarot', 'Astrology'],
-      price: '200.000đ',
-    };
-
-    if (expertInfo) {
-      initialProfile = {
-        name: expertInfo.name,
-        title: expertInfo.title,
-        bio: expertInfo.bio || "",
-        experience: expertInfo.about || "",
-        yoe: parseInt(expertInfo.experience) || 5,
-        email: `${expertInfo.id}@gmail.com`,
+    const fetchExpertProfile = async () => {
+      // 1. First set mock data based on ID
+      const expertInfo = experts.find(e => e.id === id);
+      let initialProfile = {
+        name: 'Master Lina',
+        title: 'Chuyên gia Tarot & Chiêm tinh học',
+        bio: 'Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân. Hơn 5 năm kinh nghiệm thấu cảm.',
+        experience: 'Tôi đã có hơn 5 năm nghiên cứu và thực hành Tarot chuyên sâu kết hợp với Chiêm tinh học phương Tây. Đã giúp đỡ hơn 1000 khách hàng tìm lại định hướng trong cuộc sống, hàn gắn các mối quan hệ đổ vỡ và định hình lộ trình sự nghiệp tương lai.',
+        yoe: 5 as number | '',
+        email: 'lina.mystic@gmail.com',
         phone: '0987.654.321',
-        facebook: expertInfo.social?.facebook || 'fb.com',
-        instagram: expertInfo.social?.threads || 'instagr.am',
-        specs: expertInfo.specialties || ['Tarot'],
-        price: expertInfo.packages?.[0] ? `${expertInfo.packages[0].price.toLocaleString()}đ` : '200.000đ',
+        facebook: 'fb.com/master.lina.tarot',
+        instagram: 'instagr.am/lina.mystic',
+        specs: ['Tarot', 'Astrology'],
+        price: '200.000đ',
       };
-      setAvatar(expertInfo.avatar || null);
-      setSavedAvatar(expertInfo.avatar || null);
-    }
 
-    setProfile(initialProfile);
-    setTempProfile(initialProfile);
+      if (expertInfo) {
+        initialProfile = {
+          name: expertInfo.name,
+          title: expertInfo.title,
+          bio: expertInfo.bio || "",
+          experience: expertInfo.about || "",
+          yoe: parseInt(expertInfo.experience) || 5,
+          email: `${expertInfo.id}@gmail.com`,
+          phone: '0987.654.321',
+          facebook: expertInfo.social?.facebook || 'fb.com',
+          instagram: expertInfo.social?.threads || 'instagr.am',
+          specs: expertInfo.specialties || ['Tarot'],
+          price: expertInfo.packages?.[0] ? `${expertInfo.packages[0].price.toLocaleString()}đ` : '200.000đ',
+        };
+        setAvatar(expertInfo.avatar || null);
+        setSavedAvatar(expertInfo.avatar || null);
+      }
 
-    // 2. Override with localStorage if exists
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed.profile) {
-            const mergedProfile = { ...initialProfile, ...parsed.profile };
-            setProfile(mergedProfile);
-            setTempProfile(mergedProfile);
+      // 2. Override with localStorage if exists as secondary fallback
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed.profile) {
+              initialProfile = { ...initialProfile, ...parsed.profile };
+            }
+            if (parsed.avatar) {
+              setAvatar(parsed.avatar);
+              setSavedAvatar(parsed.avatar);
+            }
+            if (parsed.coverColor) {
+              setCoverColor(parsed.coverColor);
+              setSavedCoverColor(parsed.coverColor);
+            }
+          } catch (e) {
+            console.error("Error loading stored profile data", e);
           }
-          if (parsed.avatar) {
-            setAvatar(parsed.avatar);
-            setSavedAvatar(parsed.avatar);
-          }
-          if (parsed.coverColor) {
-            setCoverColor(parsed.coverColor);
-            setSavedCoverColor(parsed.coverColor);
-          }
-        } catch (e) {
-          console.error("Error loading stored profile data", e);
         }
       }
-    }
-  }, [id]);
+
+      // 3. Load from backend if token exists
+      if (token) {
+        try {
+          const res = await expertApi.getProfile(id, token);
+          if (res) {
+            initialProfile = {
+              name: res.user?.name || res.name || initialProfile.name,
+              title: res.specialty && res.specialty.length > 0 ? `Chuyên gia ` + res.specialty.join(' & ') : initialProfile.title,
+              bio: res.bio || initialProfile.bio,
+              experience: res.experience || initialProfile.experience,
+              yoe: res.experience_years !== undefined ? res.experience_years : initialProfile.yoe,
+              email: res.user?.email || initialProfile.email,
+              phone: res.phone || initialProfile.phone,
+              facebook: res.facebook || initialProfile.facebook,
+              instagram: res.instagram || initialProfile.instagram,
+              specs: res.specialty || initialProfile.specs,
+              price: res.price || initialProfile.price,
+            };
+            if (res.avatar) {
+              setAvatar(res.avatar);
+              setSavedAvatar(res.avatar);
+            }
+          }
+        } catch (error) {
+          console.warn('Backend expert profile not found or failed to load. Using client-side state.', error);
+        }
+      }
+
+      setProfile(initialProfile);
+      setTempProfile(initialProfile);
+    };
+
+    fetchExpertProfile();
+  }, [id, token]);
 
   // Check for changes
   useEffect(() => {
@@ -150,21 +184,44 @@ export default function ExpertProfilePage({ id }: { id: string }) {
     }));
   };
 
-  const handleSave = () => {
-    setProfile({ ...tempProfile });
-    setSavedAvatar(avatar);
-    setSavedCoverColor(coverColor);
-    setHasChanges(false);
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`expert-profile-data-${id}`, JSON.stringify({
-        profile: tempProfile,
-        avatar,
-        coverColor
-      }));
+  const handleSave = async () => {
+    if (!token) {
+      toast.error("Bạn cần đăng nhập để thực hiện thay đổi này.");
+      return;
     }
 
-    toast.success("Đã cập nhật trang cá nhân thành công!");
+    try {
+      const payload = {
+        bio: tempProfile.bio,
+        specialty: tempProfile.specs,
+        experience_years: tempProfile.yoe !== '' ? Number(tempProfile.yoe) : 0,
+        phone: tempProfile.phone,
+        facebook: tempProfile.facebook,
+        instagram: tempProfile.instagram,
+        experience: tempProfile.experience,
+        avatar: avatar,
+      };
+
+      await expertApi.updateProfile(id, payload, token);
+
+      setProfile({ ...tempProfile });
+      setSavedAvatar(avatar);
+      setSavedCoverColor(coverColor);
+      setHasChanges(false);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`expert-profile-data-${id}`, JSON.stringify({
+          profile: tempProfile,
+          avatar,
+          coverColor
+        }));
+      }
+
+      toast.success("Đã cập nhật trang cá nhân thành công!");
+    } catch (error) {
+      console.error('Failed to update expert profile:', error);
+      toast.error("Có lỗi xảy ra khi cập nhật hồ sơ cá nhân lên server.");
+    }
   };
 
   const specialties = ['Tarot', 'Astrology', 'Numerology', 'Tử vi', 'Phong thủy'];

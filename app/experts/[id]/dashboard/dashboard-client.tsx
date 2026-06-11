@@ -14,6 +14,9 @@ import { ExpertHeader } from '@/components/layout/ExpertHeader';
 import { useAuthStore } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { experts } from '@/lib/services-data';
+import { expertApi } from '@/lib/api-client';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 export default function ExpertDashboard({ id }: { id: string }) {
   const { token } = useAuthStore();
@@ -22,8 +25,10 @@ export default function ExpertDashboard({ id }: { id: string }) {
   // --- STATES ---
   const [isVerified, setIsVerified] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [services, setServices] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
 
-  // Dữ liệu profile
+  // Profile Data
   const [profileData, setProfileData] = useState({
     name: "Master Lina",
     title: "Chuyên gia Tarot & Chiêm tinh học",
@@ -36,21 +41,16 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
   // Notifications simulation state
   const [notifications, setNotifications] = useState([
-    { id: 1, title: "Lịch hẹn mới", desc: "Khách hàng Nguyễn Văn A đã đặt lịch Tarot lúc 14:00 ngày mai.", time: "10 phút trước", icon: <Calendar className="w-4 h-4 text-purple-400" /> },
-    { id: 2, title: "Yêu cầu dịch vụ", desc: "Dịch vụ 'Giải mã bản đồ sao' của bạn đang đợi hệ thống phê duyệt.", time: "1 giờ trước", icon: <Clock className="w-4 h-4 text-yellow-400" /> },
-  ]);
-
-  const [services] = useState([
-    { id: 1, name: 'Trải bài Tarot định hướng sự nghiệp', price: '200.000đ', duration: '30 phút', status: 'active' },
-    { id: 2, name: 'Phân tích bản đồ sao cá nhân', price: '500.000đ', duration: '60 phút', status: 'pending' },
+    { id: 1, title: "Lịch hẹn mới", desc: "Khách hàng đã đăng ký lịch Tarot trực tuyến.", time: "10 phút trước", icon: <Calendar className="w-4 h-4 text-purple-400" /> },
+    { id: 2, title: "Yêu cầu dịch vụ", desc: "Các thay đổi dịch vụ của bạn đang đợi hệ thống phê duyệt.", time: "1 giờ trước", icon: <Clock className="w-4 h-4 text-yellow-400" /> },
   ]);
 
   const appointmentRef = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
 
-  // Load from mock data & localStorage on mount
+  // Load profile, services, and appointments from backend
   useEffect(() => {
-    // Look up expert details from the mock database using dynamic id
+    // 1. Initial fallback load from local static data
     const expertInfo = experts.find(e => e.id === id);
     if (expertInfo) {
       setProfileData({
@@ -62,8 +62,19 @@ export default function ExpertDashboard({ id }: { id: string }) {
         avatar: expertInfo.avatar || null,
         specs: expertInfo.specialties || ['Tarot']
       });
+
+      if (expertInfo.packages) {
+        setServices(expertInfo.packages.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: `${p.price.toLocaleString()}đ`,
+          duration: `${p.duration} phút`,
+          status: 'active'
+        })));
+      }
     }
 
+    // 2. Secondary fallback load from localStorage
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
       if (stored) {
@@ -89,17 +100,86 @@ export default function ExpertDashboard({ id }: { id: string }) {
         }
       }
     }
+
+    // 3. Dynamic Load from Backend API
+    if (!token) return;
+
+    const fetchBackendData = async () => {
+      try {
+        // Fetch Profile
+        const profileRes = await expertApi.getProfile(id, token);
+        if (profileRes) {
+          setProfileData({
+            name: profileRes.user?.name || profileRes.name || "Chuyên gia",
+            title: profileRes.specialty && profileRes.specialty.length > 0 ? `Chuyên gia ` + profileRes.specialty.join(' & ') : "Chuyên gia tư vấn",
+            bio: profileRes.bio || "",
+            experience: profileRes.experience || "",
+            yoe: profileRes.experience_years !== undefined ? profileRes.experience_years : 5,
+            avatar: profileRes.avatar || null,
+            specs: profileRes.specialty || ['Tarot']
+          });
+          setIsVerified(profileRes.is_verified || false);
+        }
+
+        // Fetch Services
+        const servicesRes = await expertApi.getServices(id, token);
+        if (servicesRes) {
+          setServices(servicesRes.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            price: `${s.price.toLocaleString()}đ`,
+            duration: `${s.duration} phút`,
+            status: s.status?.toLowerCase() || 'pending'
+          })));
+        }
+
+        // Fetch Appointments
+        const appointmentsRes = await expertApi.getAppointments(id, token);
+        if (appointmentsRes) {
+          setAppointments(appointmentsRes);
+        }
+      } catch (error) {
+        console.error('Lỗi khi đồng bộ dữ liệu với API backend:', error);
+      }
+    };
+
+    fetchBackendData();
   }, [id, token]);
+
+  const handleDeleteService = async (serviceId: string) => {
+    if (!token) {
+      toast.error('Phiên đăng nhập hết hạn.');
+      return;
+    }
+
+    if (!window.confirm('Bạn có chắc chắn muốn xóa gói dịch vụ này?')) return;
+
+    const loadToast = toast.loading('Đang xóa gói dịch vụ...');
+    try {
+      await expertApi.deleteService(id, serviceId, token);
+      setServices(prev => prev.filter(s => String(s.id) !== String(serviceId)));
+      toast.success('Xóa gói dịch vụ thành công!', { id: loadToast });
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.status === 409 || err.status === 409) {
+        toast.error('Không thể xóa gói dịch vụ đang có lịch hẹn đã đăng ký.', { id: loadToast });
+      } else {
+        toast.error('Có lỗi xảy ra khi xóa dịch vụ.', { id: loadToast });
+      }
+    }
+  };
+
+  // Tính số lượng lịch hẹn mới (Paid hoặc Pending)
+  const pendingAppointmentsCount = appointments.filter(a => a.status === 'PAID' || a.status === 'PENDING').length;
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col font-['Be_Vietnam_Pro'] overflow-x-hidden selection:bg-red-500/30 selection:text-red-200">
-
-      {/* Horizontal Header (Sticky Top Nav replacing Vertical Sidebar) */}
+      {/* Horizontal Header */}
       <ExpertHeader
-        onScrollToSection={(id) => {
-          if (id === 'appointments') {
+        onScrollToSection={(sectionId) => {
+          if (sectionId === 'appointments') {
             appointmentRef.current?.scrollIntoView({ behavior: 'smooth' });
-          } else if (id === 'feedbacks') {
+          } else if (sectionId === 'feedbacks') {
             feedbackRef.current?.scrollIntoView({ behavior: 'smooth' });
           }
         }}
@@ -110,7 +190,6 @@ export default function ExpertDashboard({ id }: { id: string }) {
       <AnimatePresence>
         {showNotifications && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
@@ -118,7 +197,6 @@ export default function ExpertDashboard({ id }: { id: string }) {
               onClick={() => setShowNotifications(false)}
               className="fixed inset-0 bg-black z-50 backdrop-blur-sm"
             />
-            {/* Drawer Container */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -167,7 +245,7 @@ export default function ExpertDashboard({ id }: { id: string }) {
             <p className="text-gray-400 text-xs sm:text-sm uppercase tracking-[0.25em] font-medium">Hệ thống quản lý chuyên gia &amp; Dịch vụ cá nhân</p>
           </div>
           <button
-            onClick={() => setShowNotifications(false)}
+            onClick={() => setShowNotifications(true)}
             className="hidden md:flex p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-red-500/10 hover:border-red-500/30 transition-all duration-300 group relative items-center justify-center"
           >
             <Bell className="w-6 h-6 text-gray-400 group-hover:text-red-500" />
@@ -178,20 +256,17 @@ export default function ExpertDashboard({ id }: { id: string }) {
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={<DollarSign className="text-green-400 w-6 h-6" />} label="Doanh thu" value="1.250.000đ" />
-          <StatCard icon={<Calendar className="text-purple-400 w-6 h-6" />} label="Lịch hẹn mới" value="02" onClick={() => appointmentRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
+          <StatCard icon={<Calendar className="text-purple-400 w-6 h-6" />} label="Lịch hẹn mới" value={String(pendingAppointmentsCount).padStart(2, '0')} onClick={() => appointmentRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
           <StatCard icon={<Star className="text-yellow-400 w-6 h-6" />} label="Đánh giá TB" value="4.9" />
           <StatCard icon={<MessageSquare className="text-blue-400 w-6 h-6" />} label="Phản hồi" value="12" onClick={() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
         </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* LEFT: PROFILE SUMMARY */}
           <div className="lg:col-span-4 space-y-6">
             <section className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
-              {/* Profile Cover Banner Header */}
               <div className="h-28 bg-gradient-to-r from-purple-900/40 to-red-900/40 w-full relative" />
-
-              {/* Main Profile Info */}
               <div className="p-8 pt-0 relative">
-                {/* Overlap Avatar */}
                 <div className="absolute top-[-40px] left-8">
                   <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-900 shadow-2xl bg-gray-800 flex items-center justify-center">
                     {profileData.avatar ? (
@@ -202,7 +277,6 @@ export default function ExpertDashboard({ id }: { id: string }) {
                   </div>
                 </div>
 
-                {/* Verification Badge */}
                 <div className="flex justify-end pt-4">
                   <Link href={`${baseUrl}/verify`} className={`text-[10px] px-3.5 py-1.5 rounded-xl font-black uppercase tracking-wider transition-all border ${isVerified ? "bg-green-500/10 text-green-400 border-green-500/30" : "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500 hover:text-white"}`}>
                     {isVerified ? 'Verified' : 'Verify Now'}
@@ -217,14 +291,12 @@ export default function ExpertDashboard({ id }: { id: string }) {
                     <p className="text-xs text-red-400 font-semibold mt-1">{profileData.title}</p>
                   </div>
 
-                  {/* Bio */}
                   {profileData.bio && (
                     <p className="text-xs text-gray-300 italic bg-white/5 p-4 rounded-2xl border border-white/5 leading-relaxed">
                       "{profileData.bio}"
                     </p>
                   )}
 
-                  {/* Specialties */}
                   <div className="space-y-2">
                     <p className="text-[10px] text-gray-500 uppercase font-black tracking-wider">Chuyên môn</p>
                     <div className="flex flex-wrap gap-1.5">
@@ -236,19 +308,17 @@ export default function ExpertDashboard({ id }: { id: string }) {
                     </div>
                   </div>
 
-                  {/* Quick Stats list */}
                   <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-4 text-center">
                     <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
                       <p className="text-xs font-black text-yellow-400">⭐ 4.9</p>
                       <p className="text-[8px] text-gray-500 uppercase font-black tracking-wider mt-0.5">Đánh giá</p>
                     </div>
                     <div className="bg-white/5 p-2.5 rounded-xl border border-white/5">
-                      <p className="text-xs font-black text-purple-400">{profileData.yoe !== undefined ? profileData.yoe : 5} năm</p>
+                      <p className="text-xs font-black text-purple-400">{profileData.yoe} năm</p>
                       <p className="text-[8px] text-gray-500 uppercase font-black tracking-wider mt-0.5">Kinh nghiệm</p>
                     </div>
                   </div>
 
-                  {/* Edit button */}
                   <Link href={`${baseUrl}/profile`} className="block pt-2">
                     <Button variant="primary" className="w-full py-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-lg shadow-red-500/20">
                       <Edit3 className="w-4 h-4" /> Thiết lập trang cá nhân
@@ -261,7 +331,6 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
           {/* RIGHT: SERVICES */}
           <div className="lg:col-span-8 space-y-8">
-            {/* PACKAGE SERVICES */}
             <section className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2"><Briefcase className="w-5 h-5 text-red-500" /> Quản lý dịch vụ cá nhân</h2>
@@ -271,33 +340,56 @@ export default function ExpertDashboard({ id }: { id: string }) {
                   </Button>
                 </Link>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {services.map((s) => (
-                  <div key={s.id} className="group bg-black/40 border border-white/5 p-5 rounded-2xl hover:border-red-500/30 transition-all duration-300">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className={`p-2 rounded-lg ${s.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
-                        {s.status === 'active' ? <CheckCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+
+              {services.length === 0 ? (
+                <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-3xl">
+                  <p className="text-gray-500 text-sm italic">Chưa có gói dịch vụ nào. Hãy thêm gói mới!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {services.map((s) => (
+                    <div key={s.id} className="group bg-black/40 border border-white/5 p-5 rounded-2xl hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-4">
+                          <div className={`p-2 rounded-lg ${s.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                            {s.status === 'active' ? <CheckCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+                          </div>
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Link href={`${baseUrl}/package?edit=${s.id}`}>
+                              <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteService(s.id)}
+                              className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-white text-lg">{s.name}</h3>
+                        <div className="flex items-center gap-4 mt-3 text-sm">
+                          <span className="text-gray-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {s.duration}</span>
+                          <span className="font-bold text-red-400">{s.price}</span>
+                        </div>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"><Edit3 className="w-4 h-4" /></button>
-                        <button className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-white text-lg">{s.name}</h3>
-                    <div className="flex items-center gap-4 mt-3 text-sm">
-                      <span className="text-gray-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {s.duration}</span>
-                      <span className="font-bold text-red-400">{s.price}</span>
-                    </div>
-                    {/* Hiển thị trạng thái duyệt */}
-                    <div className="mt-4 flex items-center gap-2">
-                      <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-md ${s.status === 'active' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+
+                      <div className="mt-4 flex items-center gap-2">
+                        <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-md ${
+                          s.status === 'active' 
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                            : s.status === 'rejected'
+                              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                              : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                         }`}>
-                        {s.status === 'active' ? 'Đang hoạt động' : 'Chờ Admin duyệt'}
-                      </span>
+                          {s.status === 'active' ? 'Đang hoạt động' : s.status === 'rejected' ? 'Bị từ chối' : 'Chờ duyệt'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
         </div>
@@ -307,32 +399,44 @@ export default function ExpertDashboard({ id }: { id: string }) {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h2 className="text-2xl font-bold text-white flex items-center gap-3"><Calendar className="w-6 h-6 text-red-500" /> Quản lý lịch hẹn</h2>
             <div className="flex gap-2">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input className="bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white outline-none focus:border-red-500 transition-colors" placeholder="Tìm tên khách..." />
-              </div>
-              <Button variant="secondary" size="sm" className="px-3 hover:bg-white/15 transition-colors border border-white/10"><Filter className="w-4 h-4" /></Button>
               <Link href={`${baseUrl}/schedule`}>
                 <Button variant="primary" size="sm" className="px-4 whitespace-nowrap"><Calendar className="w-4 h-4 mr-1" /> Lịch &amp; Giờ rảnh</Button>
               </Link>
             </div>
           </div>
-          <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/30">
-            <table className="w-full text-left border-collapse min-w-[500px]">
-              <thead className="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest font-black">
-                <tr>
-                  <th className="px-6 py-4">Khách hàng</th>
-                  <th className="px-6 py-4">Lĩnh vực</th>
-                  <th className="px-6 py-4">Thời gian</th>
-                  <th className="px-6 py-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-sm">
-                <AppointmentRow name="Nguyễn Văn A" type="Tarot" time="14:00 - 05/03/2026" />
-                <AppointmentRow name="Trần Thị B" type="Tử vi" time="09:30 - 06/03/2026" />
-              </tbody>
-            </table>
-          </div>
+
+          {appointments.length === 0 ? (
+            <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-3xl">
+              <p className="text-gray-500 text-sm italic">Chưa có lịch hẹn nào của khách hàng.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/30">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead className="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest font-black">
+                  <tr>
+                    <th className="px-6 py-4">Khách hàng</th>
+                    <th className="px-6 py-4">Dịch vụ</th>
+                    <th className="px-6 py-4">Trạng thái</th>
+                    <th className="px-6 py-4">Thời gian</th>
+                    <th className="px-6 py-4 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-sm">
+                  {appointments.filter(a => a.status !== 'AVAILABLE').map((apt: any) => (
+                    <AppointmentRow
+                      key={apt.id}
+                      name={apt.customer_name || apt.user?.name || 'Khách hàng'}
+                      serviceName={apt.service_name || apt.service?.name || 'Dịch vụ'}
+                      time={apt.start_time ? format(new Date(apt.start_time), 'HH:mm - dd/MM/yyyy', { locale: vi }) : 'Chưa định ngày'}
+                      status={apt.status}
+                      id={apt.id}
+                      expertId={id}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         {/* FEEDBACK */}
@@ -372,20 +476,41 @@ function NotificationItem({ title, desc, time, icon }: any) {
   );
 }
 
-function AppointmentRow({ name, type, time }: any) {
+function AppointmentRow({ name, serviceName, time, status, id, expertId }: any) {
+  const statusLabels: Record<string, string> = {
+    PENDING: 'Chờ thanh toán',
+    PAID: 'Đã thanh toán',
+    COMPLETED: 'Hoàn thành',
+    CANCELLED: 'Đã hủy'
+  };
+
+  const statusColors: Record<string, string> = {
+    PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    PAID: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    COMPLETED: 'bg-green-500/10 text-green-400 border-green-500/20',
+    CANCELLED: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+  };
+
   return (
     <tr className="hover:bg-white/5 transition-colors group">
       <td className="px-6 py-4 font-bold text-white">{name}</td>
       <td className="px-6 py-4">
-        <span className="bg-red-500/10 text-red-400 px-3 py-1 rounded-lg text-[10px] font-black border border-red-500/20 uppercase tracking-wider">
-          🔮 {type}
+        <span className="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-lg text-[10px] font-black border border-purple-500/20 uppercase tracking-wider">
+          🔮 {serviceName}
+        </span>
+      </td>
+      <td className="px-6 py-4">
+        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold border ${statusColors[status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+          {statusLabels[status] || status}
         </span>
       </td>
       <td className="px-6 py-4 text-gray-400 font-medium">
         <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-gray-500" /> {time}</span>
       </td>
       <td className="px-6 py-4 text-right">
-        <button className="text-xs text-red-400 hover:text-red-300 font-black hover:underline transition-all">Chi tiết</button>
+        <Link href={`/experts/${expertId}/dashboard/schedule`}>
+          <button className="text-xs text-red-400 hover:text-red-300 font-black hover:underline transition-all">Chi tiết</button>
+        </Link>
       </td>
     </tr>
   );
