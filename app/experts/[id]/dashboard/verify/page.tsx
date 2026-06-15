@@ -1,16 +1,8 @@
+'use client';
+
+import React from 'react';
 import VerifyExpertClient from './verify-client';
-import { experts } from '@/lib/services-data';
 
-export function generateStaticParams() {
-  return experts.map((e) => ({ id: e.id }));
-}
-
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: { params: { id: string } }) {
   return <VerifyExpertClient id={params.id} />;
 }

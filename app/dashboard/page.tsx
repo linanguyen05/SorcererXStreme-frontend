@@ -19,6 +19,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import Link from 'next/link';
 import { useSidebarCollapsed } from '@/components/layout/Sidebar';
+import { expertApi } from '@/lib/api-client';
 
 const tools = [
   {
@@ -96,18 +97,67 @@ const stats = [
 ];
 
 export default function DashboardPage() {
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, token } = useAuthStore();
   const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
+      return;
     }
-  }, [isAuthenticated, router]);
 
-  if (!isAuthenticated) {
-    return null;
+    if (user?.role === 'ADMIN') {
+      router.push(`/admins/${user.id || '1'}/dashboard`);
+      return;
+    }
+
+    if (user?.role === 'EXPERT') {
+      const checkStatus = async () => {
+        let isApproved = false;
+        if (token && user.id !== 'temp-id') {
+          try {
+            const profile = await expertApi.getProfile(user.id, token);
+            if (profile && profile.status === 'APPROVED') {
+              isApproved = true;
+            }
+          } catch (e) {
+            console.warn("API check failed:", e);
+          }
+        }
+        
+        // localStorage check fallback
+        if (!isApproved) {
+          const storedExperts = localStorage.getItem('mock-admin-experts');
+          if (storedExperts) {
+            const allExperts = JSON.parse(storedExperts);
+            const matchedExpert = allExperts.find((e: any) => e.id === user.id || (user.email && e.email === user.email));
+            if (matchedExpert && matchedExpert.status === 'APPROVED') {
+              isApproved = true;
+            }
+          }
+        }
+
+        if (isApproved) {
+          router.push(`/experts/${user.id}/dashboard`);
+        } else {
+          router.push(`/experts/${user.id}/pending`);
+        }
+      };
+      
+      checkStatus();
+    }
+  }, [isAuthenticated, user, token, router]);
+
+  if (!isAuthenticated || user?.role === 'EXPERT' || user?.role === 'ADMIN') {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">Đang chuyển hướng đến không gian làm việc...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

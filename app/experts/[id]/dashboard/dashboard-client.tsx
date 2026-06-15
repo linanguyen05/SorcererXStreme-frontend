@@ -18,7 +18,10 @@ import { expertApi } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
+import { useRouter } from 'next/navigation';
+
 export default function ExpertDashboard({ id }: { id: string }) {
+  const router = useRouter();
   const { token } = useAuthStore();
   const baseUrl = `/experts/${id}/dashboard`;
 
@@ -50,65 +53,99 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
   // Load profile, services, and appointments from backend
   useEffect(() => {
-    // 1. Initial fallback load from local static data
-    const expertInfo = experts.find(e => e.id === id);
-    if (expertInfo) {
-      setProfileData({
-        name: expertInfo.name,
-        title: expertInfo.title,
-        bio: expertInfo.bio || expertInfo.about || "",
-        experience: expertInfo.experience || "5 năm",
-        yoe: parseInt(expertInfo.experience) || 5,
-        avatar: expertInfo.avatar || null,
-        specs: expertInfo.specialties || ['Tarot']
-      });
+    let isSubscribed = true;
 
-      if (expertInfo.packages) {
-        setServices(expertInfo.packages.map(p => ({
-          id: p.id,
-          name: p.name,
-          price: `${p.price.toLocaleString()}đ`,
-          duration: `${p.duration} phút`,
-          status: 'active'
-        })));
-      }
-    }
-
-    // 2. Secondary fallback load from localStorage
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed.profile) {
-            setProfileData(prev => ({
-              ...prev,
-              name: parsed.profile.name || prev.name,
-              title: parsed.profile.title || prev.title,
-              bio: parsed.profile.bio || prev.bio,
-              experience: parsed.profile.experience || prev.experience,
-              yoe: parsed.profile.yoe !== undefined ? parsed.profile.yoe : prev.yoe,
-              avatar: parsed.avatar || prev.avatar,
-              specs: parsed.profile.specs || prev.specs
-            }));
+    const fetchAll = async () => {
+      // 1. Check approval first
+      if (typeof window !== 'undefined') {
+        const storedExperts = localStorage.getItem('mock-admin-experts');
+        if (storedExperts) {
+          try {
+            const allExperts = JSON.parse(storedExperts);
+            const currentUser = useAuthStore.getState().user;
+            const matchedExpert = allExperts.find((e: any) => e.id === id || (currentUser?.email && e.email === currentUser.email));
+            if (matchedExpert && matchedExpert.status === 'PENDING') {
+              router.push(`/experts/${id}/pending`);
+              return;
+            }
+          } catch (e) {
+            console.error("Local check failed", e);
           }
-          if (parsed.isVerified) {
-            setIsVerified(true);
-          }
-        } catch (e) {
-          console.error("Error loading localStorage data in dashboard", e);
         }
       }
-    }
 
-    // 3. Dynamic Load from Backend API
-    if (!token) return;
+      if (token) {
+        try {
+          const profileRes = await expertApi.getProfile(id, token);
+          if (profileRes && profileRes.status === 'PENDING') {
+            router.push(`/experts/${id}/pending`);
+            return;
+          }
+        } catch (err) {
+          console.warn("API check failed in dashboard client", err);
+        }
+      }
 
-    const fetchBackendData = async () => {
+      if (!isSubscribed) return;
+
+      // 2. Initial fallback load from local static data
+      const expertInfo = experts.find(e => e.id === id);
+      if (expertInfo) {
+        setProfileData({
+          name: expertInfo.name,
+          title: expertInfo.title,
+          bio: expertInfo.bio || expertInfo.about || "",
+          experience: expertInfo.experience || "5 năm",
+          yoe: parseInt(expertInfo.experience) || 5,
+          avatar: expertInfo.avatar || null,
+          specs: expertInfo.specialties || ['Tarot']
+        });
+
+        if (expertInfo.packages) {
+          setServices(expertInfo.packages.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: `${p.price.toLocaleString()}đ`,
+            duration: `${p.duration} phút`,
+            status: 'active'
+          })));
+        }
+      }
+
+      // 3. Secondary fallback load from localStorage
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed.profile && isSubscribed) {
+              setProfileData(prev => ({
+                ...prev,
+                name: parsed.profile.name || prev.name,
+                title: parsed.profile.title || prev.title,
+                bio: parsed.profile.bio || prev.bio,
+                experience: parsed.profile.experience || prev.experience,
+                yoe: parsed.profile.yoe !== undefined ? parsed.profile.yoe : prev.yoe,
+                avatar: parsed.avatar || prev.avatar,
+                specs: parsed.profile.specs || prev.specs
+              }));
+            }
+            if (parsed.isVerified && isSubscribed) {
+              setIsVerified(true);
+            }
+          } catch (e) {
+            console.error("Error loading localStorage data in dashboard", e);
+          }
+        }
+      }
+
+      // 4. Dynamic Load from Backend API
+      if (!token) return;
+
       try {
         // Fetch Profile
         const profileRes = await expertApi.getProfile(id, token);
-        if (profileRes) {
+        if (profileRes && isSubscribed) {
           setProfileData({
             name: profileRes.user?.name || profileRes.name || "Chuyên gia",
             title: profileRes.specialty && profileRes.specialty.length > 0 ? `Chuyên gia ` + profileRes.specialty.join(' & ') : "Chuyên gia tư vấn",
@@ -123,7 +160,7 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
         // Fetch Services
         const servicesRes = await expertApi.getServices(id, token);
-        if (servicesRes) {
+        if (servicesRes && isSubscribed) {
           setServices(servicesRes.map((s: any) => ({
             id: s.id,
             name: s.name,
@@ -135,7 +172,7 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
         // Fetch Appointments
         const appointmentsRes = await expertApi.getAppointments(id, token);
-        if (appointmentsRes) {
+        if (appointmentsRes && isSubscribed) {
           setAppointments(appointmentsRes);
         }
       } catch (error) {
@@ -143,8 +180,12 @@ export default function ExpertDashboard({ id }: { id: string }) {
       }
     };
 
-    fetchBackendData();
-  }, [id, token]);
+    fetchAll();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [id, token, router]);
 
   const handleDeleteService = async (serviceId: string) => {
     if (!token) {
