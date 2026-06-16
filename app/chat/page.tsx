@@ -20,6 +20,8 @@ const FormattedAIResponse = ({ content }: { content: string }) => {
   return <FormattedContent content={content} />;
 };
 
+import { GuestProfileModal } from '@/components/profile/GuestProfileModal';
+
 export default function ChatPage() {
   const router = useRouter();
   const sidebarCollapsed = useSidebarCollapsed();
@@ -29,36 +31,61 @@ export default function ChatPage() {
   const { messages, isLoading, addMessage, setLoading, sessionId, setSessionId, clearMessages } = useChatStore();
   const userContext = useUserContext();
 
+  // Quản lý trạng thái Guest
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [hasGuestAccess, setHasGuestAccess] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (!isAuthenticated) {
+      const guestId = localStorage.getItem('guestId');
+      const guestProfile = localStorage.getItem('guestProfile');
+      if (guestId && guestProfile) {
+        setHasGuestAccess(true);
+      } else {
+        setShowGuestModal(true);
+      }
+    }
+  }, [isAuthenticated]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, router]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  // Quyền truy cập: User đã đăng nhập HOẶC Guest đã điền hồ sơ
+  const isAllowed = isAuthenticated ? true : hasGuestAccess;
+
   // Khởi tạo session khi component mount
   useEffect(() => {
     const initSession = async () => {
-      if (!sessionId && token) {
+      const isGuest = !isAuthenticated;
+      const guestId = isGuest ? localStorage.getItem('guestId') : null;
+      if (!token && !guestId) return;
+
+      if (!sessionId) {
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat/new-session`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
+              ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` }),
             },
           });
 
           if (response.ok) {
             const data = await response.json();
             setSessionId(data.sessionId || data.session_id);
+          } else if (response.status === 401 && !isAuthenticated) {
+            localStorage.removeItem('guestId');
+            localStorage.removeItem('guestProfile');
+            setHasGuestAccess(false);
+            setShowGuestModal(true);
+            toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
           }
         } catch (error) {
           console.error('Failed to create session:', error);
@@ -66,8 +93,10 @@ export default function ChatPage() {
       }
     };
 
-    initSession();
-  }, [sessionId, token, setSessionId]);
+    if (isAllowed) {
+      initSession();
+    }
+  }, [sessionId, token, setSessionId, isAuthenticated, isAllowed]);
 
   const handleRefresh = async () => {
     if (isLoading) return;
@@ -78,12 +107,16 @@ export default function ChatPage() {
     // Reset session (dùng empty string thay vì null)
     setSessionId('');
 
+    const isGuest = !isAuthenticated;
+    const guestId = isGuest ? localStorage.getItem('guestId') : null;
+    if (!token && !guestId) return;
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_CHAT_SERVICE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat/new-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` }),
         },
       });
 
@@ -91,6 +124,12 @@ export default function ChatPage() {
         const data = await response.json();
         setSessionId(data.sessionId || data.session_id);
         toast.success('Đã làm mới cuộc trò chuyện!');
+      } else if (response.status === 401 && !isAuthenticated) {
+        localStorage.removeItem('guestId');
+        localStorage.removeItem('guestProfile');
+        setHasGuestAccess(false);
+        setShowGuestModal(true);
+        toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
       }
     } catch (error) {
       console.error('Failed to refresh session:', error);
@@ -112,20 +151,27 @@ export default function ChatPage() {
 
     setLoading(true);
 
+    const isGuest = !isAuthenticated;
+    const guestId = isGuest ? localStorage.getItem('guestId') : null;
+
     try {
       const { token, user } = useAuthStore.getState();
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat`;
 
-      // Chuẩn bị user_context từ user profile với validation
+      const context = isGuest 
+        ? JSON.parse(localStorage.getItem('guestProfile') || '{}')
+        : { name: user?.name, gender: user?.gender, birth_date: user?.birth_date, birth_time: user?.birth_time, birth_place: user?.birth_place };
+
+      // Chuẩn bị user_context từ user profile hoặc guest profile với validation
       const requestBody = {
         domain: "chatbot",
         feature_type: "question",
         user_context: {
-          name: user?.name || "User",
-          gender: user?.gender || "other",
-          birth_date: user?.birth_date || "2000-01-01",
-          birth_time: user?.birth_time || "12:00",
-          birth_place: user?.birth_place || "Việt Nam"
+          name: context.name || "Khách",
+          gender: context.gender || "other",
+          birth_date: context.birth_date || "2000-01-01",
+          birth_time: context.birth_time || "12:00",
+          birth_place: context.birth_place || "Việt Nam"
         },
         data: {
           sessionId: sessionId,
@@ -139,7 +185,7 @@ export default function ChatPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify(requestBody),
       });
@@ -151,12 +197,27 @@ export default function ChatPage() {
         console.error('Chat API error:', errorData);
 
         if (response.status === 401) {
+          if (!isAuthenticated) {
+            localStorage.removeItem('guestId');
+            localStorage.removeItem('guestProfile');
+            setHasGuestAccess(false);
+            setShowGuestModal(true);
+            toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
+            return;
+          }
           toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
           return;
         } else if (response.status === 429) {
           toast.error('Bạn đã hỏi quá nhiều. Vui lòng thử lại sau.');
           return;
         } else if (response.status === 403) {
+          if (errorData.error === 'GUEST_LIMIT_REACHED') {
+            toast.error('Bạn đã dùng hết 3 lượt dùng thử miễn phí. Hãy đăng ký để tiếp tục sử dụng!');
+            setTimeout(() => {
+              router.push('/auth/register');
+            }, 2500);
+            return;
+          }
           toast.error('Bạn đã hết lượt sử dụng. Vui lòng nâng cấp VIP.');
           return;
         } else if (response.status === 500) {
@@ -238,8 +299,27 @@ export default function ChatPage() {
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
+  if (!isClient) return null;
+
+  if (!isAllowed) {
+    return (
+      <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
+        <AnimatedBackground />
+        <Sidebar />
+        <GuestProfileModal
+          isOpen={showGuestModal}
+          onClose={() => {
+            setShowGuestModal(false);
+            if (!hasGuestAccess) {
+              router.push('/auth/login');
+            }
+          }}
+          onSuccess={() => {
+            setHasGuestAccess(true);
+          }}
+        />
+      </div>
+    );
   }
 
   return (

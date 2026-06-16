@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { User, Calendar, MapPin, Clock, ArrowRight, Sparkles, Star, Moon } from 'lucide-react';
@@ -21,6 +21,38 @@ export default function SetupPage() {
         birthTime: '',
         birthPlace: ''
     });
+
+    // Tự động điền thông tin từ hồ sơ guest lưu trong localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('guestProfile');
+            if (stored) {
+                try {
+                    const guest = JSON.parse(stored);
+                    
+                    // Định dạng lại birth_date từ ISOString sang YYYY-MM-DD
+                    let birthDateFormatted = '';
+                    const rawDate = guest.birth_date || guest.birthDate;
+                    if (rawDate) {
+                        const date = new Date(rawDate);
+                        if (!isNaN(date.getTime())) {
+                            birthDateFormatted = date.toISOString().split('T')[0];
+                        }
+                    }
+
+                    setFormData({
+                        name: guest.name || '',
+                        gender: guest.gender || 'male',
+                        birthDate: birthDateFormatted,
+                        birthTime: guest.birth_time || guest.birthTime || '',
+                        birthPlace: guest.birth_place || guest.birthPlace || ''
+                    });
+                } catch (e) {
+                    console.error('Failed to parse guestProfile in SetupPage:', e);
+                }
+            }
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,6 +78,11 @@ export default function SetupPage() {
                 formData.birthPlace,
                 token
             );
+            
+            // Xóa thông tin guest trong localStorage sau khi đã hoàn tất hồ sơ tài khoản chính thức
+            localStorage.removeItem('guestId');
+            localStorage.removeItem('guestProfile');
+
             toast.success('Cập nhật hồ sơ thành công!');
             router.push('/profile');
         } catch (error) {

@@ -14,11 +14,7 @@ export default function LandingPage() {
     const { user } = useAuthStore();
 
     const handleNavigation = (path: string) => {
-        if (!user) {
-            router.push('/auth/register'); // Chưa đăng nhập -> Sang đăng ký
-        } else {
-            router.push(path);             // Đã đăng nhập -> Vào tính năng
-        }
+        router.push(path);
     };
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-purple-500/30">

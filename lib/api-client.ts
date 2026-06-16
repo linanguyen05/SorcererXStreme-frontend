@@ -15,6 +15,14 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    // Tự động gắn x-guest-id từ localStorage nếu không có token (chạy ở client-side)
+    if (typeof window !== 'undefined') {
+      const storedGuestId = window.localStorage.getItem('guestId');
+      if (storedGuestId) {
+        headers['x-guest-id'] = storedGuestId;
+      }
+    }
   }
 
   const config: RequestInit = {
@@ -36,7 +44,13 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
     } catch {
       error = { message: text || 'Request failed' };
     }
-    throw new Error(error.message || 'Request failed');
+    
+    // Ném lỗi giàu thuộc tính (status, error code, redirectRegister) để UI bắt được và định tuyến
+    const errObj = new Error(error.message || 'Request failed') as any;
+    errObj.status = response.status;
+    errObj.error = error.error; // ví dụ: GUEST_RESTRICTED, GUEST_LIMIT_REACHED
+    errObj.redirectRegister = error.redirectRegister;
+    throw errObj;
   }
 
   if (response.status === 204) {
@@ -358,5 +372,20 @@ export const paymentApi = {
     apiRequest(`/api/payments/status/${subscriptionId}`, {
       method: 'GET',
       token,
+    }),
+};
+
+export const guestApi = {
+  register: (data: {
+    guestId: string;
+    name: string;
+    gender: 'male' | 'female' | 'other';
+    birth_date: string;
+    birth_time: string;
+    birth_place: string;
+  }) =>
+    apiRequest('/api/users/guest-register', {
+      method: 'POST',
+      body: data,
     }),
 };
