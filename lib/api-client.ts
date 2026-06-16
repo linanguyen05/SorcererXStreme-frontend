@@ -68,7 +68,7 @@ export const authApi = {
     return await confirmSignUp({ username: email, confirmationCode: code });
   },
 
-  register: async (email: string, password: string) => {
+  register: async (email: string, password: string, role: string) => {
     // 1. Create user in Cognito (No Backend Sync)
     try {
       const { userId } = await signUp({
@@ -77,6 +77,7 @@ export const authApi = {
         options: {
           userAttributes: {
             email,
+            'custom:role': role,
           },
         },
       });
@@ -122,10 +123,11 @@ export const authApi = {
         throw new Error('Failed to retrieve access token from Cognito session');
       }
 
+      const role = session.tokens?.idToken?.payload?.['custom:role'] as string || 'USER';
       return {
         token,
         sub: session.userSub,
-        user: { email }
+        user: { email, role }
       };
     }
 
@@ -137,10 +139,10 @@ export const authApi = {
   },
 
   resetPassword: async (email: string, code: string, newPassword: string) => {
-    return await confirmResetPassword({ 
-      username: email, 
-      confirmationCode: code, 
-      newPassword 
+    return await confirmResetPassword({
+      username: email,
+      confirmationCode: code,
+      newPassword
     });
   },
 
@@ -148,7 +150,7 @@ export const authApi = {
     await signOut();
   }
 };
-  
+
 
 export const profileApi = {
   get: (token: string) =>

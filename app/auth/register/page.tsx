@@ -28,6 +28,7 @@ export default function RegisterPage() {
     email: false 
   });
   
+  const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
   const [isTouched, setIsTouched] = useState(false);
 
   const { register, confirmRegistration } = useAuthStore();
@@ -55,7 +56,7 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      const success = await register(email, password);
+      const success = await register(email, password, role);
       if (success) {
         toast.success('Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận.');
         setStep('verify');
@@ -176,6 +177,8 @@ export default function RegisterPage() {
           {step === 'register' ? (
             <form onSubmit={handleRegister} className="space-y-5 relative">
               
+
+
               {/* Email Input */}
               <motion.div
                 initial={{ x: -20, opacity: 0 }}

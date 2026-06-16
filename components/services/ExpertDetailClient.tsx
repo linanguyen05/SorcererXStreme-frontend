@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Star, ChevronLeft, Clock, Shield, Users, Award, Check,
     Sparkles, ChevronRight, ChevronLeft as ChevLeft, Quote,
-    MapPin, Zap, Crown
+    MapPin, Zap, Crown, Facebook, Instagram, Youtube
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
@@ -18,12 +18,21 @@ import { experts, Expert, ServicePackage, formatPrice } from '@/lib/services-dat
 const SPECIALTY_COLORS: Record<string, string> = {
     'Tarot': 'from-purple-500 to-violet-600',
     'Chiêm Tinh': 'from-blue-500 to-cyan-600',
+    'Chiêm tinh': 'from-blue-500 to-cyan-600',
+    'Astrology': 'from-blue-500 to-cyan-600',
     'Tử Vi': 'from-amber-500 to-yellow-600',
+    'Tử vi': 'from-amber-500 to-yellow-600',
     'Thần Số Học': 'from-green-500 to-emerald-600',
+    'Thần số học': 'from-green-500 to-emerald-600',
+    'Numerology': 'from-green-500 to-emerald-600',
     'Phong Thủy': 'from-teal-500 to-green-600',
+    'Phong thủy': 'from-teal-500 to-green-600',
     'Bói Bài': 'from-pink-500 to-rose-600',
+    'Bói bài': 'from-pink-500 to-rose-600',
     'Năng Lượng': 'from-orange-500 to-amber-600',
+    'Năng lượng': 'from-orange-500 to-amber-600',
     'Tâm Linh': 'from-indigo-500 to-purple-600',
+    'Tâm linh': 'from-indigo-500 to-purple-600',
 };
 
 function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' }) {
@@ -229,15 +238,52 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeGalleryImg, setActiveGalleryImg] = useState<string | null>(null);
 
-    const expert = experts.find((e) => e.id === expertId);
+    const staticExpert = experts.find((e) => e.id === expertId);
+    const [dynamicExpert, setDynamicExpert] = useState<typeof staticExpert | null>(null);
 
     useEffect(() => {
         setMounted(true);
         const check = () => setIsMobile(window.innerWidth < 768);
         check();
         window.addEventListener('resize', check);
+
+        // Load custom data from localStorage if exists
+        if (staticExpert) {
+            let mergedExpert = { ...staticExpert };
+            const stored = localStorage.getItem(`expert-profile-data-${expertId}`) || localStorage.getItem('expert-profile-data');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.profile) {
+                        mergedExpert.name = parsed.profile.name || mergedExpert.name;
+                        mergedExpert.bio = parsed.profile.bio || mergedExpert.bio;
+                        mergedExpert.about = parsed.profile.experience || mergedExpert.about;
+                        mergedExpert.experience = parsed.profile.yoe !== undefined && parsed.profile.yoe !== ''
+                            ? `${parsed.profile.yoe} năm`
+                            : mergedExpert.experience;
+                        mergedExpert.specialties = parsed.profile.specs || mergedExpert.specialties;
+                        
+                        // MXH Links
+                        mergedExpert.social = {
+                            ...mergedExpert.social,
+                            facebook: parsed.profile.facebook || mergedExpert.social?.facebook || '',
+                            threads: parsed.profile.instagram || mergedExpert.social?.threads || '',
+                        };
+                    }
+                    if (parsed.avatar) {
+                        mergedExpert.avatar = parsed.avatar;
+                    }
+                } catch (e) {
+                    console.error("Error parsing stored expert profile", e);
+                }
+            }
+            setDynamicExpert(mergedExpert);
+        }
+
         return () => window.removeEventListener('resize', check);
-    }, []);
+    }, [expertId, staticExpert]);
+
+    const expert = dynamicExpert || staticExpert;
 
     if (!mounted) return null;
 
@@ -317,6 +363,11 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                                 {expert.name}
                             </motion.h1>
                             <p className="text-yellow-300/80 text-sm md:text-base font-medium">{expert.title}</p>
+                            {expert.bio && (
+                                <p className="text-gray-300/90 text-xs md:text-sm italic mt-1.5 leading-relaxed max-w-2xl font-serif">
+                                    "{expert.bio}"
+                                </p>
+                            )}
                             <div className="flex items-center gap-3 mt-2 flex-wrap">
                                 <div className="flex items-center gap-1">
                                     <StarRating rating={expert.rating} />
@@ -328,6 +379,25 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                                 <span className="text-gray-600">·</span>
                                 <span className="text-gray-400 text-sm">{expert.experience} kinh nghiệm</span>
                             </div>
+                            {expert.social && Object.values(expert.social).some(v => v) && (
+                                <div className="flex items-center gap-2.5 mt-3">
+                                    {expert.social.facebook && (
+                                        <a href={expert.social.facebook.startsWith('http') ? expert.social.facebook : `https://${expert.social.facebook}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/10 hover:bg-blue-600 hover:scale-110 text-white transition-all duration-200" title="Facebook">
+                                            <Facebook className="w-3.5 h-3.5" />
+                                        </a>
+                                    )}
+                                    {(expert.social.threads || (expert.social as any).instagram) && (
+                                        <a href={(expert.social.threads || (expert.social as any).instagram || '').startsWith('http') ? (expert.social.threads || (expert.social as any).instagram) : `https://${expert.social.threads || (expert.social as any).instagram}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/10 hover:bg-pink-600 hover:scale-110 text-white transition-all duration-200" title="Instagram">
+                                            <Instagram className="w-3.5 h-3.5" />
+                                        </a>
+                                    )}
+                                    {expert.social.youtube && (
+                                        <a href={expert.social.youtube.startsWith('http') ? expert.social.youtube : `https://${expert.social.youtube}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-white/10 hover:bg-red-600 hover:scale-110 text-white transition-all duration-200" title="Youtube">
+                                            <Youtube className="w-3.5 h-3.5" />
+                                        </a>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -12,6 +12,7 @@ import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { Footer } from '@/components/layout/Footer';
 import ContentHeader from "@/components/layout/ContentHeader";
 import { experts, Expert, ExpertSpecialty, SocialLinks, formatPrice } from '@/lib/services-data';
+import { useAuthStore } from '@/lib/store';
 
 // ─── Specialty config ───────────────────────────────────────────────────────
 const ALL_SPECIALTIES: ExpertSpecialty[] = [
@@ -390,10 +391,18 @@ function ExpertTile({ expert, index }: { expert: Expert; index: number }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function ServicesPage() {
     const sidebarCollapsed = useSidebarCollapsed();
+    const router = useRouter();
     const [isMobile, setIsMobile] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [query, setQuery] = useState('');
     const [filter, setFilter] = useState<ExpertSpecialty | 'all'>('all');
+    const { isAuthenticated } = useAuthStore();
+
+    // useEffect(() => {
+    //     if (!isAuthenticated) {
+    //         router.push('/auth/login');
+    //     }
+    // }, [isAuthenticated, router]);
 
     useEffect(() => {
         setMounted(true);
@@ -403,6 +412,7 @@ export default function ServicesPage() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
+    // if (!isAuthenticated) return null;
     if (!mounted) return null;
 
     const filtered = experts.filter(e => {

@@ -5,6 +5,7 @@ import { authApi, profileApi, partnerApi } from './api-client';
 interface User {
   id: string;
   email: string;
+  role?: string;
   name?: string;
   gender?: string;
   birth_date?: string;
@@ -21,7 +22,7 @@ interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string, role: string) => Promise<boolean>;
   confirmRegistration: (email: string, code: string) => Promise<boolean>;
   completeProfile: (name: string, gender: string, birth_date: string, birth_time: string, birth_place: string, token: string) => Promise<void>;
   updateProfile: (name: string, birthDate: string, birthTime: string, birthPlace: string, token: string) => Promise<void>;
@@ -64,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
           const mappedUser: User = {
             id: fullUser.id || 'temp-id',
             email: fullUser.email,
+            role: user.role || 'USER',
             name: fullUser.name,
             gender: fullUser.gender,
             birth_date: fullUser.birth_date,
@@ -82,10 +84,10 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (email: string, password: string) => {
+      register: async (email: string, password: string, role: string) => {
         try {
           // authApi.register now handles Cognito signUp + Backend Sync
-          await authApi.register(email, password);
+          await authApi.register(email, password, role);
 
           // Auto-login removed as flow is now Register -> Verify -> Manual Login
           return true;

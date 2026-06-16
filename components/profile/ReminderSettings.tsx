@@ -18,17 +18,40 @@ export function ReminderSettings() {
         email: user?.email || '',
     });
 
-    // 1. Load settings từ Backend
+    // Sub-notification categories state
+    const [categories, setCategories] = useState({
+        dailyHoroscope: true,
+        appointments: true,
+        transactions: true,
+    });
+
+    // 1. Load settings từ Backend & localStorage
     useEffect(() => {
         const loadSettings = async () => {
             if (!token) return;
             try {
                 const data = await reminderApi.get(token);
                 // Backend trả về field: is_subscribed
+                const isSubscribed = data.is_subscribed ?? false;
                 setSettings({
-                    emailEnabled: data.is_subscribed ?? false,
+                    emailEnabled: isSubscribed,
                     email: user?.email || '',
                 });
+
+                // Load categories from localStorage if exists
+                if (typeof window !== 'undefined') {
+                    const storedCats = localStorage.getItem(`email_cats_${user?.email}`);
+                    if (storedCats) {
+                        setCategories(JSON.parse(storedCats));
+                    } else if (!isSubscribed) {
+                        // If backend is unsubscribed, sync categories to false
+                        setCategories({
+                            dailyHoroscope: false,
+                            appointments: false,
+                            transactions: false,
+                        });
+                    }
+                }
             } catch (error) {
                 console.log('No existing settings found, using defaults');
             } finally {
@@ -55,11 +78,29 @@ export function ReminderSettings() {
             const response = await reminderApi.update(payload, token);
 
             // Cập nhật state local dựa trên kết quả trả về từ Backend
-            // Backend trả về { message, settings: { is_subscribed, ... } }
             const updatedStatus = response.settings?.is_subscribed ?? shouldSubscribe;
 
             setSettings(prev => ({ ...prev, emailEnabled: updatedStatus }));
             toast.success(response.message || 'Cập nhật thành công');
+
+            // Synchronize categories if unsubscribed
+            if (!updatedStatus) {
+                const offCats = { dailyHoroscope: false, appointments: false, transactions: false };
+                setCategories(offCats);
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem(`email_cats_${user?.email}`, JSON.stringify(offCats));
+                }
+            } else {
+                // If subscribed, enable all if they were all false
+                const allDisabled = !categories.dailyHoroscope && !categories.appointments && !categories.transactions;
+                if (allDisabled) {
+                    const onCats = { dailyHoroscope: true, appointments: true, transactions: true };
+                    setCategories(onCats);
+                    if (typeof window !== 'undefined') {
+                        localStorage.setItem(`email_cats_${user?.email}`, JSON.stringify(onCats));
+                    }
+                }
+            }
 
         } catch (error: any) {
             console.error('Update Error:', error);
@@ -67,6 +108,28 @@ export function ReminderSettings() {
             toast.error(errorMsg);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleToggleCategory = async (key: keyof typeof categories) => {
+        const nextCats = {
+            ...categories,
+            [key]: !categories[key]
+        };
+        setCategories(nextCats);
+        
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(`email_cats_${user?.email}`, JSON.stringify(nextCats));
+        }
+
+        // Determine if we should change main is_subscribed status
+        const atLeastOneChecked = nextCats.dailyHoroscope || nextCats.appointments || nextCats.transactions;
+        if (atLeastOneChecked && !settings.emailEnabled) {
+            await handleUpdateStatus(true);
+        } else if (!atLeastOneChecked && settings.emailEnabled) {
+            await handleUpdateStatus(false);
+        } else {
+            toast.success('Đã lưu tùy chọn nhận tin');
         }
     };
 
@@ -161,6 +224,88 @@ export function ReminderSettings() {
                         <p className="text-sm md:text-base text-blue-100 truncate font-medium italic">{user?.email}</p>
                     </div>
                 </div>
+
+                {/* Email categories toggle switches */}
+                <AnimatePresence>
+                    {settings.emailEnabled && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden space-y-4 pt-6 border-t border-white/10"
+                        >
+                            <p className="text-[10px] uppercase tracking-wider text-gray-500 font-black">Phân loại nhận thông báo</p>
+                            
+                            <div className="grid grid-cols-1 gap-3">
+                                {/* Category 1: Daily Horoscope */}
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5 hover:border-purple-500/30 transition-all group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center shrink-0">
+                                            <Sparkles className="w-5 h-5 text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Vận mệnh & Thông điệp vũ trụ</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">Lời khuyên tarot, tử vi và chiêm tinh học hàng ngày</p>
+                                        </div>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categories.dailyHoroscope} 
+                                            onChange={() => handleToggleCategory('dailyHoroscope')} 
+                                            className="sr-only peer" 
+                                        />
+                                        <div className="w-10 h-6 bg-gray-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 peer-checked:after:bg-purple-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500/20 border border-white/10"></div>
+                                    </label>
+                                </div>
+
+                                {/* Category 2: Appointments */}
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5 hover:border-blue-500/30 transition-all group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
+                                            <Clock className="w-5 h-5 text-blue-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">Lịch hẹn & Tư vấn</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">Thông báo về lịch hẹn sắp diễn ra, thay đổi trạng thái duyệt</p>
+                                        </div>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categories.appointments} 
+                                            onChange={() => handleToggleCategory('appointments')} 
+                                            className="sr-only peer" 
+                                        />
+                                        <div className="w-10 h-6 bg-gray-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 peer-checked:after:bg-blue-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500/20 border border-white/10"></div>
+                                    </label>
+                                </div>
+
+                                {/* Category 3: System / Promos */}
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5 hover:border-green-500/30 transition-all group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center shrink-0">
+                                            <Mail className="w-5 h-5 text-green-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-white group-hover:text-green-300 transition-colors">Ưu đãi VIP & Bản tin hệ thống</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">Các thông báo cập nhật tính năng mới và chương trình tri ân</p>
+                                        </div>
+                                    </div>
+                                    <label className="relative inline-flex inline-flex items-center cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categories.transactions} 
+                                            onChange={() => handleToggleCategory('transactions')} 
+                                            className="sr-only peer" 
+                                        />
+                                        <div className="w-10 h-6 bg-gray-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 peer-checked:after:bg-green-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500/20 border border-white/10"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Footer Info ẩn hiện mượt mà */}
                 <AnimatePresence>

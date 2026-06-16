@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import SearchBar from "@/components/services/SearchBar";
 import CategoryFilter from "@/components/services/CategoryFilter";
 import ServiceCard, { type ServiceData } from "@/components/services/ServiceCard";
 import { motion } from "framer-motion";
 import { Sidebar, useSidebarCollapsed } from "@/components/layout/Sidebar";
 import ContentHeader from "@/components/layout/ContentHeader";
+import { useAuthStore } from "@/lib/store";
 
 const imgZodiac = "/services/mystical-zodiac.jpg";
 const imgTarot = "/services/mystical-tarot.jpg";
@@ -28,10 +30,18 @@ const services: ServiceData[] = [
 ];
 
 export default function ServiceListingPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const isCollapsed = useSidebarCollapsed();
   const [isMobile, setIsMobile] = useState(false);
+  const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -47,6 +57,10 @@ export default function ServiceListingPage() {
       return matchSearch && matchCategory;
     });
   }, [search, activeCategory]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex">

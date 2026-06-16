@@ -53,11 +53,11 @@ export default function FortunePage() {
   const [isDailyLoading, setIsDailyLoading] = useState(false);
 
   // Redirect to login if not authenticated or profile incomplete
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user?.isProfileComplete) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, user, router]);
+  useEffect(() => {
+    if (!isAuthenticated || !user?.isProfileComplete) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, user, router]);
 
   // Sync user data to form when user loads
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function FortunePage() {
         setIsDailyLoading(false);
         return;
       }
-
+      
       if (!user?.birth_time) {
         toast.error('Vui lòng cập nhật giờ sinh trong hồ sơ cá nhân');
         setIsDailyLoading(false);
@@ -131,8 +131,8 @@ export default function FortunePage() {
 
       console.log('[Fortune Daily] Sending request:', {
         target_date: apiTargetDate,
-        birth_time: user.birth_time,
-        birth_place: user.birth_place
+        birth_time: user?.birth_time || '12:00',
+        birth_place: user?.birth_place || 'Hanoi'
       });
 
       // Call daily horoscope API
@@ -140,16 +140,16 @@ export default function FortunePage() {
         domain: 'horoscope',
         feature_type: 'daily',
         user_context: {
-          name: user.name || 'User',
-          gender: user.gender || 'male',
-          birth_date: formatBirthDate(user.birth_date || ''),
-          birth_time: user.birth_time,  // ✅ REQUIRED
-          birth_place: user.birth_place  // ✅ REQUIRED
+          name: user?.name || 'User',
+          gender: user?.gender || 'male',
+          birth_date: formatBirthDate(user?.birth_date || '1990-01-01'),
+          birth_time: user?.birth_time || '12:00',  // ✅ REQUIRED
+          birth_place: user?.birth_place || 'Hanoi'  // ✅ REQUIRED
         },
         data: {
           target_date: dailyInput.targetDate  // ✅ REQUIRED for daily
         }
-      }, token);
+      }, token || '');
 
       // Parse giống như Tarot - backend trả về: { analysis: {...} }
       let analysis = '';
@@ -193,8 +193,6 @@ export default function FortunePage() {
       }
 
       if (!analysis || analysis.trim() === '') {
-        toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
-        setIsDailyLoading(false);
         toast.error('Không nhận được kết quả từ hệ thống. Vui lòng thử lại');
         setIsDailyLoading(false);
         return;
@@ -245,11 +243,11 @@ export default function FortunePage() {
         user: user?.email
       });
 
-      if (!token || !isAuthenticated) {
-        toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
-        setIsLoading(false);
-        return;
-      }
+      // if (!token || !isAuthenticated) {
+      //   toast.error('Vui lòng đăng nhập để sử dụng tính năng này');
+      //   setIsLoading(false);
+      //   return;
+      // }
 
       // Validate required fields
       if (!tuviInput.name || !tuviInput.birthDate) {
@@ -298,8 +296,8 @@ export default function FortunePage() {
 
       console.log('[Fortune] Sending natal chart request:', {
         birth_date: formattedBirthDate,
-        birth_time: tuviInput.birthTime,
-        birth_place: tuviInput.birthPlace
+        birth_time: tuviInput.birthTime || '12:00',
+        birth_place: tuviInput.birthPlace || 'Hanoi'
       });
 
 
@@ -311,11 +309,11 @@ export default function FortunePage() {
           name: tuviInput.name,
           gender: tuviInput.gender,
           birth_date: formattedBirthDate,
-          birth_time: tuviInput.birthTime,  // ✅ REQUIRED
-          birth_place: tuviInput.birthPlace  // ✅ REQUIRED
+          birth_time: tuviInput.birthTime || '12:00',  // ✅ REQUIRED
+          birth_place: tuviInput.birthPlace || 'Hanoi'  // ✅ REQUIRED
         }
         // ❌ NO data.target_date for natal chart
-      }, token);
+      }, token || '');
 
 
       // Parse giống như Tarot
@@ -543,7 +541,7 @@ export default function FortunePage() {
                   className="space-y-8 relative" // Thêm relative để định vị lớp phủ
                 >
                   {/* LỚP PHỦ KHÓA TÍNH NĂNG */}
-                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-[2px] rounded-3xl border border-white/10">
+                  {/* <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-[2px] rounded-3xl border border-white/10">
                     <div className="bg-black/80 p-8 rounded-2xl border border-yellow-500/30 shadow-2xl shadow-yellow-500/10 text-center max-w-md mx-4 transform hover:scale-105 transition-transform duration-300">
                       <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Lock className="w-8 h-8 text-yellow-400" />
@@ -553,7 +551,7 @@ export default function FortunePage() {
                         Hệ thống đang được nâng cấp để mang đến những lời giải đoán chính xác nhất. Vui lòng quay lại sau!
                       </p>
                     </div>
-                  </div>
+                  </div> */}
                   {!dailyResult ? (
                     <div className="max-w-2xl mx-auto">
                       <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-xl">
