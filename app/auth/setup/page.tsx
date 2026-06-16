@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Calendar, MapPin, Clock, ArrowRight, Sparkles, Star, Moon, Camera, Facebook, Instagram, Award, AlertCircle } from 'lucide-react';
@@ -25,38 +25,37 @@ export default function SetupPage() {
         birthPlace: ''
     });
 
-    // Role state
-    const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
+    // Tự động điền thông tin từ hồ sơ guest lưu trong localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('guestProfile');
+            if (stored) {
+                try {
+                    const guest = JSON.parse(stored);
+                    
+                    // Định dạng lại birth_date từ ISOString sang YYYY-MM-DD
+                    let birthDateFormatted = '';
+                    const rawDate = guest.birth_date || guest.birthDate;
+                    if (rawDate) {
+                        const date = new Date(rawDate);
+                        if (!isNaN(date.getTime())) {
+                            birthDateFormatted = date.toISOString().split('T')[0];
+                        }
+                    }
 
-    // Expert Info Form State
-    const [bio, setBio] = useState('');
-    const [experienceYears, setExperienceYears] = useState<number | ''>('');
-    const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
-    const [facebook, setFacebook] = useState('');
-    const [instagram, setInstagram] = useState('');
-    const [avatar, setAvatar] = useState<string | null>(null);
-
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                toast.error("Kích thước ảnh tối đa là 2MB");
-                return;
+                    setFormData({
+                        name: guest.name || '',
+                        gender: guest.gender || 'male',
+                        birthDate: birthDateFormatted,
+                        birthTime: guest.birth_time || guest.birthTime || '',
+                        birthPlace: guest.birth_place || guest.birthPlace || ''
+                    });
+                } catch (e) {
+                    console.error('Failed to parse guestProfile in SetupPage:', e);
+                }
             }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatar(reader.result as string);
-                toast.success("Tải ảnh đại diện thành công!");
-            };
-            reader.readAsDataURL(file);
         }
-    };
-
-    const toggleSpec = (spec: string) => {
-        setSelectedSpecs(prev =>
-            prev.includes(spec) ? prev.filter(s => s !== spec) : [...prev, spec]
-        );
-    };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -100,56 +99,10 @@ export default function SetupPage() {
                 formData.birthPlace,
                 token
             );
-
-            // 2. Update Cognito Attribute
-            try {
-                await updateUserAttribute({
-                    userAttribute: {
-                        attributeKey: 'custom:role',
-                        value: role
-                    }
-                });
-                // Force session refresh so tokens are updated with the custom:role claim
-                await fetchAuthSession({ forceRefresh: true });
-            } catch (cognitoError) {
-                console.error("Cognito attribute update failed:", cognitoError);
-            }
-
-            // 3. Update Zustand Store user object role
-            const currentUser = useAuthStore.getState().user;
-            const userId = currentUser?.id || user?.id || 'temp-id';
-
-            useAuthStore.setState({
-                user: currentUser ? {
-                    ...currentUser,
-                    role: role,
-                    isProfileComplete: true
-                } : null
-            });
-
-            // 4. Save Expert Details locally if Expert role is selected
-            if (role === 'EXPERT') {
-                const expertProfilePayload = {
-                    profile: {
-                        name: formData.name,
-                        title: `Chuyên gia ` + selectedSpecs.join(" & "),
-                        bio: bio,
-                        experience: `Tôi đã có hơn ${experienceYears} năm nghiên cứu và thực hành chuyên sâu. Đã giúp đỡ nhiều khách hàng tìm lại định hướng trong cuộc sống.`,
-                        yoe: Number(experienceYears),
-                        email: user?.email || currentUser?.email || '',
-                        phone: '0987.654.321',
-                        facebook: facebook || 'fb.com',
-                        instagram: instagram || 'instagr.am',
-                        specs: selectedSpecs,
-                        price: '200.000đ'
-                    },
-                    avatar: avatar,
-                    coverColor: 'from-purple-900/60 to-red-900/60'
-                };
-
-                localStorage.setItem(`expert-profile-data-${userId}`, JSON.stringify(expertProfilePayload));
-                localStorage.setItem('expert-profile-data', JSON.stringify(expertProfilePayload));
-            }
+            
+            // Xóa thông tin guest trong localStorage sau khi đã hoàn tất hồ sơ tài khoản chính thức
+            localStorage.removeItem('guestId');
+            localStorage.removeItem('guestProfile');
 
             toast.success('Cập nhật hồ sơ thành công!');
 

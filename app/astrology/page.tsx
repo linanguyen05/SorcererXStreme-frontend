@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Calendar, MapPin, Eye, Heart, Sparkles, Clock, RotateCcw } from 'lucide-react';
+import { Star, Calendar, MapPin, Eye, Heart, Sparkles, Clock, RotateCcw, Crown } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { useAuthStore, useProfileStore } from '@/lib/store';
 import { Button } from '@/components/ui/Button';
@@ -66,14 +66,53 @@ export default function AstrologyPage() {
   const { partner, breakupData } = useProfileStore();
   const router = useRouter();
 
-  // Redirect to login if not authenticated or profile incomplete
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user?.isProfileComplete) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, user, router]);
+  const [isClient, setIsClient] = useState(false);
 
-  if (!isAuthenticated || !user?.isProfileComplete) {
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
+        <AnimatedBackground />
+        <Sidebar />
+        <main
+          className="flex-1 flex items-center justify-center p-8 relative z-10"
+          style={{ marginLeft: sidebarCollapsed ? '10px' : '280px' }}
+        >
+          <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/25">
+              <Crown className="w-8 h-8 text-white animate-pulse" />
+            </div>
+            <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              Tính năng cao cấp
+            </h2>
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
+              Đăng ký để tiếp tục trải nghiệm các tính năng của HuyenHocAI
+            </p>
+            <Button
+              onClick={() => router.push('/auth/register')}
+              className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 font-semibold rounded-xl transition-all"
+            >
+              Đăng ký ngay
+            </Button>
+            <button
+              onClick={() => router.push('/auth/login')}
+              className="mt-4 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Đã có tài khoản? Đăng nhập
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && !user?.isProfileComplete) {
     return null;
   }
 

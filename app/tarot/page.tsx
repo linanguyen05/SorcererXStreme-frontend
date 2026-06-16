@@ -13,6 +13,8 @@ import { TAROT_DECK, TarotCard } from '@/lib/tarotData';
 import ContentHeader from '@/components/layout/ContentHeader';
 import { TarotSceneNew } from '@/components/tarot/TarotSceneNew';
 import { useRouter } from 'next/navigation';
+import { GuestProfileModal } from '@/components/profile/GuestProfileModal';
+import toast from 'react-hot-toast';
 
 // --- Types ---
 type ReadingMode = 'overview' | 'question' | null;
@@ -35,12 +37,23 @@ export default function TarotPage() {
   const isPickingCardRef = useRef(false);
   const router = useRouter();
 
-  // Redirect to login if not authenticated or profile incomplete
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user?.isProfileComplete) {
-  //     router.push('/auth/login');
-  //   }
-  // }, [isAuthenticated, user, router]);  
+  // Quản lý trạng thái Guest
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [hasGuestAccess, setHasGuestAccess] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (!isAuthenticated) {
+      const guestId = localStorage.getItem('guestId');
+      const guestProfile = localStorage.getItem('guestProfile');
+      if (guestId && guestProfile) {
+        setHasGuestAccess(true);
+      } else {
+        setShowGuestModal(true);
+      }
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -49,9 +62,90 @@ export default function TarotPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  if (!isAuthenticated || !user?.isProfileComplete) {
-    return null;
-  }
+  const fetchTarotAnalysis = async (cards: any[]) => {
+    const isGuest = !isAuthenticated;
+    const guestId = isGuest ? localStorage.getItem('guestId') : null;
+
+    if (!token && !guestId) return;
+    setIsLoadingAnalysis(true);
+    try {
+      const featureType = readingMode === 'question' ? 'question' : 'overview';
+      const endpoint = featureType === 'question' ? '/api/tarot/question' : '/api/tarot/overview';
+      const cardsDrawn = cards.map((card, index) => ({
+        card_name: card.name,
+        is_upright: !card.isReversed,
+        ...(featureType === 'overview' && {
+          position: index === 0 ? 'past' : index === 1 ? 'present' : 'future'
+        })
+      }));
+
+      // Lấy thông tin user/guest context
+      const context = isGuest 
+        ? JSON.parse(localStorage.getItem('guestProfile') || '{}')
+        : { name: user?.name, gender: user?.gender, birth_date: user?.birth_date };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({
+          domain: 'tarot',
+          feature_type: featureType,
+          user_context: {
+            name: context.name || 'Khách',
+            gender: context.gender || 'other',
+            birth_date: context.birth_date || new Date().toISOString()
+          },
+          data: { cards_drawn: cardsDrawn, ...(featureType === 'question' && { question }) }
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        // Kiểm tra lỗi 401 nếu guestId không tồn tại hoặc hết hạn trong DB
+        if (response.status === 401 && !isAuthenticated) {
+          localStorage.removeItem('guestId');
+          localStorage.removeItem('guestProfile');
+          setHasGuestAccess(false);
+          setShowGuestModal(true);
+          toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
+          return;
+        }
+        // Kiểm tra lỗi dùng hết 3 lượt của guest
+        if (response.status === 403 && errData.error === 'GUEST_LIMIT_REACHED') {
+          toast.error('Bạn đã dùng hết 3 lượt dùng thử miễn phí. Hãy đăng ký để tiếp tục sử dụng!');
+          setTimeout(() => {
+            router.push('/auth/register');
+          }, 2500);
+          return;
+        }
+        throw new Error(errData.message || 'Lỗi phân tích');
+      }
+
+      const data = await response.json();
+      if (data.analysis) {
+        setAiAnalysis(typeof data.analysis === 'string' ? data.analysis : (data.analysis.body ? JSON.parse(data.analysis.body).answer : JSON.stringify(data.analysis)));
+      }
+    } catch (error: any) {
+      setAiAnalysis(`❌ Lỗi: ${error.message}`);
+    } finally {
+      setIsLoadingAnalysis(false);
+    }
+  };
+
+  const resetReading = () => {
+    setReadingMode(null);
+    setPhase('selection');
+    setSelectedCards([]);
+    setSelectedIndices([]);
+    setShuffledDeck([]);
+    setQuestion('');
+    setAiAnalysis('');
+    setIsLoadingAnalysis(false);
+    hasCalledApiRef.current = false;
+    isPickingCardRef.current = false;
+  };
 
   const startReading = (mode: ReadingMode) => {
     setReadingMode(mode);
@@ -102,56 +196,31 @@ export default function TarotPage() {
     }
   };
 
-  const fetchTarotAnalysis = async (cards: any[]) => {
-    if (!token || !user) return;
-    setIsLoadingAnalysis(true);
-    try {
-      const featureType = readingMode === 'question' ? 'question' : 'overview';
-      const endpoint = featureType === 'question' ? '/api/tarot/question' : '/api/tarot/overview';
-      const cardsDrawn = cards.map((card, index) => ({
-        card_name: card.name,
-        is_upright: !card.isReversed,
-        ...(featureType === 'overview' && {
-          position: index === 0 ? 'past' : index === 1 ? 'present' : 'future'
-        })
-      }));
+  // Quyền truy cập: Người dùng hoàn tất profile HOẶC Guest có quyền access
+  const isAllowed = isAuthenticated ? user?.isProfileComplete : hasGuestAccess;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          domain: 'tarot',
-          feature_type: featureType,
-          user_context: { name: user.name, gender: user.gender, birth_date: user.birth_date },
-          data: { cards_drawn: cardsDrawn, ...(featureType === 'question' && { question }) }
-        }),
-      });
+  if (!isClient) return null;
 
-      const data = await response.json();
-      if (data.analysis) {
-        setAiAnalysis(typeof data.analysis === 'string' ? data.analysis : (data.analysis.body ? JSON.parse(data.analysis.body).answer : JSON.stringify(data.analysis)));
-      }
-    } catch (error: any) {
-      setAiAnalysis(`❌ Lỗi: ${error.message}`);
-    } finally {
-      setIsLoadingAnalysis(false);
-    }
-  };
-
-  const resetReading = () => {
-    setReadingMode(null);
-    setPhase('selection');
-    setSelectedCards([]);
-    setSelectedIndices([]);
-    setShuffledDeck([]);
-    setQuestion('');
-    setAiAnalysis('');
-    setIsLoadingAnalysis(false);
-    hasCalledApiRef.current = false;
-    isPickingCardRef.current = false;
-  };
-
-  if (!isAuthenticated) return null;
+  if (!isAllowed) {
+    return (
+      <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
+        <AnimatedBackground />
+        <Sidebar />
+        <GuestProfileModal
+          isOpen={showGuestModal}
+          onClose={() => {
+            setShowGuestModal(false);
+            if (!hasGuestAccess) {
+              router.push('/auth/login');
+            }
+          }}
+          onSuccess={() => {
+            setHasGuestAccess(true);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-black font-sans text-white">
