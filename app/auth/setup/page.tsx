@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/store';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import toast from 'react-hot-toast';
 import { updateUserAttribute, fetchAuthSession } from 'aws-amplify/auth';
+import { profileApi, expertApi } from '@/lib/api-client';
 
 const availableSpecialties = ['Tarot', 'Astrology', 'Numerology', 'Tử vi', 'Phong thủy'];
 
@@ -36,19 +37,36 @@ export default function SetupPage() {
     const [instagram, setInstagram] = useState('');
     const [avatar, setAvatar] = useState<string | null>(null);
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 2 * 1024 * 1024) {
                 toast.error("Kích thước ảnh tối đa là 2MB");
                 return;
             }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatar(reader.result as string);
+
+            if (!token) {
+                toast.error("Bạn cần đăng nhập để tải ảnh đại diện.");
+                return;
+            }
+
+            const uploadToast = toast.loading("Đang tải ảnh đại diện lên server...");
+            try {
+                const uploadRes = await profileApi.uploadAvatar(file, token);
+                const uploadedAvatarUrl = uploadRes.url || uploadRes.avatarUrl || uploadRes.data?.url || uploadRes.data?.avatarUrl || uploadRes.imageUrl;
+
+                if (!uploadedAvatarUrl) {
+                    throw new Error("Không tìm thấy URL ảnh từ kết quả trả về của API.");
+                }
+
+                setAvatar(uploadedAvatarUrl);
+                toast.dismiss(uploadToast);
                 toast.success("Tải ảnh đại diện thành công!");
-            };
-            reader.readAsDataURL(file);
+            } catch (err: any) {
+                toast.dismiss(uploadToast);
+                console.error("Lỗi upload avatar:", err);
+                toast.error("Không thể upload ảnh: " + (err.message || "Lỗi hệ thống"));
+            }
         }
     };
 
@@ -133,7 +151,8 @@ export default function SetupPage() {
                 token
             );
 
-            // 2. Update Cognito Attribute
+            // 2. Update Cognito Attribute & Get userSub
+            let userId = user?.id || 'temp-id';
             try {
                 await updateUserAttribute({
                     userAttribute: {
@@ -142,14 +161,19 @@ export default function SetupPage() {
                     }
                 });
                 // Force session refresh so tokens are updated with the custom:role claim
-                await fetchAuthSession({ forceRefresh: true });
+                const session = await fetchAuthSession({ forceRefresh: true });
+                if (session.userSub) {
+                    userId = session.userSub;
+                }
             } catch (cognitoError) {
                 console.error("Cognito attribute update failed:", cognitoError);
             }
 
             // 3. Update Zustand Store user object role
             const currentUser = useAuthStore.getState().user;
-            const userId = currentUser?.id || user?.id || 'temp-id';
+            if (currentUser && userId !== 'temp-id') {
+                currentUser.id = userId;
+            }
 
             useAuthStore.setState({
                 user: currentUser ? {
@@ -159,17 +183,42 @@ export default function SetupPage() {
                 } : null
             });
 
-            // 4. Save Expert Details locally if Expert role is selected
+            // 4. Save Expert Details locally and database if Expert role is selected
             if (role === 'EXPERT') {
+                const mainSpecialty = selectedSpecs[0]?.toUpperCase() || 'TAROT';
+                // Build media_channels with only valid URLs
+                const mediaChannels: Record<string, string> = {};
+                if (facebook && facebook.startsWith('http')) mediaChannels.facebook = facebook;
+                if (instagram && instagram.startsWith('http')) mediaChannels.instagram = instagram;
+
+                const expertPayload: Record<string, any> = {
+                    specialty: mainSpecialty,
+                    experience_years: Number(experienceYears),
+                };
+                // bio must be >= 10 chars per backend validation
+                if (bio && bio.length >= 10) {
+                    expertPayload.bio = bio;
+                }
+                if (Object.keys(mediaChannels).length > 0) {
+                    expertPayload.media_channels = mediaChannels;
+                }
+
+                try {
+                    await expertApi.updateProfile(userId, expertPayload, token);
+                } catch (apiError) {
+                    console.error("Failed to update expert profile on backend:", apiError);
+                    toast.error("Không thể đồng bộ hồ sơ chuyên gia lên máy chủ");
+                }
+
                 const expertProfilePayload = {
                     profile: {
                         name: formData.name,
                         title: `Chuyên gia ` + selectedSpecs.join(" & "),
                         bio: bio,
-                        experience: `Tôi đã có hơn ${experienceYears} năm nghiên cứu và thực hành chuyên sâu. Đã giúp đỡ nhiều khách hàng tìm lại định hướng trong cuộc sống.`,
+                        experience: expertPayload.experience,
                         yoe: Number(experienceYears),
                         email: user?.email || currentUser?.email || '',
-                        phone: '0987.654.321',
+                        phone: expertPayload.phone,
                         facebook: facebook || 'fb.com',
                         instagram: instagram || 'instagr.am',
                         specs: selectedSpecs,

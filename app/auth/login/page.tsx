@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, Sparkles, Star, Moon, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
+import { expertApi } from '@/lib/api-client';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -29,11 +30,33 @@ export default function LoginPage() {
       const success = await login(email, password);
       if (success) {
         toast.success('Đăng nhập thành công!');
-        const { user } = useAuthStore.getState();
-        if (user?.isProfileComplete) {
-          router.push('/profile'); 
+        const { user, token } = useAuthStore.getState();
+        if (user?.role?.toUpperCase() === 'EXPERT') {
+          let isApproved = false;
+          if (token && user.id !== 'temp-id') {
+            try {
+              const profileRes = await expertApi.getProfile(user.id, token);
+              const exp = profileRes?.expert || profileRes;
+              if (exp && exp.status === 'APPROVED') {
+                isApproved = true;
+              }
+            } catch (e) {
+              console.warn("API check failed during login:", e);
+            }
+          }
+          if (isApproved) {
+            router.push(`/experts/${user.id}/dashboard`);
+          } else {
+            router.push(`/experts/${user.id}/pending`);
+          }
+        } else if (user?.role === 'ADMIN') {
+          router.push(`/admins/${user.id || '1'}/dashboard`);
         } else {
-          router.push('/auth/setup');
+          if (user?.isProfileComplete) {
+            router.push('/profile'); 
+          } else {
+            router.push('/auth/setup');
+          }
         }
       } else {
         toast.error('Email hoặc mật khẩu không đúng');

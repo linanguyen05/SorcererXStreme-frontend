@@ -13,12 +13,22 @@ import Link from 'next/link';
 import { ExpertHeader } from '@/components/layout/ExpertHeader';
 import { useAuthStore } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
-import { experts } from '@/lib/services-data';
+
 import { expertApi } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 import { useRouter } from 'next/navigation';
+
+const mapSpecialtyToUI = (spec: string): string => {
+  if (!spec) return 'Tarot';
+  const upper = spec.toUpperCase();
+  if (upper === 'TAROT') return 'Tarot';
+  if (upper === 'ASTROLOGY') return 'Astrology';
+  if (upper === 'NUMEROLOGY') return 'Numerology';
+  if (upper === 'HOROSCOPE') return 'Tử vi';
+  return spec;
+};
 
 export default function ExpertDashboard({ id }: { id: string }) {
   const router = useRouter();
@@ -33,13 +43,13 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
   // Profile Data
   const [profileData, setProfileData] = useState({
-    name: "Master Lina",
-    title: "Chuyên gia Tarot & Chiêm tinh học",
-    bio: "Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân.",
-    experience: "5 năm nghiên cứu Tarot...",
-    yoe: 5,
+    name: "",
+    title: "",
+    bio: "",
+    experience: "",
+    yoe: 0,
     avatar: null as string | null,
-    specs: ['Tarot']
+    specs: [] as string[]
   });
 
   // Notifications simulation state
@@ -56,106 +66,37 @@ export default function ExpertDashboard({ id }: { id: string }) {
     let isSubscribed = true;
 
     const fetchAll = async () => {
-      // 1. Check approval first
-      if (typeof window !== 'undefined') {
-        const storedExperts = localStorage.getItem('mock-admin-experts');
-        if (storedExperts) {
-          try {
-            const allExperts = JSON.parse(storedExperts);
-            const currentUser = useAuthStore.getState().user;
-            const matchedExpert = allExperts.find((e: any) => e.id === id || (currentUser?.email && e.email === currentUser.email));
-            if (matchedExpert && matchedExpert.status === 'PENDING') {
-              router.push(`/experts/${id}/pending`);
-              return;
-            }
-          } catch (e) {
-            console.error("Local check failed", e);
-          }
-        }
-      }
+      if (!token) return;
 
-      if (token) {
-        try {
-          const profileRes = await expertApi.getProfile(id, token);
-          if (profileRes && profileRes.status === 'PENDING') {
-            router.push(`/experts/${id}/pending`);
-            return;
-          }
-        } catch (err) {
-          console.warn("API check failed in dashboard client", err);
+      // Check approval status via API
+      try {
+        const profileRes = await expertApi.getProfile(id, token);
+        const exp = profileRes?.expert || profileRes;
+        if (exp && exp.status === 'PENDING') {
+          router.push(`/experts/${id}/pending`);
+          return;
         }
+      } catch (err) {
+        console.warn('API check failed in dashboard client', err);
       }
 
       if (!isSubscribed) return;
-
-      // 2. Initial fallback load from local static data
-      const expertInfo = experts.find(e => e.id === id);
-      if (expertInfo) {
-        setProfileData({
-          name: expertInfo.name,
-          title: expertInfo.title,
-          bio: expertInfo.bio || expertInfo.about || "",
-          experience: expertInfo.experience || "5 năm",
-          yoe: parseInt(expertInfo.experience) || 5,
-          avatar: expertInfo.avatar || null,
-          specs: expertInfo.specialties || ['Tarot']
-        });
-
-        if (expertInfo.packages) {
-          setServices(expertInfo.packages.map(p => ({
-            id: p.id,
-            name: p.name,
-            price: `${p.price.toLocaleString()}đ`,
-            duration: `${p.duration} phút`,
-            status: 'active'
-          })));
-        }
-      }
-
-      // 3. Secondary fallback load from localStorage
-      if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem(`expert-profile-data-${id}`) || localStorage.getItem('expert-profile-data');
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (parsed.profile && isSubscribed) {
-              setProfileData(prev => ({
-                ...prev,
-                name: parsed.profile.name || prev.name,
-                title: parsed.profile.title || prev.title,
-                bio: parsed.profile.bio || prev.bio,
-                experience: parsed.profile.experience || prev.experience,
-                yoe: parsed.profile.yoe !== undefined ? parsed.profile.yoe : prev.yoe,
-                avatar: parsed.avatar || prev.avatar,
-                specs: parsed.profile.specs || prev.specs
-              }));
-            }
-            if (parsed.isVerified && isSubscribed) {
-              setIsVerified(true);
-            }
-          } catch (e) {
-            console.error("Error loading localStorage data in dashboard", e);
-          }
-        }
-      }
-
-      // 4. Dynamic Load from Backend API
-      if (!token) return;
 
       try {
         // Fetch Profile
         const profileRes = await expertApi.getProfile(id, token);
         if (profileRes && isSubscribed) {
+          const exp = profileRes.expert || profileRes;
           setProfileData({
-            name: profileRes.user?.name || profileRes.name || "Chuyên gia",
-            title: profileRes.specialty && profileRes.specialty.length > 0 ? `Chuyên gia ` + profileRes.specialty.join(' & ') : "Chuyên gia tư vấn",
-            bio: profileRes.bio || "",
-            experience: profileRes.experience || "",
-            yoe: profileRes.experience_years !== undefined ? profileRes.experience_years : 5,
-            avatar: profileRes.avatar || null,
-            specs: profileRes.specialty || ['Tarot']
+            name: exp.user?.name || exp.name || "Chuyên gia",
+            title: exp.specialty ? `Chuyên gia ` + mapSpecialtyToUI(exp.specialty) : "Chuyên gia tư vấn",
+            bio: exp.bio || "",
+            experience: exp.experience || "",
+            yoe: exp.experience_years !== undefined ? exp.experience_years : 5,
+            avatar: exp.user?.avatar || exp.avatar || null,
+            specs: exp.specialty ? [mapSpecialtyToUI(exp.specialty)] : ['Tarot']
           });
-          setIsVerified(profileRes.is_verified || false);
+          setIsVerified(exp.status === 'APPROVED' || exp.is_verified || false);
         }
 
         // Fetch Services
@@ -296,10 +237,10 @@ export default function ExpertDashboard({ id }: { id: string }) {
 
         {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={<DollarSign className="text-green-400 w-6 h-6" />} label="Doanh thu" value="1.250.000đ" />
+          <StatCard icon={<DollarSign className="text-green-400 w-6 h-6" />} label="Doanh thu" value="0.0đ" />
           <StatCard icon={<Calendar className="text-purple-400 w-6 h-6" />} label="Lịch hẹn mới" value={String(pendingAppointmentsCount).padStart(2, '0')} onClick={() => appointmentRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
-          <StatCard icon={<Star className="text-yellow-400 w-6 h-6" />} label="Đánh giá TB" value="4.9" />
-          <StatCard icon={<MessageSquare className="text-blue-400 w-6 h-6" />} label="Phản hồi" value="12" onClick={() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
+          <StatCard icon={<Star className="text-yellow-400 w-6 h-6" />} label="Đánh giá TB" value="0.0" />
+          <StatCard icon={<MessageSquare className="text-blue-400 w-6 h-6" />} label="Phản hồi" value="0" onClick={() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth' })} isClickable />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

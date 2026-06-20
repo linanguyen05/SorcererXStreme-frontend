@@ -19,7 +19,7 @@ import {
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
-import { experts } from '@/lib/services-data';
+
 import { expertApi } from '@/lib/api-client';
 import { useAuthStore } from '@/lib/store';
 
@@ -110,44 +110,7 @@ function atOffset(dayOffset: number, hour: number, minute: number): Date {
 }
 
 function buildSeedAppointments(): CalendarEvent[] {
-  return [
-    {
-      id: 'apt-1', type: 'appointment', status: 'COMPLETED',
-      customer: 'Nguyễn Văn A', service: 'Trải bài Tarot định hướng sự nghiệp',
-      title: 'Nguyễn Văn A · Tarot',
-      start: atOffset(-1, 14, 0), end: atOffset(-1, 14, 30),
-    },
-    {
-      id: 'apt-2', type: 'appointment', status: 'PAID',
-      customer: 'Trần Thị B', service: 'Phân tích bản đồ sao cá nhân',
-      title: 'Trần Thị B · Bản đồ sao',
-      start: atOffset(1, 10, 0), end: atOffset(1, 11, 0),
-    },
-    {
-      id: 'apt-3', type: 'appointment', status: 'PENDING',
-      customer: 'Lê Hoàng C', service: 'Trải bài Tarot tình duyên',
-      title: 'Lê Hoàng C · Tarot',
-      start: atOffset(1, 16, 0), end: atOffset(1, 16, 45),
-    },
-    {
-      id: 'apt-4', type: 'appointment', status: 'PAID',
-      customer: 'Phạm Thu D', service: 'Tư vấn thần số học',
-      title: 'Phạm Thu D · Thần số học',
-      start: atOffset(3, 9, 30), end: atOffset(3, 10, 15),
-    },
-    {
-      id: 'apt-5', type: 'appointment', status: 'COMPLETED',
-      customer: 'Vũ Minh E', service: 'Phân tích bản đồ sao cá nhân',
-      title: 'Vũ Minh E · Bản đồ sao',
-      start: atOffset(4, 20, 0), end: atOffset(4, 21, 0),
-    },
-    {
-      id: 'apt-6', type: 'appointment', status: 'CANCELLED',
-      customer: 'Đỗ Lan F', service: 'Trải bài Tarot tổng quan',
-      title: 'Đỗ Lan F · Tarot',
-      start: atOffset(2, 13, 0), end: atOffset(2, 13, 30),
-    },
-  ];
+  return [];
 }
 
 // ──────────────────────────────────────────────────────────

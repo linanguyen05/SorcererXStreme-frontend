@@ -36,29 +36,17 @@ function ExpertPendingClient({ id }: { id: string }) {
       let isApproved = false;
       let status: 'PENDING' | 'APPROVED' | 'REJECTED' = 'PENDING';
 
-      // 1. Try real API if token is present
+      // Check status via API
       if (token && id !== 'temp-id') {
         try {
-          const profile = await expertApi.getProfile(id, token);
-          if (profile && profile.status) {
-            status = profile.status;
-            isApproved = (profile.status === 'APPROVED');
+          const profileRes = await expertApi.getProfile(id, token);
+          const exp = profileRes?.expert || profileRes;
+          if (exp && exp.status) {
+            status = exp.status;
+            isApproved = (exp.status === 'APPROVED');
           }
         } catch (apiError) {
-          console.warn("API check failed, falling back to localStorage check.", apiError);
-        }
-      }
-
-      // 2. Fallback to localStorage simulation
-      if (status === 'PENDING') {
-        const storedExperts = localStorage.getItem('mock-admin-experts');
-        if (storedExperts) {
-          const allExperts = JSON.parse(storedExperts);
-          const matchedExpert = allExperts.find((e: any) => e.id === id || (user?.email && e.email === user.email));
-          if (matchedExpert) {
-            status = matchedExpert.status;
-            isApproved = (matchedExpert.status === 'APPROVED');
-          }
+          console.warn("API check failed.", apiError);
         }
       }
 

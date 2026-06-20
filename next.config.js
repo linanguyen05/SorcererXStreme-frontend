@@ -1,5 +1,5 @@
 const nextConfig = {
-  output: 'export',
+  output: process.env.NODE_ENV === 'development' ? undefined : 'export',
   reactStrictMode: true,
   images: {
     unoptimized: true,

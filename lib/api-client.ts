@@ -9,9 +9,10 @@ interface RequestOptions {
 async function apiRequest(endpoint: string, options: RequestOptions = {}) {
   const { method = 'GET', body, token } = options;
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
+  const headers: HeadersInit = {};
+  if (!(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -31,7 +32,7 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
   };
 
   if (body) {
-    config.body = JSON.stringify(body);
+    config.body = body instanceof FormData ? body : JSON.stringify(body);
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
@@ -156,12 +157,29 @@ export const profileApi = {
   get: (token: string) =>
     apiRequest('/api/users/profile', { token }),
 
+  complete: (data: any, token: string) =>
+    apiRequest('/api/users/complete-profile', {
+      method: 'PUT',
+      body: data,
+      token,
+    }),
+
   update: (data: any, token: string) =>
     apiRequest('/api/users/update-profile', {
       method: 'PATCH',
       body: data,
       token,
     }),
+
+  uploadAvatar: (file: File, token: string) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return apiRequest('/api/users/avatar', {
+      method: 'POST',
+      body: formData,
+      token,
+    });
+  },
 
   upgradeToVIP: (token: string, tier: string = 'VIP', durationDays: number = 30) =>
     apiRequest('/api/users/upgrade-vip', {
@@ -452,11 +470,14 @@ export const adminApi = {
 
 export const expertApi = {
   // A. Expert Profile Management
-  getProfile: (expertId: string, token: string) =>
-    apiRequest(`/experts/${expertId}/profile`, { token }),
+  list: () =>
+    apiRequest('/api/experts'),
 
-  updateProfile: (expertId: string, data: { bio?: string; specialty?: string[]; experience_years?: number; [key: string]: any }, token: string) =>
-    apiRequest(`/experts/${expertId}/profile`, {
+  getProfile: (expertId: string, token: string) =>
+    apiRequest(`/api/experts/${expertId}/profile`, { token }),
+
+  updateProfile: (expertId: string, data: { bio?: string; specialty?: string | string[]; experience_years?: number; [key: string]: any }, token: string) =>
+    apiRequest(`/api/experts/${expertId}/profile`, {
       method: 'PATCH',
       body: data,
       token,

@@ -1,8 +1,4 @@
-import { experts } from '@/lib/services-data';
-
-export function generateStaticParams() {
-  return experts.map((e) => ({ id: e.id }));
-}
+export const dynamicParams = true;
 
 export default function ExpertLayout({
   children,

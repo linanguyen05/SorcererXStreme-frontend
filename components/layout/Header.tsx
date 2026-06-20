@@ -124,7 +124,10 @@ export const Header = () => {
                                                 <p className="text-xs text-gray-400 truncate mt-0.5">{user.email}</p>
                                             </div>
                                             <div className="p-2">
-                                                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group">
+                                                <Link 
+                                                    href={user.role === 'EXPERT' ? `/experts/${user.id}/dashboard` : user.role === 'ADMIN' ? `/admins/${user.id || '1'}/dashboard` : "/dashboard"} 
+                                                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-all group"
+                                                >
                                                     <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400"><LayoutDashboard className="w-4 h-4" /></div>
                                                     Dashboard
                                                 </Link>
@@ -198,7 +201,13 @@ export const Header = () => {
                                                         <p className="text-sm text-gray-400 truncate text-left">{user.email}</p>
                                                     </div>
                                                 </div>
-                                                <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-4 text-center text-white border border-white/20 rounded-xl flex items-center justify-center gap-2"><LayoutDashboard className="w-5 h-5" /> Dashboard</Link>
+                                                <Link 
+                                                    href={user.role === 'EXPERT' ? `/experts/${user.id}/dashboard` : user.role === 'ADMIN' ? `/admins/${user.id || '1'}/dashboard` : "/dashboard"} 
+                                                    onClick={() => setIsMobileMenuOpen(false)} 
+                                                    className="w-full py-4 text-center text-white border border-white/20 rounded-xl flex items-center justify-center gap-2"
+                                                >
+                                                    <LayoutDashboard className="w-5 h-5" /> Dashboard
+                                                </Link>
                                                 <button onClick={handleLogout} className="w-full py-4 text-center text-red-400 border border-red-500/20 rounded-xl flex items-center justify-center gap-2"><LogOut className="w-5 h-5" /> Đăng xuất</button>
                                             </>
                                         ) : (

@@ -65,7 +65,7 @@ export const useAuthStore = create<AuthState>()(
           const mappedUser: User = {
             id: fullUser.id || 'temp-id',
             email: fullUser.email,
-            role: user.role || 'USER',
+            role: (fullUser.role || user.role || 'USER').toUpperCase(),
             name: fullUser.name,
             gender: fullUser.gender,
             birth_date: fullUser.birth_date,
@@ -112,7 +112,7 @@ export const useAuthStore = create<AuthState>()(
       completeProfile: async (name: string, gender: string, birth_date: string, birth_time: string, birth_place: string, token: string) => {
         if (token) {
           try {
-            const updatedUser = await profileApi.update({ name, gender, birth_date, birth_time, birth_place }, token);
+            const updatedUser = await profileApi.complete({ name, gender, birth_date, birth_time, birth_place }, token);
             const mappedUser = {
               ...get().user,
               ...updatedUser,
