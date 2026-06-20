@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast';
@@ -8,7 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import ExpertChat from '@/components/chat/ExpertChat';
 
 export const metadata: Metadata = {
-  title: "SorcererXStreme - Huyền Thuật AI",
+  title: "HuyenHocAI - Huyền Thuật AI",
   description: "Ứng dụng huyền thuật với AI tiên tiến",
 };
 

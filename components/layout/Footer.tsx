@@ -25,7 +25,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                     <div className="space-y-4 col-span-1 sm:col-span-2 lg:col-span-1">
                         <Link href="/" className="inline-block">
                             <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white" style={{ fontFamily: 'Pacifico, cursive' }}>
-                                SorcererXStreme
+                                HuyenHocai
                             </h2>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed">
@@ -67,7 +67,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                                 <Link href="/blog" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Blog</Link>
                             </li>
                             <li>
-                                <Link href="/expert-listing" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Tìm Kiếm Chuyên Gia</Link>
+                                <Link href="/service-listing?tab=experts" className="text-gray-400 hover:text-purple-400 transition-colors text-sm">Tìm Kiếm Chuyên Gia</Link>
                             </li>
                         </ul>
                     </div>
@@ -97,7 +97,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                         <ul className="space-y-4">
                             <li className="flex items-start gap-3 text-gray-400 text-sm">
                                 <MapPin className="w-5 h-5 text-purple-500 flex-shrink-0" />
-                                <span>54-47 Đường Lê Duẩn, Phường Sài Gòn, TP. Hồ Chí Minh</span>
+                                <span>Lô E2a-7, Đường D1, Khu Công nghệ cao, Phường Tăng Nhơn Phú, TP. Hồ Chí Minh</span>
                             </li>
                             <li className="flex items-center gap-3 text-gray-400 text-sm">
                                 <Phone className="w-5 h-5 text-purple-500 flex-shrink-0" />
@@ -105,7 +105,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
                             </li>
                             <li className="flex items-center gap-3 text-gray-400 text-sm">
                                 <Mail className="w-5 h-5 text-purple-500 flex-shrink-0" />
-                                <span>contact@sorcererxstreme.com</span>
+                                <span>contact.huyenhocai@gmail.com</span>
                             </li>
                         </ul>
                     </div>
@@ -113,7 +113,7 @@ export const Footer = ({ forceRender = false }: { forceRender?: boolean }) => {
 
                 <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
                     <p className="text-gray-500 text-sm text-center md:text-left">
-                        © {new Date().getFullYear()} SorcererXStreme. All rights reserved.
+                        © {new Date().getFullYear()} HuyenHocAI. All rights reserved.
                     </p>
                     <p className="text-gray-600 text-xs flex items-center gap-1">
                         Made with <span className="text-red-500">❤</span> by TEEJ Sorcerer Team

@@ -333,7 +333,7 @@ export default function ChatPage() {
       >
         {/* Header */}
         <ContentHeader
-          title="AI Chat Huyền Thuật"
+          title="Chat Huyền Thuật"
           description="Trò chuyện với AI về thế giới bí ẩn"
         >
           {/* Nút Refresh được đưa vào children của ContentHeader */}

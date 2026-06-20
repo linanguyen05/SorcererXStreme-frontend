@@ -2,7 +2,7 @@
 
 import { color, motion } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, Star, Moon, Sun, ArrowRight, Zap, Shield, Heart, MessageCircle } from 'lucide-react';
+import { Sparkles, Star, Moon, Sun, ArrowRight, Zap, Shield, Heart, MessageCircle, Compass } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { useAuthStore } from '@/lib/store';  
@@ -60,7 +60,7 @@ export default function LandingPage() {
                             className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed"
                         >
                             Kết hợp trí tuệ nhân tạo tiên tiến với các bộ môn huyền học cổ xưa.
-                            SorcererXStreme mang đến cho bạn những lời khuyên sâu sắc và chính xác nhất.
+                            HuyenHocAI mang đến cho bạn những lời khuyên sâu sắc và chính xác nhất.
                         </motion.p>
 
                         <motion.div
@@ -149,6 +149,13 @@ export default function LandingPage() {
                                     icon: <Sun className="w-6 h-6 text-pink-400" />,
                                     color: "from-pink-500/20 to-rose-500/20",
                                     href: "/numerology"
+                                },
+                                {
+                                    title: "Dịch Vụ & Chuyên Gia",
+                                    desc: "Đặt gói dịch vụ tâm linh và kết nối tư vấn 1:1 trực tiếp với các chuyên gia huyền học hàng đầu.",
+                                    icon: <Compass className="w-6 h-6 text-amber-400" />,
+                                    color: "from-amber-500/20 to-yellow-500/20",
+                                    href: "/service-listing"
                                 }
                             ].map((feature, index) => (
                                 <div
@@ -175,66 +182,59 @@ export default function LandingPage() {
                 {/* Why Choose Us */}
                 <section className="py-24 bg-gradient-to-b from-transparent to-purple-900/10">
                     <div className="container mx-auto px-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                            <div>
-                                <h2 className="text-3xl md:text-5xl font-bold mb-8">
-                                    Tại Sao Chọn <br />
-                                    <span className="text-purple-400">SorcererXStreme?</span>
-                                </h2>
-                                <div className="space-y-8">
-                                    {[
-                                        {
-                                            title: "AI Chính Xác Cao",
-                                            desc: "Sử dụng mô hình ngôn ngữ lớn được huấn luyện chuyên sâu về huyền học.",
-                                            icon: <Zap className="w-5 h-5 text-yellow-400" />
-                                        },
-                                        {
-                                            title: "Bảo Mật Tuyệt Đối",
-                                            desc: "Thông tin cá nhân và câu chuyện của bạn được mã hóa và bảo vệ an toàn.",
-                                            icon: <Shield className="w-5 h-5 text-green-400" />
-                                        },
-                                        {
-                                            title: "Tận Tâm & Thấu Hiểu",
-                                            desc: "Không chỉ là dự đoán, chúng tôi mang đến lời khuyên để bạn tốt hơn mỗi ngày.",
-                                            icon: <Heart className="w-5 h-5 text-red-400" />
-                                        }
-                                    ].map((item, index) => (
-                                        <div key={index} className="flex gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10">
-                                                {item.icon}
-                                            </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                                                <p className="text-gray-400">{item.desc}</p>
-                                            </div>
+                        <div className="text-center max-w-2xl mx-auto mb-16">
+                            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-medium text-purple-300 bg-purple-500/10 border border-purple-500/20 mb-5">
+                                Giá trị cốt lõi
+                            </span>
+                            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+                                Tại Sao Chọn{' '}
+                                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    HuyenHocAI?
+                                </span>
+                            </h2>
+                            <p className="text-gray-400">
+                                Sự kết hợp giữa trí tuệ nhân tạo và huyền học, mang đến trải nghiệm chính xác và gần gũi.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {[
+                                {
+                                    title: "AI Chính Xác Cao",
+                                    desc: "Sử dụng mô hình ngôn ngữ lớn được huấn luyện chuyên sâu về huyền học.",
+                                    icon: <Zap className="w-6 h-6 text-yellow-400" />,
+                                    glow: "from-yellow-500/20",
+                                    ring: "group-hover:border-yellow-400/40"
+                                },
+                                {
+                                    title: "Bảo Mật Tuyệt Đối",
+                                    desc: "Thông tin cá nhân và câu chuyện của bạn được mã hóa và bảo vệ an toàn.",
+                                    icon: <Shield className="w-6 h-6 text-green-400" />,
+                                    glow: "from-green-500/20",
+                                    ring: "group-hover:border-green-400/40"
+                                },
+                                {
+                                    title: "Tận Tâm & Thấu Hiểu",
+                                    desc: "Không chỉ là dự đoán, chúng tôi mang đến lời khuyên để bạn tốt hơn mỗi ngày.",
+                                    icon: <Heart className="w-6 h-6 text-red-400" />,
+                                    glow: "from-red-500/20",
+                                    ring: "group-hover:border-red-400/40"
+                                }
+                            ].map((item, index) => (
+                                <div
+                                    key={index}
+                                    className={`group relative bg-white/5 border border-white/10 ${item.ring} rounded-3xl p-8 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden`}
+                                >
+                                    <div className={`absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br ${item.glow} to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                                    <div className="relative z-10">
+                                        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 mb-6 group-hover:scale-110 transition-transform duration-300">
+                                            {item.icon}
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 blur-[100px] opacity-20" />
-                                <div className="relative bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-xl">
-                                            A
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold">An Nhiên</h4>
-                                            <div className="flex text-yellow-400 text-xs">
-                                                <Star className="w-3 h-3 fill-current" />
-                                                <Star className="w-3 h-3 fill-current" />
-                                                <Star className="w-3 h-3 fill-current" />
-                                                <Star className="w-3 h-3 fill-current" />
-                                                <Star className="w-3 h-3 fill-current" />
-                                            </div>
-                                        </div>
+                                        <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                                        <p className="text-gray-400 leading-relaxed">{item.desc}</p>
                                     </div>
-                                    <p className="text-gray-300 italic mb-6">
-                                        "Tôi thực sự bất ngờ với độ chính xác của Tarot. Những lời khuyên rất thực tế và giúp tôi giải tỏa được nhiều căng thẳng trong công việc. Giao diện web cũng rất đẹp và dễ sử dụng!"
-                                    </p>
-                                    <div className="text-sm text-gray-500">Đã trải nghiệm Tarot • 2 ngày trước</div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </section>

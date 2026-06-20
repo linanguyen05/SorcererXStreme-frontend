@@ -66,7 +66,7 @@ const blogPosts = [
         excerpt: "Sự kết hợp giữa dữ liệu lớn (Big Data) và tri thức cổ xưa tạo nên những kết quả chính xác đến kinh ngạc. Liệu máy móc có thể hiểu được định mệnh?",
         image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800",
         category: "Công Nghệ",
-        author: "SorcererX Tech",
+        author: "HuyenHocAI Tech",
         date: "05/02/2026",
         readTime: "9 phút"
     },

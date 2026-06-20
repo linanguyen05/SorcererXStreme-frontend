@@ -7,7 +7,7 @@ export default function ExpertsRedirectPage() {
     const router = useRouter();
 
     useEffect(() => {
-        router.replace('/expert-listing');
+        router.replace('/service-listing?tab=experts');
     }, [router]);
 
     return (

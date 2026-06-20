@@ -182,7 +182,7 @@
 //                       ? "bg-gradient-to-r from-yellow-400 via-yellow-200 to-amber-400"
 //                       : "bg-gradient-to-r from-white via-purple-200 to-white"
 //                   )} style={{ fontFamily: 'Pacifico, cursive' }}>
-//                     SorcererXStreme
+//                     HuyenHocai
 //                   </h1>
 //                   <p className={cn(
 //                     "text-[10px] tracking-widest font-medium uppercase",
@@ -432,8 +432,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  Briefcase,
-  Search
+  Compass,
+  BookOpen
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -478,8 +478,8 @@ const navigationItems = [
   { name: 'Cung Hoàng Đạo', href: '/astrology', icon: Star },
   { name: 'Tử Vi', href: '/fortune', icon: Moon },
   { name: 'Thần Số Học', href: '/numerology', icon: Hash },
-  { name: 'Tìm Kiếm Dịch Vụ', href: '/service-listing', icon: Search },
-  { name: 'Tìm Kiếm Chuyên Gia', href: '/expert-listing', icon: Briefcase },
+  { name: 'Dịch Vụ & Chuyên Gia', href: '/service-listing', icon: Compass },
+  { name: 'Blog', href: '/blog', icon: BookOpen },
   { name: 'Hồ Sơ', href: '/profile', icon: Settings }
 ];
 
@@ -569,7 +569,7 @@ export const Sidebar = () => {
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className={cn(
-          "h-screen fixed left-0 top-0 z-[60] shadow-2xl", // z-index cao hơn để đè lên content
+          "h-screen fixed left-0 top-0 z-[60] shadow-2xl flex flex-col", // flex-col để header / nav / khối user xếp dọc đúng chiều cao màn hình
           isMobile ? "w-[280px]" : "", // Cố định chiều rộng trên mobile
           isVIP ? "bg-black/95 border-yellow-500/20" : "bg-black/95 border-white/10"
         )}
@@ -588,7 +588,7 @@ export const Sidebar = () => {
                     ? "bg-gradient-to-r from-yellow-400 via-yellow-200 to-amber-400"
                     : "bg-gradient-to-r from-white via-purple-200 to-white"
                 )} style={{ fontFamily: 'Pacifico, cursive' }}>
-                  SorcererXStreme
+                  HuyenHocai
                 </h1>
                 <p className={cn(
                   "text-[10px] tracking-widest font-medium uppercase",

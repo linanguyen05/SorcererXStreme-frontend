@@ -162,7 +162,7 @@ export default function RegisterPage() {
               className="text-4xl font-bold bg-gradient-to-r from-white via-red-200 to-white bg-clip-text text-transparent"
               style={{ fontFamily: 'Pacifico, cursive' }}
             >
-              SorcererXStreme
+              HuyenHocai
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}

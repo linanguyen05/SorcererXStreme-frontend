@@ -59,7 +59,7 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
             <Link href="/" className="group relative flex-shrink-0">
               <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <h1 className="relative text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-red-200 to-white group-hover:via-red-400 transition-all duration-300 font-['Pacifico']">
-                SorcererXStreme
+                HuyenHocai
               </h1>
             </Link>
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-[10px] font-black uppercase tracking-wider">

@@ -61,7 +61,7 @@ export const Header = () => {
                     <Link href="/" className="relative z-[110] flex-shrink-0 group">
                         <div className="absolute -inset-2 bg-purple-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <h1 className="relative text-xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white group-hover:via-purple-400 transition-all duration-300" style={{ fontFamily: 'Pacifico, cursive' }}>
-                            SorcererXStreme
+                            HuyenHocai
                         </h1>
                     </Link>
 

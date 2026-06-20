@@ -1,6 +1,6 @@
-# SorcererXStreme Frontend
+# HuyenHocAI Frontend
 
-Frontend application cho SorcererXStreme - ứng dụng huyền thuật AI, được xây dựng với Next.js 14 và TypeScript.
+Frontend application cho HuyenHocAI - ứng dụng huyền thuật AI, được xây dựng với Next.js 14 và TypeScript.
 
 ## Tech Stack
 

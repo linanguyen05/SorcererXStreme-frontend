@@ -382,7 +382,7 @@ export default function CheckoutExpertPage() {
                             📅 {formattedDate} &nbsp;·&nbsp; 🕐 {selectedTime}
                         </motion.p>
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex flex-wrap gap-3 justify-center">
-                            <Button onClick={() => router.push('/expert-listing')} className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2.5 rounded-xl text-sm">Xem thêm chuyên gia</Button>
+                            <Button onClick={() => router.push('/service-listing?tab=experts')} className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-2.5 rounded-xl text-sm">Xem thêm chuyên gia</Button>
                             <Button onClick={() => router.push('/')} className="bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold px-6 py-2.5 rounded-xl text-sm">Về trang chủ</Button>
                         </motion.div>
                     </div>
@@ -623,7 +623,7 @@ export default function CheckoutExpertPage() {
 
                                             <div className="flex items-start gap-2 text-xs text-gray-500 mb-4">
                                                 <Shield className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                                                Nhấn xác nhận đồng nghĩa bạn đồng ý điều khoản dịch vụ của SorcererXStreme.
+                                                Nhấn xác nhận đồng nghĩa bạn đồng ý điều khoản dịch vụ của HuyenHocAI.
                                             </div>
 
                                             <div className="relative group">

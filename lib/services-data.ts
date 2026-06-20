@@ -1,5 +1,5 @@
 // ============================================================
-// EXPERT READER DATA — SorcererXStreme
+// EXPERT READER DATA — HuyenHocAI
 // Each expert offers 1:1 consultation sessions across multiple domains
 // ============================================================
 

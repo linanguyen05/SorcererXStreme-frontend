@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import SearchBar from "@/components/services/SearchBar";
 import CategoryFilter from "@/components/services/CategoryFilter";
 import ServiceCard, { type ServiceData } from "@/components/services/ServiceCard";
+import { ExpertTile, ALL_SPECIALTIES } from "@/components/services/ExpertTile";
 import { motion } from "framer-motion";
+import { Sparkles, Briefcase, Search, Filter } from "lucide-react";
 import { Sidebar, useSidebarCollapsed } from "@/components/layout/Sidebar";
 import ContentHeader from "@/components/layout/ContentHeader";
 import { useAuthStore } from "@/lib/store";
+import { experts, ExpertSpecialty } from "@/lib/services-data";
 
 const imgZodiac = "/services/mystical-zodiac.jpg";
 const imgTarot = "/services/mystical-tarot.jpg";
@@ -29,13 +32,21 @@ const services: ServiceData[] = [
   { id: 7, slug: "than-so-hoc", title: "Thần Số Học", image: imgNumerology, format: "Chatbot AI", formatIcon: "chat", duration: "20 phút", price: "70.000 VNĐ", category: "Thần số học" },
 ];
 
-export default function ServiceListingPage() {
+type TabKey = "services" | "experts";
+
+function ServiceListingContent() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Tất cả");
+  const searchParams = useSearchParams();
   const isCollapsed = useSidebarCollapsed();
   const [isMobile, setIsMobile] = useState(false);
   const { isAuthenticated } = useAuthStore();
+
+  const [tab, setTab] = useState<TabKey>(
+    searchParams.get("tab") === "experts" ? "experts" : "services"
+  );
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("Tất cả");
+  const [specialty, setSpecialty] = useState<ExpertSpecialty | "all">("all");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -50,13 +61,33 @@ export default function ServiceListingPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const filtered = useMemo(() => {
+  // Keep the URL in sync so the tab is shareable / preserved on refresh
+  const switchTab = (next: TabKey) => {
+    setTab(next);
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    if (next === "experts") params.set("tab", "experts");
+    else params.delete("tab");
+    const qs = params.toString();
+    router.replace(qs ? `/service-listing?${qs}` : "/service-listing", { scroll: false });
+  };
+
+  const filteredServices = useMemo(() => {
     return services.filter((service) => {
       const matchSearch = service.title.toLowerCase().includes(search.toLowerCase());
       const matchCategory = activeCategory === "Tất cả" || service.category === activeCategory;
       return matchSearch && matchCategory;
     });
   }, [search, activeCategory]);
+
+  const filteredExperts = useMemo(() => {
+    const q = search.toLowerCase();
+    return experts.filter((e) => {
+      const matchQ = !q || e.name.toLowerCase().includes(q) || e.title.toLowerCase().includes(q) ||
+        e.specialties.some((s) => s.toLowerCase().includes(q)) || e.location?.toLowerCase().includes(q);
+      const matchF = specialty === "all" || e.specialties.includes(specialty);
+      return matchQ && matchF;
+    });
+  }, [search, specialty]);
 
   if (!isAuthenticated) {
     return null;
@@ -71,13 +102,11 @@ export default function ServiceListingPage() {
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className="flex-1 min-h-screen flex flex-col relative overflow-hidden"
       >
-        {/* 2. ĐẶT CONTENT HEADER LÊN ĐẦU TRANG */}
-        <ContentHeader 
-          title="Dịch Vụ Tâm Linh" 
-          description="Khám phá vận mệnh • Khai sáng tương lai" 
+        <ContentHeader
+          title="Dịch Vụ & Chuyên Gia"
+          description="Dịch vụ AI & Chuyên gia tư vấn 1:1 trong một nơi"
         />
 
-        {/* 3. KHỐI HIỂN THỊ NỘI DUNG Ở DƯỚI HEADER */}
         <div className="flex-1 relative overflow-y-auto custom-scrollbar">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-3xl" />
@@ -85,25 +114,104 @@ export default function ServiceListingPage() {
           </div>
 
           <div className="relative z-10 max-w-[1400px] mx-auto px-4 lg:px-12 py-8 space-y-8 pt-6 md:pt-8">
+            {/* Tabs */}
+            <div className="flex justify-center">
+              <div className="inline-flex p-1 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md">
+                {([
+                  { key: "services" as TabKey, label: "Dịch vụ", Icon: Sparkles },
+                  { key: "experts" as TabKey, label: "Chuyên gia", Icon: Briefcase },
+                ]).map(({ key, label, Icon }) => (
+                  <button
+                    key={key}
+                    onClick={() => switchTab(key)}
+                    className={`relative flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                      tab === key ? "text-white" : "text-gray-400 hover:text-gray-200"
+                    }`}
+                  >
+                    {tab === key && (
+                      <motion.span
+                        layoutId="tabHighlight"
+                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/80 to-pink-600/80 shadow-lg shadow-purple-900/30"
+                        transition={{ type: "spring", damping: 24, stiffness: 260 }}
+                      />
+                    )}
+                    <Icon className="w-4 h-4 relative z-10" />
+                    <span className="relative z-10">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Search + filters */}
             <div className="space-y-4">
               <SearchBar value={search} onChange={setSearch} />
-              <CategoryFilter categories={categories} active={activeCategory} onSelect={setActiveCategory} />
+              {tab === "services" ? (
+                <CategoryFilter categories={categories} active={activeCategory} onSelect={setActiveCategory} />
+              ) : (
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  <Filter className="w-4 h-4 text-gray-500 flex-shrink-0 mr-1" />
+                  {(["all", ...ALL_SPECIALTIES] as string[]).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setSpecialty(f as ExpertSpecialty | "all")}
+                      className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
+                        specialty === f
+                          ? "bg-yellow-400 text-black border-yellow-400 shadow shadow-yellow-900/30"
+                          : "bg-white/[0.04] text-gray-400 border-white/[0.08] hover:border-white/20 hover:text-gray-200"
+                      }`}
+                    >
+                      {f === "all" ? "Tất cả" : f}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filtered.map((service, i) => (
-                <ServiceCard key={service.id} service={service} index={i} />
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
-              <div className="text-center py-10 text-muted-foreground">
-                Không tìm thấy dịch vụ nào phù hợp.
-              </div>
+            {/* Grid */}
+            {tab === "services" ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {filteredServices.map((service, i) => (
+                    <ServiceCard key={service.id} service={service} index={i} />
+                  ))}
+                </div>
+                {filteredServices.length === 0 && (
+                  <div className="text-center py-10 text-muted-foreground">
+                    Không tìm thấy dịch vụ nào phù hợp.
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-gray-400 text-sm">
+                  <span className="text-white font-semibold">{filteredExperts.length}</span> chuyên gia
+                  {specialty !== "all" && <> · <span className="text-yellow-300">{specialty}</span></>}
+                </p>
+                {filteredExperts.length === 0 ? (
+                  <div className="text-center py-16 text-gray-500">
+                    <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-lg">Không tìm thấy chuyên gia phù hợp</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredExperts.map((expert, i) => (
+                      <ExpertTile key={expert.id} expert={expert} index={i} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
       </motion.main>
     </div>
+  );
+}
+
+export default function ServiceListingPage() {
+  return (
+    <Suspense fallback={null}>
+      <ServiceListingContent />
+    </Suspense>
   );
 }

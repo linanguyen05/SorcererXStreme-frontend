@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Calendar,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Compass
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -66,6 +67,15 @@ const tools = [
     color: 'from-emerald-500 to-teal-600',
     shadow: 'shadow-emerald-500/20',
     border: 'border-emerald-500/20'
+  },
+  {
+    name: 'Dịch Vụ & Chuyên Gia',
+    description: 'Đặt gói dịch vụ & tư vấn 1:1 với chuyên gia',
+    icon: Compass,
+    href: '/service-listing',
+    color: 'from-rose-500 to-yellow-500',
+    shadow: 'shadow-rose-500/20',
+    border: 'border-rose-500/20'
   }
 ];
 

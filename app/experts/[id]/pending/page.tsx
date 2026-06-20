@@ -153,7 +153,7 @@ function ExpertPendingClient({ id }: { id: string }) {
             </div>
 
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              Chào mừng bạn đến với mạng lưới chuyên gia của SorcererXstreme. 
+              Chào mừng bạn đến với mạng lưới chuyên gia của HuyenHocAI.
               Để bảo vệ chất lượng tư vấn và uy tín của nền tảng, Ban quản trị đang tiến hành xác minh thông tin bằng cấp, chứng chỉ và hồ sơ chuyên môn của bạn. 
               Quá trình kiểm duyệt thường được hoàn tất trong vòng <strong>12 đến 24 giờ làm việc</strong>.
             </p>
