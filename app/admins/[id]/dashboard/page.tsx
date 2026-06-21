@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import {
   User, Briefcase, CheckCircle, AlertCircle,
-  Bell, Search, X, ShieldCheck, UserCheck, Users, BarChart3
+  Bell, Search, X, ShieldCheck, UserCheck, Users, BarChart3,
+  Eye, Ban, Mail, Phone, Award, FileText
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { AdminHeader } from '@/components/layout/AdminHeader';
@@ -19,30 +20,85 @@ const mockExperts = [
     name: "Master Alistair",
     title: "Chuyên gia Thần Số Học & Tarot",
     email: "alistair.numerology@gmail.com",
+    phone: "0912.345.678",
     experience: "7 năm kinh nghiệm",
+    experienceDetail: "Hơn 7 năm học hỏi và tư vấn thực tế. Đã giải luận thành công cho hơn 1.000 bản đồ số học và trải bài Tarot, giúp nhiều người định hình rõ ràng hướng đi sự nghiệp.",
     specs: ["Tarot", "Thần Số Học"],
     status: "PENDING",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    cccdNumber: "031092008472",
+    certifications: [
+      "Chứng chỉ Chuyên gia Thần Số Học - Học viện Mystic Việt Nam",
+      "Chứng nhận Tarot Reader Chuyên Nghiệp AAT (American Association of Tarot)"
+    ]
   },
   {
     id: "exp-2",
     name: "Astrologer Celine",
     title: "Chuyên gia Bản đồ sao & Chiêm tinh học",
     email: "celine.astrology@outlook.com",
+    phone: "0988.777.666",
     experience: "4 năm kinh nghiệm",
+    experienceDetail: "Chuyên sâu về chiêm tinh phương Tây, bản đồ sao cặp đôi (synastry) và bản đồ sao vận hạn. Thấu cảm sâu sắc và định hướng tâm lý nhẹ nhàng.",
     specs: ["Chiêm Tinh"],
     status: "PENDING",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+    cccdNumber: "030095018243",
+    certifications: [
+      "Chứng chỉ Chiêm Tinh Học Căn Bản & Nâng Cao - LSA (London School of Astrology)",
+      "Bằng tốt nghiệp tâm lý học tham vấn - ĐH KHXH&NV"
+    ]
   },
   {
     id: "exp-3",
     name: "Thầy Minh Tuệ",
     title: "Chuyên gia Kinh Dịch & Tử Vi Phương Đông",
     email: "minhtue.tuvi@vietnam.vn",
+    phone: "0905.123.456",
     experience: "12 năm kinh nghiệm",
+    experienceDetail: "Hơn một thập kỷ nghiên cứu cổ thư phương Đông, chuyên lập lá số tử vi trọn đời, đoán giải vận hạn năm, phong thủy gia trạch và gieo quẻ Kinh Dịch giải quyết bế tắc tức thời.",
     specs: ["Tử Vi", "Kinh Dịch"],
     status: "APPROVED",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    cccdNumber: "001094002847",
+    certifications: [
+      "Bằng Viện Sĩ Nghiên Cứu Di Sản Cổ Học Đông Á",
+      "Ủy Viên Hiệp Hội Phong Thủy Kinh Dịch Việt Nam"
+    ]
+  },
+  {
+    id: "exp-4",
+    name: "Master Lina",
+    title: "Chuyên gia Tarot & Chiêm tinh học",
+    email: "lina.mystic@gmail.com",
+    phone: "0934.567.890",
+    experience: "5 năm kinh nghiệm",
+    experienceDetail: "Định hướng sự nghiệp, tình duyên thông qua các trải bài Tarot chuyên sâu và bản đồ sao cá nhân. Hơn 5 năm kinh nghiệm thấu cảm và chữa lành tâm lý.",
+    specs: ["Tarot", "Chiêm Tinh"],
+    status: "BANNED",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+    cccdNumber: "002095001948",
+    certifications: [
+      "Chứng nhận Tarot Reader Chuyên Nghiệp - Hiệp Hội Tarot Việt Nam",
+      "Khóa huấn luyện chữa lành đứa trẻ bên trong (Inner Child Healing)"
+    ]
+  },
+  {
+    id: "exp-5",
+    name: "Cô Diệu Lâm",
+    title: "Chuyên gia Phong Thủy Hôn Nhân & Gia Đình",
+    email: "dieulam.fengshui@gmail.com",
+    phone: "0976.223.344",
+    experience: "8 năm kinh nghiệm",
+    experienceDetail: "Tư vấn hòa hợp gia đạo, phong thủy phòng ngủ, phong thủy nhà bếp và ngày lành tháng tốt cho việc đại sự như cưới hỏi, làm nhà.",
+    specs: ["Phong Thủy"],
+    status: "REJECTED",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+    cccdNumber: "003096001859",
+    certifications: [
+      "Chứng nhận Chuyên Gia Phong Thủy - Viện Nghiên Cứu Phong Thủy Quốc Tế",
+      "Chứng nhận Tham Vấn Tâm Lý Gia Đình"
+    ]
   }
 ];
 
@@ -51,25 +107,66 @@ const mockServices = [
     id: "ser-1",
     name: "Tư vấn tình duyên chuyên sâu qua Thần Số Học",
     expertName: "Master Alistair",
+    expertAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    expertEmail: "alistair.numerology@gmail.com",
     price: "450.000đ",
     duration: "45 phút",
-    status: "PENDING"
+    status: "PENDING",
+    category: "Thần Số Học",
+    format: "Online (Google Meet)",
+    description: "Giải mã các chỉ số Đường đời, Sứ mệnh và Thái độ để thấu hiểu năng lượng tình duyên bản thân và định hướng mối quan hệ tương lai. Khám phá các năm cá nhân thuận lợi cho hôn đạo."
   },
   {
     id: "ser-2",
     name: "Giải mã bản đồ sao cặp đôi (Synastry Chart)",
     expertName: "Astrologer Celine",
+    expertAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+    expertEmail: "celine.astrology@outlook.com",
     price: "750.000đ",
     duration: "90 phút",
-    status: "PENDING"
+    status: "PENDING",
+    category: "Chiêm Tinh",
+    format: "Online (Zoom)",
+    description: "Phân tích so sánh hai bản đồ sao cá nhân để tìm ra điểm tương hợp, xung khắc, bài học nhân quả và tiềm năng gắn kết lâu dài giữa hai người. Thích hợp cho các cặp đôi đang muốn tiến tới hôn nhân."
   },
   {
     id: "ser-3",
     name: "Lập lá số tử vi trọn đời & Luận giải đại vận",
     expertName: "Thầy Minh Tuệ",
+    expertAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    expertEmail: "minhtue.tuvi@vietnam.vn",
     price: "1.200.000đ",
     duration: "120 phút",
-    status: "APPROVED"
+    status: "APPROVED",
+    category: "Tử Vi",
+    format: "Gọi thoại trực tiếp",
+    description: "Luận giải chi tiết 12 cung số trên lá số Tử Vi. Dự báo chi tiết về tài lộc, gia đạo, công danh, sức khỏe và các hạn lớn trong cuộc đời. Giải đáp các câu hỏi cụ thể của đương số."
+  },
+  {
+    id: "ser-4",
+    name: "Trải bài Tarot định hướng sự nghiệp 6 tháng tới",
+    expertName: "Master Lina",
+    expertAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+    expertEmail: "lina.mystic@gmail.com",
+    price: "350.000đ",
+    duration: "30 phút",
+    status: "BANNED",
+    category: "Tarot",
+    format: "Online (Google Meet)",
+    description: "Sử dụng bộ bài Rider-Waite để phân tích tình trạng công việc hiện tại, các cơ hội mới, thách thức ẩn giấu và lời khuyên hành động cụ thể để đạt bước tiến lớn trong sự nghiệp."
+  },
+  {
+    id: "ser-5",
+    name: "Giải quẻ dịch học vấn thi cử & Phong thủy phòng học",
+    expertName: "Cô Diệu Lâm",
+    expertAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+    expertEmail: "dieulam.fengshui@gmail.com",
+    price: "500.000đ",
+    duration: "60 phút",
+    status: "REJECTED",
+    category: "Phong Thủy",
+    format: "Tư vấn tại gia / Online",
+    description: "Gieo quẻ Kinh Dịch hỏi về kết quả thi cử, xin học bổng. Đồng thời tư vấn sắp xếp bàn học, hướng ngồi theo phong thủy bản mệnh của học sinh để tăng cường tập trung và may mắn."
   }
 ];
 
@@ -82,8 +179,10 @@ export default function AdminDashboard() {
   const [services, setServices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeApprovalTab, setActiveApprovalTab] = useState<'experts' | 'services'>('experts');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED'>('PENDING');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'BANNED'>('PENDING');
   const [pendingSearch, setPendingSearch] = useState('');
+  const [selectedExpertForDetails, setSelectedExpertForDetails] = useState<any | null>(null);
+  const [selectedServiceForDetails, setSelectedServiceForDetails] = useState<any | null>(null);
 
   // Stats for cards (uses total pending across mock local storage)
   const [stats, setStats] = useState({
@@ -168,12 +267,33 @@ export default function AdminDashboard() {
     fetchData();
   }, [token, statusFilter]);
 
-  // Handle status update (Approve or send to Pending)
-  const handleUpdateExpertStatus = async (id: string, newStatus: 'PENDING' | 'APPROVED') => {
+  // Handle status update (Approve, reject, ban, or send to Pending)
+  const handleUpdateExpertStatus = async (id: string, newStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'BANNED') => {
     const allMocks = getMockExpertsFromLocalStorage();
     const expert = allMocks.find((e: any) => e.id === id);
     const displayName = expert ? expert.name : id;
-    const actionText = newStatus === 'APPROVED' ? 'phê duyệt' : 'chuyển về chờ duyệt';
+    
+    let actionText = '';
+    let notifTitle = '';
+    let notifIcon = <AlertCircle className="w-4 h-4 text-yellow-400" />;
+
+    if (newStatus === 'APPROVED') {
+      actionText = 'phê duyệt';
+      notifTitle = 'Duyệt chuyên gia thành công';
+      notifIcon = <CheckCircle className="w-4 h-4 text-green-400" />;
+    } else if (newStatus === 'PENDING') {
+      actionText = 'chuyển về chờ duyệt';
+      notifTitle = 'Chuyển về chờ duyệt';
+      notifIcon = <AlertCircle className="w-4 h-4 text-yellow-400" />;
+    } else if (newStatus === 'REJECTED') {
+      actionText = 'từ chối';
+      notifTitle = 'Từ chối chuyên gia';
+      notifIcon = <X className="w-4 h-4 text-orange-400" />;
+    } else if (newStatus === 'BANNED') {
+      actionText = 'cấm hoạt động';
+      notifTitle = 'Cấm tài khoản';
+      notifIcon = <Ban className="w-4 h-4 text-red-500" />;
+    }
 
     toast.promise(
       (async () => {
@@ -186,7 +306,16 @@ export default function AdminDashboard() {
         }
 
         // Update local mock list
-        const updated = allMocks.map((e: any) => e.id === id ? { ...e, status: newStatus } : e);
+        const updated = allMocks.map((e: any) => {
+          if (e.id === id) {
+            const updatedExp = { ...e, status: newStatus };
+            if (selectedExpertForDetails && selectedExpertForDetails.id === id) {
+              setSelectedExpertForDetails(updatedExp);
+            }
+            return updatedExp;
+          }
+          return e;
+        });
         localStorage.setItem('mock-admin-experts', JSON.stringify(updated));
 
         // Refetch data to show correct filter view
@@ -195,16 +324,16 @@ export default function AdminDashboard() {
         // Add simulation notification
         const newNotif = {
           id: Date.now(),
-          title: newStatus === 'APPROVED' ? 'Duyệt chuyên gia thành công' : 'Chuyển về chờ duyệt',
-          desc: `Chuyên gia ${displayName} đã được ${actionText}.`,
+          title: notifTitle,
+          desc: `Chuyên gia ${displayName} đã bị/được ${actionText}.`,
           time: 'Vừa xong',
-          icon: newStatus === 'APPROVED' ? <CheckCircle className="w-4 h-4 text-green-400" /> : <AlertCircle className="w-4 h-4 text-yellow-400" />
+          icon: notifIcon
         };
         setNotifications(prev => [newNotif, ...prev]);
       })(),
       {
         loading: `Đang thực hiện ${actionText} chuyên gia...`,
-        success: `Đã ${actionText} chuyên gia ${displayName}!`,
+        success: `Đã thực hiện ${actionText} chuyên gia ${displayName}!`,
         error: `Có lỗi xảy ra khi cập nhật chuyên gia.`,
       }
     );
@@ -252,11 +381,32 @@ export default function AdminDashboard() {
   };
 
   // Handle status update for Service
-  const handleUpdateServiceStatus = async (id: string, newStatus: 'PENDING' | 'APPROVED') => {
+  const handleUpdateServiceStatus = async (id: string, newStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'BANNED') => {
     const allMocks = getMockServicesFromLocalStorage();
     const service = allMocks.find((s: any) => s.id === id);
     const displayName = service ? service.name : id;
-    const actionText = newStatus === 'APPROVED' ? 'phê duyệt' : 'chuyển về chờ duyệt';
+    
+    let actionText = '';
+    let notifTitle = '';
+    let notifIcon = <AlertCircle className="w-4 h-4 text-yellow-400" />;
+
+    if (newStatus === 'APPROVED') {
+      actionText = 'phê duyệt';
+      notifTitle = 'Duyệt dịch vụ thành công';
+      notifIcon = <CheckCircle className="w-4 h-4 text-green-400" />;
+    } else if (newStatus === 'PENDING') {
+      actionText = 'chuyển về chờ duyệt';
+      notifTitle = 'Chuyển về chờ duyệt';
+      notifIcon = <AlertCircle className="w-4 h-4 text-yellow-400" />;
+    } else if (newStatus === 'REJECTED') {
+      actionText = 'từ chối';
+      notifTitle = 'Từ chối dịch vụ';
+      notifIcon = <X className="w-4 h-4 text-orange-400" />;
+    } else if (newStatus === 'BANNED') {
+      actionText = 'tạm ngưng hoạt động';
+      notifTitle = 'Đình chỉ dịch vụ';
+      notifIcon = <Ban className="w-4 h-4 text-red-500" />;
+    }
 
     toast.promise(
       (async () => {
@@ -269,17 +419,26 @@ export default function AdminDashboard() {
         }
 
         // Update local mock list
-        const updated = allMocks.map((s: any) => s.id === id ? { ...s, status: newStatus } : s);
+        const updated = allMocks.map((s: any) => {
+          if (s.id === id) {
+            const updatedSer = { ...s, status: newStatus };
+            if (selectedServiceForDetails && selectedServiceForDetails.id === id) {
+              setSelectedServiceForDetails(updatedSer);
+            }
+            return updatedSer;
+          }
+          return s;
+        });
         localStorage.setItem('mock-admin-services', JSON.stringify(updated));
 
         await fetchData();
 
         const newNotif = {
           id: Date.now(),
-          title: newStatus === 'APPROVED' ? 'Duyệt dịch vụ thành công' : 'Chuyển về chờ duyệt',
+          title: notifTitle,
           desc: `Dịch vụ "${displayName}" đã được ${actionText}.`,
           time: 'Vừa xong',
-          icon: newStatus === 'APPROVED' ? <CheckCircle className="w-4 h-4 text-green-400" /> : <AlertCircle className="w-4 h-4 text-yellow-400" />
+          icon: notifIcon
         };
         setNotifications(prev => [newNotif, ...prev]);
       })(),
@@ -464,10 +623,14 @@ export default function AdminDashboard() {
               </div>
 
               {/* Status Switcher */}
-              <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 gap-1">
-                {(['PENDING', 'APPROVED', 'ALL'] as const).map((status) => {
+              <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 gap-1 flex-wrap">
+                {(['PENDING', 'APPROVED', 'REJECTED', 'BANNED', 'ALL'] as const).map((status) => {
                   const isActive = statusFilter === status;
-                  const label = status === 'PENDING' ? 'Chờ duyệt' : status === 'APPROVED' ? 'Đã duyệt' : 'Tất cả';
+                  const label = 
+                    status === 'PENDING' ? 'Chờ duyệt' : 
+                    status === 'APPROVED' ? 'Đã duyệt' : 
+                    status === 'REJECTED' ? 'Từ chối' :
+                    status === 'BANNED' ? 'Bị cấm' : 'Tất cả';
                   return (
                     <button
                       key={status}
@@ -565,6 +728,11 @@ export default function AdminDashboard() {
                               <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
                               Đã duyệt
                             </span>
+                          ) : exp.status === 'BANNED' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                              Bị cấm
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
                               Từ chối
@@ -572,26 +740,64 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
+                            <button
+                              onClick={() => setSelectedExpertForDetails(exp)}
+                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-white/5 border border-white/10 text-gray-300 hover:bg-white/15 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> Chi tiết
+                            </button>
                             {exp.status === 'PENDING' && (
-                              <button
-                                onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-green-500/20"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" /> Phê duyệt
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <CheckCircle className="w-3.5 h-3.5" /> Duyệt
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateExpertStatus(exp.id, 'REJECTED')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <X className="w-3.5 h-3.5" /> Từ chối
+                                </button>
+                              </>
                             )}
                             {exp.status === 'APPROVED' && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateExpertStatus(exp.id, 'BANNED')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <Ban className="w-3.5 h-3.5" /> Cấm
+                                </button>
+                              </>
+                            )}
+                            {exp.status === 'BANNED' && (
+                              <button
+                                onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Mở cấm
+                              </button>
+                            )}
+                            {exp.status === 'REJECTED' && (
                               <button
                                 onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-yellow-500/20"
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
                               >
-                                <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                <AlertCircle className="w-3.5 h-3.5" /> Xem xét lại
                               </button>
                             )}
                             <button
                               onClick={() => handleDeleteExpert(exp.id)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm hover:shadow-red-500/20"
+                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm"
                             >
                               <X className="w-3.5 h-3.5" /> Xóa
                             </button>
@@ -628,9 +834,11 @@ export default function AdminDashboard() {
                           {ser.name}
                         </td>
                         <td className="px-6 py-4 text-gray-300 font-semibold flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-black text-white">
-                            {ser.expertName.charAt(0)}
-                          </div>
+                          <img
+                            src={ser.expertAvatar || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"}
+                            alt={ser.expertName}
+                            className="w-6 h-6 rounded-full object-cover border border-white/10"
+                          />
                           {ser.expertName}
                         </td>
                         <td className="px-6 py-4 text-gray-400 flex items-center gap-1">
@@ -650,33 +858,76 @@ export default function AdminDashboard() {
                               <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
                               Đã duyệt
                             </span>
+                          ) : ser.status === 'BANNED' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                              Tạm ngưng
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
-                              Từ chiết
+                              Từ chối
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-2 flex-wrap">
+                            <button
+                              onClick={() => setSelectedServiceForDetails(ser)}
+                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-white/5 border border-white/10 text-gray-300 hover:bg-white/15 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> Chi tiết
+                            </button>
                             {ser.status === 'PENDING' && (
-                              <button
-                                onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-green-500/20"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" /> Phê duyệt
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <CheckCircle className="w-3.5 h-3.5" /> Duyệt
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateServiceStatus(ser.id, 'REJECTED')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <X className="w-3.5 h-3.5" /> Từ chối
+                                </button>
+                              </>
                             )}
                             {ser.status === 'APPROVED' && (
+                              <>
+                                <button
+                                  onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateServiceStatus(ser.id, 'BANNED')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                                >
+                                  <Ban className="w-3.5 h-3.5" /> Cấm
+                                </button>
+                              </>
+                            )}
+                            {ser.status === 'BANNED' && (
+                              <button
+                                onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Mở cấm
+                              </button>
+                            )}
+                            {ser.status === 'REJECTED' && (
                               <button
                                 onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm hover:shadow-yellow-500/20"
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
                               >
-                                <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                <AlertCircle className="w-3.5 h-3.5" /> Xem xét lại
                               </button>
                             )}
                             <button
                               onClick={() => handleDeleteService(ser.id)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm hover:shadow-red-500/20"
+                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm"
                             >
                               <X className="w-3.5 h-3.5" /> Xóa
                             </button>
@@ -696,6 +947,429 @@ export default function AdminDashboard() {
           </div>
         </section>
       </main>
+
+      {/* EXPERT DETAILS MODAL */}
+      <AnimatePresence>
+        {selectedExpertForDetails && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedExpertForDetails(null)}
+              className="fixed inset-0 bg-black/80 z-[110] backdrop-blur-md"
+            />
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 30 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+              className="fixed inset-0 m-auto z-[120] max-w-4xl h-fit max-h-[85vh] overflow-y-auto w-11/12 bg-gray-950/95 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl p-6 sm:p-10 flex flex-col font-['Be_Vietnam_Pro'] text-white selection:bg-red-500/30"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center border-b border-white/10 pb-5 mb-6">
+                <div className="space-y-1">
+                  <h3 className="text-xl sm:text-2xl font-black flex items-center gap-2.5 text-white">
+                    <ShieldCheck className="w-6 h-6 text-red-500" /> Hồ sơ chi tiết Chuyên gia
+                  </h3>
+                  <p className="text-xs text-gray-400">Kiểm tra thông tin hồ sơ cá nhân và tài liệu pháp lý trước khi phê duyệt</p>
+                </div>
+                <button
+                  onClick={() => setSelectedExpertForDetails(null)}
+                  className="p-2 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Grid content */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 overflow-y-visible">
+                {/* Left Column: Avatar & Basic stats */}
+                <div className="md:col-span-4 flex flex-col items-center text-center space-y-4 border-r border-white/5 pr-0 md:pr-6">
+                  <div className="relative">
+                    <img
+                      src={selectedExpertForDetails.avatar}
+                      alt={selectedExpertForDetails.name}
+                      className="w-32 h-32 rounded-full object-cover border-4 border-red-500/30 shadow-2xl"
+                    />
+                    <span className="absolute bottom-1 right-1 bg-gray-900 border border-white/20 p-1.5 rounded-full text-xs">🔮</span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-black text-white">{selectedExpertForDetails.name}</h4>
+                    <p className="text-xs text-red-400 font-bold mt-1">{selectedExpertForDetails.title}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">{selectedExpertForDetails.experience}</p>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {selectedExpertForDetails.specs.map((s: string) => (
+                      <span key={s} className="text-[9px] font-black uppercase bg-purple-500/10 border border-purple-500/20 text-purple-400 px-2 py-0.5 rounded">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="w-full pt-4 border-t border-white/5 text-left space-y-3">
+                    <div className="flex items-center gap-2 text-xs text-gray-300">
+                      <Mail className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                      <span className="truncate">{selectedExpertForDetails.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-300">
+                      <Phone className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                      <span>{selectedExpertForDetails.phone || '0912.345.678'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-gray-500">Trạng thái:</span>
+                      {selectedExpertForDetails.status === 'PENDING' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
+                          Chờ duyệt
+                        </span>
+                      ) : selectedExpertForDetails.status === 'APPROVED' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
+                          Đã duyệt
+                        </span>
+                      ) : selectedExpertForDetails.status === 'BANNED' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
+                          Bị cấm
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
+                          Từ từ chối
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Bio & CCCD documents */}
+                <div className="md:col-span-8 space-y-6">
+                  {/* Bio & Intro */}
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-red-500" /> Giới thiệu chuyên môn & Kinh nghiệm
+                    </h5>
+                    <p className="text-xs text-gray-300 leading-relaxed bg-white/5 p-4 rounded-2xl border border-white/5">
+                      {selectedExpertForDetails.experienceDetail || "Chuyên gia chưa cung cấp thông tin chi tiết về kinh nghiệm."}
+                    </p>
+                  </div>
+
+                  {/* Legal Documents */}
+                  <div className="space-y-4">
+                    <h5 className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-red-500" /> Tài liệu xác minh (CCCD / Passport)
+                    </h5>
+
+                    <div className="bg-white/5 border border-white/5 p-4 rounded-2xl space-y-3">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400">Số định danh / CCCD:</span>
+                        <span className="font-bold text-white tracking-widest">{selectedExpertForDetails.cccdNumber || '031092008472'}</span>
+                      </div>
+
+                      {/* Mock CCCD Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        {/* Front Card */}
+                        <div className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 p-3 rounded-xl relative overflow-hidden h-32 flex flex-col justify-between shadow-lg">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-400/5 rounded-full blur-xl pointer-events-none" />
+                          <div className="text-[6px] font-bold text-cyan-200 text-center leading-none">
+                            CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br />
+                            <span className="text-[5px] text-cyan-300 font-normal">Độc lập - Tự do - Hạnh phúc</span>
+                          </div>
+                          <div className="text-[8px] font-black text-cyan-300 text-center uppercase -mt-2">
+                            CĂN CƯỚC CÔNG DÂN
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            <div className="w-8 h-10 bg-gray-800 border border-white/10 rounded flex-shrink-0 flex items-center justify-center text-[8px]">👤</div>
+                            <div className="text-[7px] leading-tight text-white space-y-0.5">
+                              <p className="font-black text-cyan-300">Số / No: <span className="text-white font-mono">{selectedExpertForDetails.cccdNumber || '031092008472'}</span></p>
+                              <p>Họ tên: <span className="font-bold uppercase text-[8px]">{selectedExpertForDetails.name}</span></p>
+                              <p>Ngày sinh: 15/08/1992</p>
+                              <p>Quốc tịch: Việt Nam</p>
+                            </div>
+                          </div>
+                          <div className="text-[5px] text-cyan-400 text-right font-medium">CCCD MẶT TRƯỚC (SIMULATED)</div>
+                        </div>
+
+                        {/* Back Card */}
+                        <div className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 p-3 rounded-xl relative overflow-hidden h-32 flex flex-col justify-between shadow-lg">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-400/5 rounded-full blur-xl pointer-events-none" />
+                          <div className="text-[6px] font-bold text-cyan-200 leading-none">
+                            ĐẶC ĐIỂM NHÂN DẠNG / PERSONAL IDENTIFICATION
+                          </div>
+                          <div className="text-[7px] text-white leading-normal space-y-1">
+                            <p>Nốt ruồi cách 1cm trên sau cánh mũi trái.</p>
+                            <p>Ngày cấp: 20/12/2021</p>
+                            <p>Cơ quan cấp: Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội.</p>
+                          </div>
+                          <div className="flex justify-between items-end">
+                            <div className="w-12 h-6 bg-gray-800/80 border border-white/10 rounded text-[5px] flex items-center justify-center">VAN TAY</div>
+                            <span className="text-[5px] text-cyan-400 font-medium">CCCD MẶT SAU (SIMULATED)</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Certifications list */}
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-red-500" /> Bằng cấp / Chứng chỉ nghiệp vụ
+                    </h5>
+                    <ul className="space-y-2 text-xs">
+                      {(selectedExpertForDetails.certifications && selectedExpertForDetails.certifications.length > 0) ? (
+                        selectedExpertForDetails.certifications.map((cert: string, idx: number) => (
+                          <li key={idx} className="flex items-center gap-2 bg-white/5 border border-white/5 px-3 py-2.5 rounded-xl hover:bg-white/10 transition-colors">
+                            <Award className="w-4 h-4 text-purple-400 shrink-0" />
+                            <span className="text-gray-300 font-medium">{cert}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-gray-500 italic">Chưa đăng ký chứng chỉ nào.</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Actions */}
+              <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center justify-end gap-3">
+                {selectedExpertForDetails.status === 'PENDING' && (
+                  <>
+                    <button
+                      onClick={() => handleUpdateExpertStatus(selectedExpertForDetails.id, 'APPROVED')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-green-500/10"
+                    >
+                      <CheckCircle className="w-4 h-4" /> Phê duyệt hồ sơ
+                    </button>
+                    <button
+                      onClick={() => handleUpdateExpertStatus(selectedExpertForDetails.id, 'REJECTED')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-orange-500/10"
+                    >
+                      <X className="w-4 h-4" /> Từ chối hồ sơ
+                    </button>
+                  </>
+                )}
+                {selectedExpertForDetails.status === 'APPROVED' && (
+                  <>
+                    <button
+                      onClick={() => handleUpdateExpertStatus(selectedExpertForDetails.id, 'PENDING')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-yellow-500/10"
+                    >
+                      <AlertCircle className="w-4 h-4" /> Thu hồi quyền
+                    </button>
+                    <button
+                      onClick={() => handleUpdateExpertStatus(selectedExpertForDetails.id, 'BANNED')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-1.5 shadow-lg shadow-red-500/10"
+                    >
+                      <Ban className="w-4 h-4" /> Khóa / Cấm tài khoản
+                    </button>
+                  </>
+                )}
+                {selectedExpertForDetails.status === 'BANNED' && (
+                  <button
+                    onClick={() => handleUpdateExpertStatus(selectedExpertForDetails.id, 'APPROVED')}
+                    className="px-5 py-2.5 rounded-2xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-green-500/10"
+                  >
+                    <CheckCircle className="w-4 h-4" /> Gỡ cấm (Kích hoạt lại)
+                  </button>
+                )}
+                {selectedExpertForDetails.status === 'REJECTED' && (
+                  <button
+                    onClick={() => handleUpdateExpertStatus(selectedExpertForDetails.id, 'PENDING')}
+                    className="px-5 py-2.5 rounded-2xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-yellow-500/10"
+                  >
+                    <AlertCircle className="w-4 h-4" /> Đưa về hàng chờ duyệt
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    handleDeleteExpert(selectedExpertForDetails.id);
+                    setSelectedExpertForDetails(null);
+                  }}
+                  className="px-5 py-2.5 rounded-2xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1.5 shadow-lg"
+                >
+                  <X className="w-4 h-4" /> Xóa tài khoản
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* SERVICE DETAILS MODAL */}
+      <AnimatePresence>
+        {selectedServiceForDetails && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedServiceForDetails(null)}
+              className="fixed inset-0 bg-black/80 z-[110] backdrop-blur-md"
+            />
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 30 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+              className="fixed inset-0 m-auto z-[120] max-w-2xl h-fit max-h-[85vh] overflow-y-auto w-11/12 bg-gray-950/95 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-2xl p-6 sm:p-10 flex flex-col font-['Be_Vietnam_Pro'] text-white selection:bg-red-500/30"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center border-b border-white/10 pb-5 mb-6">
+                <div className="space-y-1">
+                  <h3 className="text-xl sm:text-2xl font-black flex items-center gap-2.5 text-white">
+                    <Briefcase className="w-6 h-6 text-red-500" /> Chi tiết gói Dịch vụ
+                  </h3>
+                  <p className="text-xs text-gray-400">Xem xét thông tin gói dịch vụ trước khi cập nhật trạng thái</p>
+                </div>
+                <button
+                  onClick={() => setSelectedServiceForDetails(null)}
+                  className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="space-y-6 flex-1 pr-1">
+                {/* Service Name & Status */}
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-wider bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1 rounded-full">
+                      {selectedServiceForDetails.category || "Dịch vụ"}
+                    </span>
+                    {selectedServiceForDetails.status === 'PENDING' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
+                        Chờ duyệt
+                      </span>
+                    ) : selectedServiceForDetails.status === 'APPROVED' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                        Đã duyệt
+                      </span>
+                    ) : selectedServiceForDetails.status === 'BANNED' ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                        Tạm ngưng
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
+                        Từ chối
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+                    {selectedServiceForDetails.name}
+                  </h4>
+                </div>
+
+                {/* Key Metrics */}
+                <div className="grid grid-cols-2 gap-4 p-5 bg-white/5 border border-white/5 rounded-3xl">
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Giá dịch vụ</p>
+                    <p className="text-lg font-black text-red-400">{selectedServiceForDetails.price}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Thời lượng & Hình thức</p>
+                    <p className="text-sm font-bold text-white flex items-center gap-1.5 mt-0.5">
+                      <Clock className="w-4 h-4 text-gray-400" /> {selectedServiceForDetails.duration} ({selectedServiceForDetails.format || "Online"})
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <h5 className="text-xs uppercase font-black tracking-widest text-gray-400">Mô tả dịch vụ</h5>
+                  <p className="text-sm text-gray-300 leading-relaxed font-light bg-white/5 border border-white/5 p-5 rounded-3xl">
+                    {selectedServiceForDetails.description || "Chưa có mô tả chi tiết cho dịch vụ này."}
+                  </p>
+                </div>
+
+                {/* Expert In Charge */}
+                <div className="space-y-3">
+                  <h5 className="text-xs uppercase font-black tracking-widest text-gray-400">Chuyên gia phụ trách</h5>
+                  <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-3xl">
+                    <img
+                      src={selectedServiceForDetails.expertAvatar || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"}
+                      alt={selectedServiceForDetails.expertName}
+                      className="w-12 h-12 rounded-full object-cover border border-white/10"
+                    />
+                    <div>
+                      <p className="font-bold text-white">{selectedServiceForDetails.expertName}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{selectedServiceForDetails.expertEmail || "expert@sorcerer.com"}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-white/10 pt-6 mt-8">
+                {selectedServiceForDetails.status === 'PENDING' && (
+                  <>
+                    <button
+                      onClick={() => handleUpdateServiceStatus(selectedServiceForDetails.id, 'APPROVED')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-green-500/10"
+                    >
+                      <CheckCircle className="w-4 h-4" /> Phê duyệt dịch vụ
+                    </button>
+                    <button
+                      onClick={() => handleUpdateServiceStatus(selectedServiceForDetails.id, 'REJECTED')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-orange-500/10"
+                    >
+                      <X className="w-4 h-4" /> Từ chối dịch vụ
+                    </button>
+                  </>
+                )}
+                {selectedServiceForDetails.status === 'APPROVED' && (
+                  <>
+                    <button
+                      onClick={() => handleUpdateServiceStatus(selectedServiceForDetails.id, 'PENDING')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-yellow-500/10"
+                    >
+                      <AlertCircle className="w-4 h-4" /> Thu hồi (Chuyển về chờ duyệt)
+                    </button>
+                    <button
+                      onClick={() => handleUpdateServiceStatus(selectedServiceForDetails.id, 'BANNED')}
+                      className="px-5 py-2.5 rounded-2xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-1.5 shadow-lg"
+                    >
+                      <Ban className="w-4 h-4" /> Đình chỉ dịch vụ
+                    </button>
+                  </>
+                )}
+                {selectedServiceForDetails.status === 'BANNED' && (
+                  <button
+                    onClick={() => handleUpdateServiceStatus(selectedServiceForDetails.id, 'APPROVED')}
+                    className="px-5 py-2.5 rounded-2xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-green-500/10"
+                  >
+                    <CheckCircle className="w-4 h-4" /> Gỡ đình chỉ (Kích hoạt lại)
+                  </button>
+                )}
+                {selectedServiceForDetails.status === 'REJECTED' && (
+                  <button
+                    onClick={() => handleUpdateServiceStatus(selectedServiceForDetails.id, 'PENDING')}
+                    className="px-5 py-2.5 rounded-2xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1.5 shadow-lg shadow-yellow-500/10"
+                  >
+                    <AlertCircle className="w-4 h-4" /> Đưa về hàng chờ duyệt
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    handleDeleteService(selectedServiceForDetails.id);
+                    setSelectedServiceForDetails(null);
+                  }}
+                  className="px-5 py-2.5 rounded-2xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1.5 shadow-lg"
+                >
+                  <X className="w-4 h-4" /> Xóa dịch vụ
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
