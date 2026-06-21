@@ -3,6 +3,11 @@
 import React, { Suspense } from 'react';
 import CreatePackageClient from './package-client';
 
+export async function generateStaticParams() {
+  return [];
+}
+export const dynamicParams = true;
+
 export default function Page({ params }: { params: { id: string } }) {
   return (
     <Suspense fallback={
