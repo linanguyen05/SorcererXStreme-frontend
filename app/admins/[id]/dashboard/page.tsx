@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/Button';
 import {
   User, Briefcase, CheckCircle, AlertCircle,
   Bell, Search, X, ShieldCheck, UserCheck, Users, BarChart3,
-  Eye, Ban, Mail, Phone, Award, FileText
+  Eye, Ban, Mail, Phone, Award, FileText,
+  DollarSign, Zap, TrendingUp, Activity, Calendar, ArrowUpRight, Lock,
+  Globe, BookOpen, Star, UserX, ShieldAlert
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { AdminHeader } from '@/components/layout/AdminHeader';
@@ -170,10 +172,439 @@ const mockServices = [
   }
 ];
 
+// --- VIP Revenue Data & Component ---
+const vipRevenueData = [
+  { month: "Tháng 1", revenue: 15400000, subscribers: 120 },
+  { month: "Tháng 2", revenue: 18900000, subscribers: 150 },
+  { month: "Tháng 3", revenue: 24500000, subscribers: 190 },
+  { month: "Tháng 4", revenue: 22000000, subscribers: 175 },
+  { month: "Tháng 5", revenue: 31200000, subscribers: 240 },
+  { month: "Tháng 6", revenue: 38500000, subscribers: 298 },
+];
+
+function VipRevenueChart() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
+  const maxRevenue = Math.max(...vipRevenueData.map(d => d.revenue));
+  const minRevenue = Math.min(...vipRevenueData.map(d => d.revenue));
+  
+  const width = 500;
+  const height = 180;
+  const padding = 20;
+  const chartWidth = width - padding * 2;
+  const chartHeight = height - padding * 2;
+  
+  const points = vipRevenueData.map((d, index) => {
+    const x = padding + (index / (vipRevenueData.length - 1)) * chartWidth;
+    const y = padding + chartHeight - ((d.revenue - minRevenue * 0.8) / (maxRevenue - minRevenue * 0.8)) * chartHeight;
+    return { x, y, ...d };
+  });
+  
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+  
+  const formatVND = (value: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
+
+  return (
+    <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300">
+      <div className="absolute top-0 right-0 w-48 h-48 bg-red-500/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-red-500/10 transition-colors duration-500"></div>
+      
+      <div className="flex items-center justify-between mb-6 relative z-10">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded">VIP Revenue</span>
+          <h3 className="text-lg font-bold text-white mt-1">Doanh thu VIP Account</h3>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center gap-1 text-green-400 font-bold text-sm bg-green-500/10 px-2.5 py-1 rounded-full border border-green-500/20">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>+23.4%</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="relative h-[200px] w-full mt-4 z-10 flex flex-col justify-between">
+        <svg className="w-full h-[180px] overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="vipAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#ef4444" stopOpacity="0.0" />
+            </linearGradient>
+            <linearGradient id="vipLineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#b91c1c" />
+              <stop offset="50%" stopColor="#ef4444" />
+              <stop offset="100%" stopColor="#fca5a5" />
+            </linearGradient>
+          </defs>
+          
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+            const y = padding + chartHeight * ratio;
+            return (
+              <line key={i} x1={padding} y1={y} x2={width - padding} y2={y} stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
+            );
+          })}
+          
+          <path d={areaPath} fill="url(#vipAreaGrad)" />
+          <path d={linePath} fill="none" stroke="url(#vipLineGrad)" strokeWidth="3" strokeLinecap="round" />
+          
+          {points.map((p, i) => (
+            <g key={i}>
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={hoveredIndex === i ? 6 : 4}
+                className={`${hoveredIndex === i ? 'fill-red-400 stroke-white' : 'fill-[#121214] stroke-red-500'} stroke-2 transition-all duration-150 cursor-pointer`}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              />
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={15}
+                className="fill-transparent cursor-pointer"
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              />
+            </g>
+          ))}
+        </svg>
+        
+        <AnimatePresence>
+          {hoveredIndex !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="absolute bg-[#1a1a1e] border border-white/10 rounded-xl p-3 shadow-2xl z-20 pointer-events-none text-xs flex flex-col gap-1"
+              style={{
+                left: `${(points[hoveredIndex].x / width) * 100}%`,
+                top: `${(points[hoveredIndex].y / height) * 100 - 35}%`,
+                transform: 'translateX(-50%)',
+              }}
+            >
+              <p className="text-gray-400 font-medium">{points[hoveredIndex].month}</p>
+              <p className="text-white font-bold text-sm">{formatVND(points[hoveredIndex].revenue)}</p>
+              <p className="text-red-400 font-semibold">{points[hoveredIndex].subscribers} VIP members</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <div className="flex justify-between px-2 text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-2">
+          {vipRevenueData.map((d, i) => (
+            <span key={i}>{d.month.replace("Tháng ", "T")}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Service Packages Revenue Data & Component ---
+const serviceRevenueData = [
+  { name: "Tarot", revenue: 84500000, bookings: 420, color: "from-purple-500 to-indigo-500" },
+  { name: "Thần Số Học", revenue: 112000000, bookings: 560, color: "from-red-500 to-rose-500" },
+  { name: "Chiêm Tinh", revenue: 67000000, bookings: 310, color: "from-blue-500 to-cyan-500" },
+  { name: "Phong Thủy", revenue: 95000000, bookings: 190, color: "from-amber-500 to-orange-500" },
+];
+
+function ServiceRevenueChart() {
+  const [selectedService, setSelectedService] = useState<number | null>(null);
+  const maxRevenue = Math.max(...serviceRevenueData.map(s => s.revenue));
+  
+  const formatVND = (value: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
+
+  return (
+    <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">Services Statistics</span>
+          <h3 className="text-lg font-bold text-white mt-1">Doanh thu theo Gói Dịch vụ</h3>
+        </div>
+        <span className="text-xs text-gray-400 font-medium">Tổng quan 4 lĩnh vực chính</span>
+      </div>
+
+      <div className="flex flex-col gap-5">
+        {serviceRevenueData.map((service, index) => {
+          const percentage = (service.revenue / maxRevenue) * 100;
+          const isSelected = selectedService === index;
+          
+          return (
+            <div 
+              key={index} 
+              className={`p-3 rounded-xl transition-all duration-300 cursor-pointer ${isSelected ? 'bg-white/5 border border-white/10' : 'bg-transparent border border-transparent'}`}
+              onClick={() => setSelectedService(isSelected ? null : index)}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-white">{service.name}</span>
+                <span className="text-sm font-black text-white">{formatVND(service.revenue)}</span>
+              </div>
+              <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/10 relative">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percentage}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className={`h-full rounded-full bg-gradient-to-r ${service.color}`} 
+                />
+              </div>
+              
+              <AnimatePresence>
+                {isSelected && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden mt-3 flex items-center justify-between text-xs text-gray-400"
+                  >
+                    <span>Lượt đặt: <strong>{service.bookings} lượt</strong></span>
+                    <span>Đơn giá TB: <strong>{formatVND(service.revenue / service.bookings)} / lượt</strong></span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// --- Participant Distribution Panel ---
+function UserDistributionPanel() {
+  const customerCount = 1240;
+  const expertCount = 186;
+  const total = customerCount + expertCount;
+  const customerRatio = Math.round((customerCount / total) * 100);
+  const expertRatio = Math.round((expertCount / total) * 100);
+
+  return (
+    <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between">
+      <div>
+        <span className="text-[10px] font-black uppercase tracking-wider text-blue-500 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">User Matrix</span>
+        <h3 className="text-lg font-bold text-white mt-1 mb-6">Tỷ lệ Người tham gia</h3>
+      </div>
+
+      <div className="flex items-center justify-around gap-6 mb-6">
+        <div className="relative w-32 h-32 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
+            <circle 
+              cx="18" 
+              cy="18" 
+              r="15.915" 
+              fill="none" 
+              stroke="#ef4444" 
+              strokeWidth="3.2" 
+              strokeDasharray={`${customerRatio} ${100 - customerRatio}`} 
+              strokeDashoffset="0"
+              strokeLinecap="round"
+            />
+            <circle 
+              cx="18" 
+              cy="18" 
+              r="15.915" 
+              fill="none" 
+              stroke="#3b82f6" 
+              strokeWidth="3.2" 
+              strokeDasharray={`${expertRatio} ${100 - expertRatio}`} 
+              strokeDashoffset={`-${customerRatio}`}
+              strokeLinecap="round"
+            />
+          </svg>
+          <div className="absolute text-center">
+            <p className="text-2xl font-black text-white">{total}</p>
+            <p className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Thành viên</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-2.5">
+            <span className="w-3.5 h-3.5 rounded bg-red-500 mt-0.5 border border-red-400/20" />
+            <div>
+              <p className="text-xs font-semibold text-gray-400">Khách hàng</p>
+              <p className="text-base font-black text-white">{customerCount} ({customerRatio}%)</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <span className="w-3.5 h-3.5 rounded bg-blue-500 mt-0.5 border border-blue-400/20" />
+            <div>
+              <p className="text-xs font-semibold text-gray-400">Chuyên gia</p>
+              <p className="text-base font-black text-white">{expertCount} ({expertRatio}%)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-white/5 flex justify-between items-center text-xs text-gray-500 font-medium">
+        <span>Cập nhật: Mới đây</span>
+        <span className="text-green-400 flex items-center gap-1 font-bold">
+          <TrendingUp className="w-3 h-3" /> +12% tháng này
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// --- Top Performing Services Component ---
+const topServices = [
+  { id: 1, name: "Giải mã bản đồ sao cá nhân nâng cao", category: "Chiêm Tinh", expert: "Astrologer Celine", bookings: 124, revenue: "31.000.000đ", trend: "up" },
+  { id: 2, name: "Bản đồ vận mệnh cuộc đời trọn đời", category: "Thần Số Học", expert: "Master Alistair", bookings: 98, revenue: "49.000.000đ", trend: "up" },
+  { id: 3, name: "Trải bài Tarot định hướng sự nghiệp 6 tháng", category: "Tarot", expert: "Master Lina", bookings: 85, revenue: "21.250.000đ", trend: "down" },
+  { id: 4, name: "Tư vấn thiết kế Phong thủy nhà phố hợp mệnh", category: "Phong Thủy", expert: "Cô Diệu Lâm", bookings: 42, revenue: "50.400.000đ", trend: "up" },
+];
+
+function TopPerformingServices() {
+  return (
+    <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">High Performance</span>
+          <h3 className="text-lg font-bold text-white mt-1">Dịch vụ Thịnh hành nhất</h3>
+        </div>
+        <span className="text-xs text-red-400 font-bold border border-red-500/20 bg-red-500/5 px-2.5 py-1 rounded-full flex items-center gap-1">
+          <Award className="w-3.5 h-3.5" /> VIP Choice
+        </span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-white/10 text-[10px] text-gray-500 uppercase tracking-widest font-black">
+              <th className="pb-3 text-left">Dịch vụ</th>
+              <th className="pb-3 text-center">Số lượt đặt</th>
+              <th className="pb-3 text-right">Tổng Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {topServices.map((ser, i) => (
+              <tr key={ser.id} className="group hover:bg-white/5 transition-colors duration-150">
+                <td className="py-3.5 pr-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-white/5 border border-white/10 text-xs font-black flex items-center justify-center text-red-500">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-white group-hover:text-red-400 transition-colors duration-150 line-clamp-1">{ser.name}</p>
+                      <p className="text-[9px] text-gray-500 font-semibold mt-0.5">{ser.expert} • {ser.category}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3.5 text-center text-xs font-bold text-gray-300">
+                  {ser.bookings}
+                </td>
+                <td className="py-3.5 text-right">
+                  <span className="text-xs font-black text-white">{ser.revenue}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// --- Traffic Chart Component ---
+const trafficData = {
+  day: [
+    { label: "T2", views: 420, visitors: 280 },
+    { label: "T3", views: 550, visitors: 390 },
+    { label: "T4", views: 680, visitors: 480 },
+    { label: "T5", views: 490, visitors: 310 },
+    { label: "T6", views: 820, visitors: 560 },
+    { label: "T7", views: 950, visitors: 710 },
+    { label: "CN", views: 1100, visitors: 820 },
+  ],
+  week: [
+    { label: "Tuần 1", views: 4100, visitors: 2900 },
+    { label: "Tuần 2", views: 4900, visitors: 3500 },
+    { label: "Tuần 3", views: 5600, visitors: 4200 },
+    { label: "Tuần 4", views: 6800, visitors: 5100 },
+  ],
+  month: [
+    { label: "T1", views: 12000, visitors: 8900 },
+    { label: "T2", views: 14500, visitors: 10200 },
+    { label: "T3", views: 18900, visitors: 14100 },
+    { label: "T4", views: 16000, visitors: 11500 },
+    { label: "T5", views: 22000, visitors: 16800 },
+    { label: "T6", views: 28500, visitors: 21000 },
+  ]
+};
+
+function TrafficChart() {
+  const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month'>('day');
+  const activeData = trafficData[timeframe];
+  
+  const maxVal = Math.max(...activeData.map(d => Math.max(d.views, d.visitors)));
+
+  return (
+    <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-500 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">Traffic Analyzer</span>
+          <h3 className="text-lg font-bold text-white mt-1">Lưu lượng Truy cập</h3>
+        </div>
+        
+        <div className="flex bg-white/5 border border-white/10 p-1 rounded-xl w-fit self-start sm:self-auto">
+          {(['day', 'week', 'month'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setTimeframe(tab)}
+              className={`px-3.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${timeframe === tab ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'}`}
+            >
+              {tab === 'day' ? 'Ngày' : tab === 'week' ? 'Tuần' : 'Tháng'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-end justify-between h-[180px] pt-4 px-2 relative">
+        {activeData.map((d, i) => {
+          const viewHeight = (d.views / maxVal) * 100;
+          const visitorHeight = (d.visitors / maxVal) * 100;
+
+          return (
+            <div key={i} className="flex flex-col items-center gap-3 w-full group/bar">
+              <div className="flex items-end justify-center gap-1.5 w-full h-[130px] relative">
+                <div className="w-2.5 sm:w-3.5 bg-red-500/20 hover:bg-red-500 border border-red-500/30 rounded-t transition-all duration-300 relative group/view" style={{ height: `${viewHeight}%` }}>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1a1a1e] border border-white/10 text-[9px] text-white font-bold py-1 px-1.5 rounded opacity-0 group-hover/view:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-30">
+                    Views: {d.views}
+                  </div>
+                </div>
+
+                <div className="w-2.5 sm:w-3.5 bg-indigo-500/20 hover:bg-indigo-500 border border-indigo-500/30 rounded-t transition-all duration-300 relative group/visitor" style={{ height: `${visitorHeight}%` }}>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-[#1a1a1e] border border-white/10 text-[9px] text-white font-bold py-1 px-1.5 rounded opacity-0 group-hover/visitor:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-30">
+                    Visitors: {d.visitors}
+                  </div>
+                </div>
+              </div>
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{d.label}</span>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="flex gap-4 mt-6 text-xs justify-center pt-4 border-t border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded bg-red-500" />
+          <span className="text-gray-400 font-medium">Lượt xem trang (Views)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded bg-indigo-500" />
+          <span className="text-gray-400 font-medium">Khách truy cập (Visitors)</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { token } = useAuthStore();
 
   // --- STATES ---
+  const [activeTab, setActiveTab] = useState<'stats' | 'approval'>('stats');
   const [showNotifications, setShowNotifications] = useState(false);
   const [experts, setExperts] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
@@ -564,390 +995,492 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 bg-transparent relative">
-        <div className="absolute top-20 left-1/3 w-[500px] h-[500px] bg-red-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
-        <div className="absolute top-40 right-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
-
-        {/* WELCOME BANNER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-8">
-          <div className="space-y-2">
-            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight">
-              Admin <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-500">Dashboard</span>
-            </h1>
-            <p className="text-gray-400 text-xs sm:text-sm uppercase tracking-[0.25em] font-medium">Hệ thống phê duyệt tài khoản chuyên gia & dịch vụ</p>
-          </div>
+        {/* PREMIUM GLASS TAB SWITCHER */}
+        <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-2xl w-full sm:w-fit gap-2">
           <button
-            onClick={() => setShowNotifications(true)}
-            className="hidden md:flex p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-red-500/10 hover:border-red-500/30 transition-all duration-300 group relative items-center justify-center"
+            onClick={() => setActiveTab('stats')}
+            className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'stats' ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
           >
-            <Bell className="w-6 h-6 text-gray-400 group-hover:text-red-500" />
-            <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-gray-900"></span>
+            <BarChart3 className="w-4 h-4" /> Thống kê & Báo cáo
+          </button>
+          <button
+            onClick={() => setActiveTab('approval')}
+            className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'approval' ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+          >
+            <ShieldCheck className="w-4 h-4" /> Duyệt yêu cầu
           </button>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <StatCard icon={<Users className="text-purple-400 w-6 h-6" />} label="Chuyên gia chờ duyệt" value={stats.pendingExpertsCount.toString()} />
-          <StatCard icon={<Briefcase className="text-yellow-400 w-6 h-6" />} label="Dịch vụ chờ duyệt" value={stats.pendingServicesCount.toString()} />
-          <StatCard icon={<BarChart3 className="text-green-400 w-6 h-6" />} label="Tổng yêu cầu tồn đọng" value={(stats.pendingExpertsCount + stats.pendingServicesCount).toString()} />
-        </div>
-
-        {/* FULL WIDTH: DATA TABLE APPROVAL QUEUE */}
-        <section id="approval-table" className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/5 rounded-full blur-3xl pointer-events-none -mr-40 -mt-40" />
-
-          {/* Heading and controls */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                <ShieldCheck className="w-6 h-6 text-red-500" /> Quản lý tài nguyên
-              </h2>
-              <p className="text-gray-400 text-xs">Phê duyệt, thu hồi hoặc xóa các Chuyên gia và Dịch vụ trên hệ thống</p>
-            </div>
-
-            {/* Switch tabs & Status Filters */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Type Switcher */}
-              <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10">
-                <button
-                  onClick={() => { setActiveApprovalTab('experts'); setPendingSearch(''); }}
-                  className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'experts' ? 'bg-white/10 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-                >
-                  <UserCheck className="w-3.5 h-3.5" /> Chuyên gia
-                </button>
-                <button
-                  onClick={() => { setActiveApprovalTab('services'); setPendingSearch(''); }}
-                  className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'services' ? 'bg-white/10 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-                >
-                  <Briefcase className="w-3.5 h-3.5" /> Dịch vụ
-                </button>
+        {activeTab === 'stats' ? (
+          <div className="space-y-10">
+            {/* STATS OVERVIEW CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* VIP Revenue Overview */}
+              <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Doanh thu VIP (6T)</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">150.5Mđ</h4>
+                  </div>
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 mt-4 text-xs">
+                  <span className="text-green-400 font-bold flex items-center gap-0.5">
+                    <TrendingUp className="w-3.5 h-3.5" /> +24%
+                  </span>
+                  <span className="text-gray-500 font-medium">so với tháng trước</span>
+                </div>
               </div>
 
-              {/* Status Switcher */}
-              <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 gap-1 flex-wrap">
-                {(['PENDING', 'APPROVED', 'REJECTED', 'BANNED', 'ALL'] as const).map((status) => {
-                  const isActive = statusFilter === status;
-                  const label = 
-                    status === 'PENDING' ? 'Chờ duyệt' : 
-                    status === 'APPROVED' ? 'Đã duyệt' : 
-                    status === 'REJECTED' ? 'Từ chối' :
-                    status === 'BANNED' ? 'Bị cấm' : 'Tất cả';
-                  return (
+              {/* Total Users */}
+              <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tổng Người Dùng</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">1,426</h4>
+                  </div>
+                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
+                    <Users className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 mt-4 text-xs">
+                  <span className="text-green-400 font-bold flex items-center gap-0.5">
+                    <TrendingUp className="w-3.5 h-3.5" /> +12%
+                  </span>
+                  <span className="text-gray-500 font-medium">thành viên mới</span>
+                </div>
+              </div>
+
+              {/* Active Experts */}
+              <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tổng Chuyên Gia</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">186</h4>
+                  </div>
+                  <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 mt-4 text-xs">
+                  <span className="text-green-400 font-bold flex items-center gap-0.5">
+                    <TrendingUp className="w-3.5 h-3.5" /> +8%
+                  </span>
+                  <span className="text-gray-500 font-medium">chuyên gia hoạt động</span>
+                </div>
+              </div>
+
+              {/* Total Traffic */}
+              <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Truy cập tháng này</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">28.5K</h4>
+                  </div>
+                  <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+                    <Activity className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 mt-4 text-xs">
+                  <span className="text-green-400 font-bold flex items-center gap-0.5">
+                    <TrendingUp className="w-3.5 h-3.5" /> +18.6%
+                  </span>
+                  <span className="text-gray-500 font-medium">lượt xem trang</span>
+                </div>
+              </div>
+            </div>
+
+            {/* CHART GRID 1 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <VipRevenueChart />
+              <ServiceRevenueChart />
+            </div>
+
+            {/* CHART GRID 2 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-1">
+                <UserDistributionPanel />
+              </div>
+              <div className="lg:col-span-2">
+                <TopPerformingServices />
+              </div>
+            </div>
+
+            {/* TRAFFIC ANALYSIS */}
+            <TrafficChart />
+          </div>
+        ) : (
+          <>
+            {/* STATS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <StatCard icon={<Users className="text-purple-400 w-6 h-6" />} label="Chuyên gia chờ duyệt" value={stats.pendingExpertsCount.toString()} />
+              <StatCard icon={<Briefcase className="text-yellow-400 w-6 h-6" />} label="Dịch vụ chờ duyệt" value={stats.pendingServicesCount.toString()} />
+              <StatCard icon={<BarChart3 className="text-green-400 w-6 h-6" />} label="Tổng yêu cầu tồn đọng" value={(stats.pendingExpertsCount + stats.pendingServicesCount).toString()} />
+            </div>
+
+            {/* FULL WIDTH: DATA TABLE APPROVAL QUEUE */}
+            <section id="approval-table" className="bg-gray-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/5 rounded-full blur-3xl pointer-events-none -mr-40 -mt-40" />
+
+              {/* Heading and controls */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <ShieldCheck className="w-6 h-6 text-red-500" /> Quản lý tài nguyên
+                  </h2>
+                  <p className="text-gray-400 text-xs">Phê duyệt, thu hồi hoặc xóa các Chuyên gia và Dịch vụ trên hệ thống</p>
+                </div>
+
+                {/* Switch tabs & Status Filters */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Type Switcher */}
+                  <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10">
                     <button
-                      key={status}
-                      onClick={() => setStatusFilter(status)}
-                      className={`px-3 py-2 text-xs font-bold rounded-xl transition-all ${
-                        isActive
-                          ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg shadow-red-600/20'
-                          : 'text-gray-400 hover:text-white'
-                      }`}
+                      onClick={() => { setActiveApprovalTab('experts'); setPendingSearch(''); }}
+                      className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'experts' ? 'bg-white/10 text-white shadow' : 'text-gray-400 hover:text-white'}`}
                     >
-                      {label}
+                      <UserCheck className="w-3.5 h-3.5" /> Chuyên gia
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+                    <button
+                      onClick={() => { setActiveApprovalTab('services'); setPendingSearch(''); }}
+                      className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${activeApprovalTab === 'services' ? 'bg-white/10 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                    >
+                      <Briefcase className="w-3.5 h-3.5" /> Dịch vụ
+                    </button>
+                  </div>
 
-          {/* Search bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-black/20 p-3 rounded-2xl border border-white/5">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                value={pendingSearch}
-                onChange={(e) => setPendingSearch(e.target.value)}
-                className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-gray-500 outline-none focus:border-red-500 focus:bg-white/10 transition-all font-medium"
-                placeholder={activeApprovalTab === 'experts' ? "Tìm kiếm chuyên gia theo tên, email, chuyên môn..." : "Tìm kiếm dịch vụ theo tên, tên chuyên gia..."}
-              />
-            </div>
-            {pendingSearch && (
-              <Button
-                onClick={() => setPendingSearch('')}
-                variant="ghost"
-                size="sm"
-                className="text-gray-400 hover:text-white border border-white/5 rounded-xl px-3"
-              >
-                Xóa lọc
-              </Button>
-            )}
-          </div>
-
-          {/* TABLE CONTAINER */}
-          <div className="overflow-x-auto rounded-2xl border border-white/5 bg-black/30">
-            {isLoading ? (
-              <div className="text-center py-20">
-                <div className="w-10 h-10 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-sm text-gray-400">Đang tải danh sách dữ liệu...</p>
+                  {/* Status Switcher */}
+                  <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/10 gap-1 flex-wrap">
+                    {(['PENDING', 'APPROVED', 'REJECTED', 'BANNED', 'ALL'] as const).map((status) => {
+                      const isActive = statusFilter === status;
+                      const label = 
+                        status === 'PENDING' ? 'Chờ duyệt' : 
+                        status === 'APPROVED' ? 'Đã duyệt' : 
+                        status === 'REJECTED' ? 'Từ chối' :
+                        status === 'BANNED' ? 'Bị cấm' : 'Tất cả';
+                      return (
+                        <button
+                          key={status}
+                          onClick={() => setStatusFilter(status)}
+                          className={`px-3 py-2 text-xs font-bold rounded-xl transition-all ${
+                            isActive
+                              ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-lg shadow-red-600/20'
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-            ) : activeApprovalTab === 'experts' ? (
-              /* EXPERTS TABLE */
-              filteredExperts.length > 0 ? (
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                  <thead>
-                    <tr className="bg-white/5 border-b border-white/5 text-gray-400 uppercase text-[10px] tracking-widest font-black">
-                      <th className="px-6 py-4">Chuyên gia</th>
-                      <th className="px-6 py-4">Kinh nghiệm</th>
-                      <th className="px-6 py-4">Lĩnh vực</th>
-                      <th className="px-6 py-4">Trạng thái</th>
-                      <th className="px-6 py-4 text-right">Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-sm">
-                    {filteredExperts.map((exp) => (
-                      <tr key={exp.id} className="hover:bg-white/5 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <img src={exp.avatar} alt={exp.name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
-                            <div>
-                              <p className="font-bold text-white group-hover:text-red-400 transition-colors">{exp.name}</p>
-                              <p className="text-xs text-gray-400">{exp.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-white text-xs font-semibold">{exp.experience}</p>
-                          <p className="text-[10px] text-gray-500">{exp.title}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {exp.specs.map((s: string) => (
-                              <span key={s} className="text-[9px] font-black uppercase bg-purple-500/10 border border-purple-500/20 text-purple-400 px-2 py-0.5 rounded">
-                                {s}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {exp.status === 'PENDING' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
-                              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
-                              Chờ duyệt
-                            </span>
-                          ) : exp.status === 'APPROVED' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
-                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-                              Đã duyệt
-                            </span>
-                          ) : exp.status === 'BANNED' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
-                              <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
-                              Bị cấm
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
-                              Từ chối
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 flex-wrap">
-                            <button
-                              onClick={() => setSelectedExpertForDetails(exp)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-white/5 border border-white/10 text-gray-300 hover:bg-white/15 hover:text-white transition-all flex items-center gap-1 shadow-sm"
-                            >
-                              <Eye className="w-3.5 h-3.5" /> Chi tiết
-                            </button>
-                            {exp.status === 'PENDING' && (
-                              <>
-                                <button
-                                  onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                                >
-                                  <CheckCircle className="w-3.5 h-3.5" /> Duyệt
-                                </button>
-                                <button
-                                  onClick={() => handleUpdateExpertStatus(exp.id, 'REJECTED')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                                >
-                                  <X className="w-3.5 h-3.5" /> Từ chối
-                                </button>
-                              </>
-                            )}
-                            {exp.status === 'APPROVED' && (
-                              <>
-                                <button
-                                  onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                                >
-                                  <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
-                                </button>
-                                <button
-                                  onClick={() => handleUpdateExpertStatus(exp.id, 'BANNED')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-1 shadow-sm"
-                                >
-                                  <Ban className="w-3.5 h-3.5" /> Cấm
-                                </button>
-                              </>
-                            )}
-                            {exp.status === 'BANNED' && (
-                              <button
-                                onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" /> Mở cấm
-                              </button>
-                            )}
-                            {exp.status === 'REJECTED' && (
-                              <button
-                                onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                              >
-                                <AlertCircle className="w-3.5 h-3.5" /> Xem xét lại
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteExpert(exp.id)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm"
-                            >
-                              <X className="w-3.5 h-3.5" /> Xóa
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="text-center py-16">
-                  <UserCheck className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 font-medium text-sm">Không tìm thấy chuyên gia nào phù hợp.</p>
+
+              {/* Search bar */}
+              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-black/20 p-3 rounded-2xl border border-white/5">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    value={pendingSearch}
+                    onChange={(e) => setPendingSearch(e.target.value)}
+                    className="w-full bg-white/5 border border-white/5 hover:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-gray-500 outline-none focus:border-red-500 focus:bg-white/10 transition-all font-medium"
+                    placeholder={activeApprovalTab === 'experts' ? "Tìm kiếm chuyên gia theo tên, email, chuyên môn..." : "Tìm kiếm dịch vụ theo tên, tên chuyên gia..."}
+                  />
                 </div>
-              )
-            ) : (
-              /* SERVICES TABLE */
-              filteredServices.length > 0 ? (
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                  <thead>
-                    <tr className="bg-white/5 border-b border-white/5 text-gray-400 uppercase text-[10px] tracking-widest font-black">
-                      <th className="px-6 py-4">Tên dịch vụ</th>
-                      <th className="px-6 py-4">Chuyên gia phụ trách</th>
-                      <th className="px-6 py-4">Thời lượng</th>
-                      <th className="px-6 py-4">Giá dịch vụ</th>
-                      <th className="px-6 py-4">Trạng thái</th>
-                      <th className="px-6 py-4 text-right">Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-sm">
-                    {filteredServices.map((ser) => (
-                      <tr key={ser.id} className="hover:bg-white/5 transition-colors group">
-                        <td className="px-6 py-4 font-bold text-white group-hover:text-red-400 transition-colors">
-                          {ser.name}
-                        </td>
-                        <td className="px-6 py-4 text-gray-300 font-semibold flex items-center gap-2">
-                          <img
-                            src={ser.expertAvatar || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"}
-                            alt={ser.expertName}
-                            className="w-6 h-6 rounded-full object-cover border border-white/10"
-                          />
-                          {ser.expertName}
-                        </td>
-                        <td className="px-6 py-4 text-gray-400 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-gray-500" /> {ser.duration}
-                        </td>
-                        <td className="px-6 py-4 text-red-400 font-bold">
-                          {ser.price}
-                        </td>
-                        <td className="px-6 py-4">
-                          {ser.status === 'PENDING' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
-                              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
-                              Chờ duyệt
-                            </span>
-                          ) : ser.status === 'APPROVED' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
-                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-                              Đã duyệt
-                            </span>
-                          ) : ser.status === 'BANNED' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
-                              <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
-                              Tạm ngưng
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
-                              Từ chối
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 flex-wrap">
-                            <button
-                              onClick={() => setSelectedServiceForDetails(ser)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-white/5 border border-white/10 text-gray-300 hover:bg-white/15 hover:text-white transition-all flex items-center gap-1 shadow-sm"
-                            >
-                              <Eye className="w-3.5 h-3.5" /> Chi tiết
-                            </button>
-                            {ser.status === 'PENDING' && (
-                              <>
+                {pendingSearch && (
+                  <Button
+                    onClick={() => setPendingSearch('')}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white border border-white/5 rounded-xl px-3"
+                  >
+                    Xóa tìm kiếm
+                  </Button>
+                )}
+              </div>
+
+              {/* TABLE CONTAINER */}
+              <div className="overflow-x-auto w-full border border-white/5 rounded-[1.5rem] bg-black/30">
+                {activeApprovalTab === 'experts' ? (
+                  /* EXPERTS TABLE */
+                  filteredExperts.length > 0 ? (
+                    <table className="w-full text-left border-collapse min-w-[700px]">
+                      <thead>
+                        <tr className="border-b border-white/10 text-[10px] text-gray-400 uppercase font-black tracking-wider">
+                          <th className="py-4.5 px-6">Chuyên gia</th>
+                          <th className="py-4.5 px-6">Kinh nghiệm</th>
+                          <th className="py-4.5 px-6">Lĩnh vực</th>
+                          <th className="py-4.5 px-6">Liên hệ</th>
+                          <th className="py-4.5 px-6">Trạng thái</th>
+                          <th className="py-4.5 px-6 text-right">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-xs text-gray-300">
+                        {filteredExperts.map((exp) => (
+                          <tr key={exp.id} className="hover:bg-white/5 transition-colors group">
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-2.5">
+                                <img
+                                  src={exp.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80"}
+                                  alt={exp.name}
+                                  className="w-8 h-8 rounded-full object-cover border border-white/10"
+                                />
+                                <div>
+                                  <p className="font-bold text-white group-hover:text-red-400 transition-colors">{exp.name}</p>
+                                  <p className="text-[9px] text-gray-500 mt-0.5">{exp.title}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6 font-medium text-white">{exp.experience}</td>
+                            <td className="py-4 px-6">
+                              <div className="flex flex-wrap gap-1">
+                                {exp.specs?.map((spec: string) => (
+                                  <span key={spec} className="text-[9px] font-black uppercase tracking-wider bg-white/5 border border-white/10 text-gray-400 px-2 py-0.5 rounded">
+                                    {spec}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="space-y-0.5 text-gray-400">
+                                <p className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-gray-500" /> {exp.email}</p>
+                                <p className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-gray-500" /> {exp.phone}</p>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              {exp.status === 'PENDING' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-0.5 rounded-full">
+                                  <AlertCircle className="w-3 h-3" /> Chờ duyệt
+                                </span>
+                              )}
+                              {exp.status === 'APPROVED' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-green-400 bg-green-500/10 border border-green-500/20 px-2.5 py-0.5 rounded-full">
+                                  <CheckCircle className="w-3 h-3" /> Hoạt động
+                                </span>
+                              )}
+                              {exp.status === 'REJECTED' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full">
+                                  <X className="w-3 h-3" /> Bị từ chối
+                                </span>
+                              )}
+                              {exp.status === 'BANNED' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded-full">
+                                  <Ban className="w-3 h-3" /> Bị khóa
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              <div className="flex items-center justify-end gap-2 flex-wrap">
                                 <button
-                                  onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  onClick={() => setSelectedExpertForDetails(exp)}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-white/5 border border-white/10 text-gray-300 hover:bg-white/15 hover:text-white transition-all flex items-center gap-1 shadow-sm"
                                 >
-                                  <CheckCircle className="w-3.5 h-3.5" /> Duyệt
+                                  <Eye className="w-3.5 h-3.5" /> Chi tiết
                                 </button>
+                                {exp.status === 'PENDING' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <CheckCircle className="w-3.5 h-3.5" /> Duyệt
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateExpertStatus(exp.id, 'REJECTED')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <X className="w-3.5 h-3.5" /> Từ chối
+                                    </button>
+                                  </>
+                                )}
+                                {exp.status === 'APPROVED' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateExpertStatus(exp.id, 'BANNED')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-650 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <Ban className="w-3.5 h-3.5" /> Khóa
+                                    </button>
+                                  </>
+                                )}
+                                {exp.status === 'BANNED' && (
+                                  <button
+                                    onClick={() => handleUpdateExpertStatus(exp.id, 'APPROVED')}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  >
+                                    <CheckCircle className="w-3.5 h-3.5" /> Mở khóa
+                                  </button>
+                                )}
+                                {exp.status === 'REJECTED' && (
+                                  <button
+                                    onClick={() => handleUpdateExpertStatus(exp.id, 'PENDING')}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  >
+                                    <AlertCircle className="w-3.5 h-3.5" /> Xem xét lại
+                                  </button>
+                                )}
                                 <button
-                                  onClick={() => handleUpdateServiceStatus(ser.id, 'REJECTED')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  onClick={() => handleDeleteExpert(exp.id)}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm"
                                 >
-                                  <X className="w-3.5 h-3.5" /> Từ chối
+                                  <X className="w-3.5 h-3.5" /> Xóa
                                 </button>
-                              </>
-                            )}
-                            {ser.status === 'APPROVED' && (
-                              <>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center py-16">
+                      <UserCheck className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                      <p className="text-gray-400 font-medium text-sm">Không tìm thấy chuyên gia nào phù hợp.</p>
+                    </div>
+                  )
+                ) : (
+                  /* SERVICES TABLE */
+                  filteredServices.length > 0 ? (
+                    <table className="w-full text-left border-collapse min-w-[700px]">
+                      <thead>
+                        <tr className="bg-white/5 border-b border-white/5 text-gray-400 uppercase text-[10px] tracking-widest font-black">
+                          <th className="px-6 py-4">Tên dịch vụ</th>
+                          <th className="px-6 py-4">Chuyên gia phụ trách</th>
+                          <th className="px-6 py-4">Thời lượng</th>
+                          <th className="px-6 py-4">Giá dịch vụ</th>
+                          <th className="px-6 py-4">Trạng thái</th>
+                          <th className="px-6 py-4 text-right">Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-sm">
+                        {filteredServices.map((ser) => (
+                          <tr key={ser.id} className="hover:bg-white/5 transition-colors group">
+                            <td className="px-6 py-4 font-bold text-white group-hover:text-red-400 transition-colors">
+                              {ser.name}
+                            </td>
+                            <td className="px-6 py-4 text-gray-300 font-semibold flex items-center gap-2">
+                              <img
+                                src={ser.expertAvatar || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"}
+                                alt={ser.expertName}
+                                className="w-6 h-6 rounded-full object-cover border border-white/10"
+                              />
+                              {ser.expertName}
+                            </td>
+                            <td className="px-6 py-4 text-gray-400 flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5 text-gray-500" /> {ser.duration}
+                            </td>
+                            <td className="px-6 py-4 text-red-400 font-bold">
+                              {ser.price}
+                            </td>
+                            <td className="px-6 py-4">
+                              {ser.status === 'PENDING' ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase tracking-wider">
+                                  <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-ping" />
+                                  Chờ duyệt
+                                </span>
+                              ) : ser.status === 'APPROVED' ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-green-500/10 text-green-400 border border-green-500/20 uppercase tracking-wider">
+                                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                                  Đã duyệt
+                                </span>
+                              ) : ser.status === 'BANNED' ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
+                                  <span className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                                  Tạm ngưng
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-500/10 text-gray-400 border border-gray-500/20 uppercase tracking-wider">
+                                  Từ chối
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2 flex-wrap">
                                 <button
-                                  onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  onClick={() => setSelectedServiceForDetails(ser)}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-white/5 border border-white/10 text-gray-300 hover:bg-white/15 hover:text-white transition-all flex items-center gap-1 shadow-sm"
                                 >
-                                  <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                  <Eye className="w-3.5 h-3.5" /> Chi tiết
                                 </button>
+                                {ser.status === 'PENDING' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <CheckCircle className="w-3.5 h-3.5" /> Duyệt
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateServiceStatus(ser.id, 'REJECTED')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <X className="w-3.5 h-3.5" /> Từ chối
+                                    </button>
+                                  </>
+                                )}
+                                {ser.status === 'APPROVED' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <AlertCircle className="w-3.5 h-3.5" /> Thu hồi
+                                    </button>
+                                    <button
+                                      onClick={() => handleUpdateServiceStatus(ser.id, 'BANNED')}
+                                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-650 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                                    >
+                                      <Ban className="w-3.5 h-3.5" /> Khóa
+                                    </button>
+                                  </>
+                                )}
+                                {ser.status === 'BANNED' && (
+                                  <button
+                                    onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  >
+                                    <CheckCircle className="w-3.5 h-3.5" /> Mở cấm
+                                  </button>
+                                )}
+                                {ser.status === 'REJECTED' && (
+                                  <button
+                                    onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
+                                    className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                                  >
+                                    <AlertCircle className="w-3.5 h-3.5" /> Xem xét lại
+                                  </button>
+                                )}
                                 <button
-                                  onClick={() => handleUpdateServiceStatus(ser.id, 'BANNED')}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-950/40 border border-red-500/20 text-red-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-1 shadow-sm"
+                                  onClick={() => handleDeleteService(ser.id)}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm"
                                 >
-                                  <Ban className="w-3.5 h-3.5" /> Cấm
+                                  <X className="w-3.5 h-3.5" /> Xóa
                                 </button>
-                              </>
-                            )}
-                            {ser.status === 'BANNED' && (
-                              <button
-                                onClick={() => handleUpdateServiceStatus(ser.id, 'APPROVED')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                              >
-                                <CheckCircle className="w-3.5 h-3.5" /> Mở cấm
-                              </button>
-                            )}
-                            {ser.status === 'REJECTED' && (
-                              <button
-                                onClick={() => handleUpdateServiceStatus(ser.id, 'PENDING')}
-                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500 hover:text-black transition-all flex items-center gap-1 shadow-sm"
-                              >
-                                <AlertCircle className="w-3.5 h-3.5" /> Xem xét lại
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteService(ser.id)}
-                              className="px-3 py-1.5 rounded-xl text-xs font-black bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1 shadow-sm"
-                            >
-                              <X className="w-3.5 h-3.5" /> Xóa
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="text-center py-16">
-                  <Briefcase className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 font-medium text-sm">Không tìm thấy dịch vụ nào phù hợp.</p>
-                </div>
-              )
-            )}
-          </div>
-        </section>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center py-16">
+                      <Briefcase className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                      <p className="text-gray-400 font-medium text-sm">Không tìm thấy dịch vụ nào phù hợp.</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+          </>
+        )}
       </main>
-
       {/* EXPERT DETAILS MODAL */}
       <AnimatePresence>
         {selectedExpertForDetails && (
