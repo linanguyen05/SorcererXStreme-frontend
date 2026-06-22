@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Calendar, MapPin, Eye, Heart, Sparkles, Clock, RotateCcw, Crown } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { useAuthStore, useProfileStore } from '@/lib/store';
+import { astrologyApi } from '@/lib/api-client';
+import { formatBirthDate, parseAIResponse } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { FormattedContent } from '@/components/ui/FormattedContent';
@@ -125,29 +127,7 @@ export default function AstrologyPage() {
 
     // Use snake_case properties from user store
     const birthPlace = user?.birth_place || 'Việt Nam';
-
-    // Format birth_date to YYYY-MM-DD
-    let birthDate = '';
-    if (user?.birth_date) {
-      const dateStr = String(user.birth_date);
-      // Check if already in YYYY-MM-DD format
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-        birthDate = dateStr;
-      } else {
-        // Try to parse and convert to YYYY-MM-DD
-        try {
-          const date = new Date(dateStr);
-          if (!isNaN(date.getTime())) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            birthDate = `${year}-${month}-${day}`;
-          }
-        } catch (e) {
-          console.error('Invalid birth_date:', dateStr);
-        }
-      }
-    }
+    const birthDate = formatBirthDate(user?.birth_date);
 
     // Validate birth_date
     if (!birthDate) {
@@ -182,26 +162,7 @@ export default function AstrologyPage() {
     // Prepare partner_context if in love mode
     let partnerContext = undefined;
     if (featureType === 'love' && partner) {
-      // Format partner birth_date to YYYY-MM-DD
-      let partnerBirthDate = '';
-      if (partner.birthDate) {
-        const dateStr = String(partner.birthDate);
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-          partnerBirthDate = dateStr;
-        } else {
-          try {
-            const date = new Date(dateStr);
-            if (!isNaN(date.getTime())) {
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              partnerBirthDate = `${year}-${month}-${day}`;
-            }
-          } catch (e) {
-            console.error('Invalid partner birth_date:', dateStr);
-          }
-        }
-      }
+      const partnerBirthDate = formatBirthDate(partner.birthDate);
 
       if (!partnerBirthDate) {
         toast.error('Ngày sinh của người yêu không hợp lệ');
@@ -219,99 +180,20 @@ export default function AstrologyPage() {
     }
 
     try {
-      // Endpoint động dựa vào feature_type
-      const endpoint = featureType === 'love'
-        ? '/api/astrology/love'
-        : '/api/astrology/overview';
-
-      const requestBody: any = {
-        domain: 'astrology',
+      const requestPayload: any = {
+        domain: 'astrology' as const,
         feature_type: featureType,
         user_context: userContext
       };
 
-      // Thêm partner_context nếu là love mode
       if (featureType === 'love' && partnerContext) {
-        requestBody.partner_context = partnerContext;
+        requestPayload.partner_context = partnerContext;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const res = await astrologyApi.getReading(requestPayload, token);
+      const analysisText = parseAIResponse(res);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-
-        if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
-          setAnalysis(
-            `⚠️ **Đã hết lượt sử dụng**\n\n` +
-            `Bạn đã dùng hết ${errorData.currentUsage}/${errorData.limit} lượt cho tính năng này.\n\n` +
-            `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để tiếp tục sử dụng!`
-          );
-          setIsAnalyzing(false);
-          return;
-        }
-
-        if (response.status === 500) {
-          const errorMsg = errorData.message || errorData.error || 'Internal server error';
-          setAnalysis(
-            `❌ **Lỗi 500 - Lỗi Server**\n\n` +
-            `${errorMsg}\n\n` +
-            `Backend đang gặp sự cố. Vui lòng thử lại sau.\n\n` +
-            `_Chi tiết: ${JSON.stringify(errorData, null, 2)}_`
-          );
-          setIsAnalyzing(false);
-          return;
-        }
-
-        toast.error(errorData.message || 'Không thể lấy được phân tích từ AI');
-        setIsAnalyzing(false);
-        return;
-      }
-
-      const data = await response.json();
-
-      // Backend trả về: { analysis: "string" } hoặc { analysis: { body: "string" } }
-      if (data.analysis) {
-        let analysisText = '';
-
-        // Nếu analysis là object (Lambda response format)
-        if (typeof data.analysis === 'object') {
-          // Lambda trả về { statusCode, headers, body }
-          if (data.analysis.body) {
-            // Body là string JSON, cần parse
-            try {
-              const bodyData = typeof data.analysis.body === 'string'
-                ? JSON.parse(data.analysis.body)
-                : data.analysis.body;
-
-              // Lấy answer từ bodyData
-              analysisText = bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
-            } catch (e) {
-              // Nếu parse lỗi, dùng body trực tiếp
-              analysisText = data.analysis.body;
-            }
-          }
-          // Fallback: thử các field khác
-          else if (data.analysis.data) {
-            analysisText = data.analysis.data;
-          }
-          else if (data.analysis.message) {
-            analysisText = data.analysis.message;
-          }
-          else {
-            analysisText = JSON.stringify(data.analysis, null, 2);
-          }
-        } else {
-          // analysis is already a string
-          analysisText = data.analysis;
-        }
-
+      if (analysisText) {
         setAnalysis(analysisText);
         if (activeTab === 'overview') {
           setShowStarMap(true);
@@ -319,12 +201,30 @@ export default function AstrologyPage() {
           setShowRelationChart(true);
         }
       } else {
-        console.error('[Astrology] No analysis in response:', data);
+        console.error('[Astrology] No analysis parsed from response:', res);
         toast.error('Không nhận được nội dung phân tích từ AI');
       }
     } catch (error: any) {
       console.error('[Astrology] Error:', error);
-      toast.error(error.message || 'Có lỗi xảy ra khi kết nối với AI');
+      
+      const errorData = error.errorData || {};
+      if (error.status === 403 && error.error === 'LIMIT_REACHED') {
+        setAnalysis(
+          `⚠️ **Đã hết lượt sử dụng**\n\n` +
+          `Bạn đã dùng hết ${errorData.currentUsage || 0}/${errorData.limit || 0} lượt cho tính năng này.\n\n` +
+          `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để tiếp tục sử dụng!`
+        );
+      } else if (error.status === 500) {
+        const errorMsg = errorData.message || error.message || 'Internal server error';
+        setAnalysis(
+          `❌ **Lỗi 500 - Lỗi Server**\n\n` +
+          `${errorMsg}\n\n` +
+          `Backend đang gặp sự cố. Vui lòng thử lại sau.\n\n` +
+          `_Chi tiết: ${JSON.stringify(errorData, null, 2)}_`
+        );
+      } else {
+        toast.error(error.message || 'Có lỗi xảy ra khi kết nối với AI');
+      }
     }
 
     setIsAnalyzing(false);

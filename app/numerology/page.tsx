@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Hash, Calculator, RefreshCw, Sparkles, Star, ArrowRight, Zap, Crown, Infinity as InfinityIcon } from 'lucide-react';
 import { Sidebar, useSidebarCollapsed } from '@/components/layout/Sidebar';
 import { useAuthStore } from '@/lib/store';
+import { numerologyApi } from '@/lib/api-client';
+import { formatBirthDate, parseAIResponse } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -194,43 +196,23 @@ export default function NumerologyPage() {
       return;
     }
 
-
     const nameToUse = user?.name || '';
     const birthDateToUse = user?.birth_date || '';
     const genderToUse = user?.gender || 'other';
-    // const nameToUse = user?.name || 'Nguyễn Văn Test'; // Hard-code để test
-    // const birthDateToUse = user?.birth_date || '1999-01-01'; // Hard-code để test
 
     if (!nameToUse || !birthDateToUse) {
       toast.error('Vui lòng cập nhật đầy đủ tên và ngày sinh trong hồ sơ');
       return;
     }
 
-
-    // Format birth_date to YYYY-MM-DD
-    const formatBirthDate = (dateStr: string): string => {
-      if (!dateStr) return '';
-      const date = new Date(dateStr);
-      if (!isNaN(date.getTime())) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-      return dateStr;
-    };
-
-
     const formattedBirthDate = formatBirthDate(birthDateToUse);
-
 
     setIsCalculating(true);
 
-
     try {
-      const requestBody = {
-        domain: 'numerology',
-        feature_type: 'overview',
+      const requestPayload = {
+        domain: 'numerology' as const,
+        feature_type: 'overview' as const,
         user_context: {
           name: nameToUse,
           gender: genderToUse,
@@ -238,69 +220,10 @@ export default function NumerologyPage() {
         }
       };
 
+      console.log('[Numerology] Sending request:', { ...requestPayload, token: '***' });
 
-      console.log('[Numerology] Sending request:', { ...requestBody, token: '***' });
-
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/numerology`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-
-      console.log('[Numerology] Response status:', response.status);
-
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('[Numerology] Error response:', errorData);
-
-
-        if (response.status === 403 && errorData.error === 'LIMIT_REACHED') {
-          // Calculate local numbers for display even when limit reached
-          const lifePath = calculateLifePath(birthDateToUse);
-          const nameNumber = calculateNameNumber(nameToUse);
-          const finalNumber = lifePath <= 9 ? lifePath : lifePath;
-          const meaning = numerologyMeanings[finalNumber as keyof typeof numerologyMeanings];
-
-
-          setResult({
-            name: nameToUse,
-            birthDate: birthDateToUse,
-            lifePath,
-            nameNumber,
-            finalNumber,
-            meaning,
-            analysis: `⚠️ **Đã hết lượt sử dụng**\n\n` +
-              `Bạn đã dùng hết ${errorData.currentUsage}/${errorData.limit} lượt cho tính năng này.\n\n` +
-              `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để xem phân tích AI chi tiết!\n\n` +
-              `---\n\n**Kết quả cơ bản:**\n${meaning.description}`
-          });
-          setIsCalculating(false);
-          return;
-        }
-
-
-        if (response.status === 500) {
-          const errorMsg = errorData.message || errorData.error || 'Internal server error';
-          toast.error(`Lỗi server: ${errorMsg}`);
-          setIsCalculating(false);
-          return;
-        }
-
-
-        toast.error(errorData.message || 'Không thể lấy phân tích thần số học');
-        setIsCalculating(false);
-        return;
-      }
-
-
-      const data = await response.json();
-      console.log('[Numerology] Backend response:', data);
+      const res = await numerologyApi.getAnalysis(requestPayload, token);
+      console.log('[Numerology] Backend response:', res);
 
       // Calculate local numbers for display
       const lifePath = calculateLifePath(birthDateToUse);
@@ -308,46 +231,7 @@ export default function NumerologyPage() {
       const finalNumber = lifePath <= 9 ? lifePath : lifePath;
       const meaning = numerologyMeanings[finalNumber as keyof typeof numerologyMeanings];
 
-
-      // Parse response giống Fortune - 3 tier check
-      let analysis = '';
-
-      try {
-        // Tier 1: Check response.analysis (object with body)
-        if (data.analysis) {
-          if (typeof data.analysis === 'object') {
-            // Lambda format: { statusCode, headers, body }
-            if (data.analysis.body) {
-              const bodyData = typeof data.analysis.body === 'string'
-                ? JSON.parse(data.analysis.body)
-                : data.analysis.body;
-
-              // Extract analysis from bodyData
-              analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || bodyData.message || JSON.stringify(bodyData, null, 2);
-            } else {
-              analysis = data.analysis.data || data.analysis.message || JSON.stringify(data.analysis, null, 2);
-            }
-          } else {
-            // analysis is string
-            analysis = data.analysis;
-          }
-        }
-        // Tier 2: Check response.data (direct string)
-        else if (data.data) {
-          analysis = typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2);
-        }
-        // Tier 3: Direct Lambda format
-        else if (data.statusCode && data.body) {
-          const bodyData = typeof data.body === 'string'
-            ? JSON.parse(data.body)
-            : data.body;
-          analysis = bodyData.answer?.analysis || bodyData.answer || bodyData.analysis || JSON.stringify(bodyData, null, 2);
-        }
-      } catch (parseError) {
-        console.error('[Numerology] Parse error:', parseError);
-        analysis = '';
-      }
-
+      const analysis = parseAIResponse(res);
 
       if (analysis && analysis.trim() !== '') {
         setResult({
@@ -361,9 +245,7 @@ export default function NumerologyPage() {
         });
         toast.success('Đã tính toán thần số học thành công!');
       } else {
-        console.error('[Numerology] No analysis in response:', data);
-        toast.error('Không nhận được kết quả từ hệ thống');
-
+        toast.error('Không thể parse được nội dung phân tích từ AI');
         // Fallback to local calculation
         setResult({
           name: nameToUse,
@@ -377,25 +259,43 @@ export default function NumerologyPage() {
       }
     } catch (error: any) {
       console.error('[Numerology] Error:', error);
-      toast.error(error.message || 'Có lỗi xảy ra khi tính toán');
-      toast.error('Có lỗi xảy ra khi kết nối với AI');
 
-      // Fallback to local calculation
+      const errorData = error.errorData || {};
+      
+      // Calculate local numbers for display even when error occurs
       const lifePath = calculateLifePath(birthDateToUse);
       const nameNumber = calculateNameNumber(nameToUse);
       const finalNumber = lifePath <= 9 ? lifePath : lifePath;
       const meaning = numerologyMeanings[finalNumber as keyof typeof numerologyMeanings];
 
-
-      setResult({
-        name: nameToUse,
-        birthDate: birthDateToUse,
-        lifePath,
-        nameNumber,
-        finalNumber,
-        meaning,
-        analysis: meaning.description,
-      });
+      if (error.status === 403 && error.error === 'LIMIT_REACHED') {
+        setResult({
+          name: nameToUse,
+          birthDate: birthDateToUse,
+          lifePath,
+          nameNumber,
+          finalNumber,
+          meaning,
+          analysis: `⚠️ **Đã hết lượt sử dụng**\n\n` +
+            `Bạn đã dùng hết ${errorData.currentUsage || 0}/${errorData.limit || 0} lượt cho tính năng này.\n\n` +
+            `Nâng cấp lên **${errorData.tier === 'FREE' ? 'PREMIUM' : 'ULTIMATE'}** để xem phân tích AI chi tiết!\n\n` +
+            `---\n\n**Kết quả cơ bản:**\n${meaning.description}`
+        });
+      } else {
+        const errorMsg = errorData.message || error.message || 'Internal server error';
+        toast.error(errorMsg);
+        setResult({
+          name: nameToUse,
+          birthDate: birthDateToUse,
+          lifePath,
+          nameNumber,
+          finalNumber,
+          meaning,
+          analysis: `❌ **Lỗi: ${errorMsg}**\n\n` +
+            `Không thể lấy phân tích AI. Dưới đây là kết quả tính toán cơ bản.\n\n` +
+            `---\n\n**Kết quả cơ bản:**\n${meaning.description}`
+        });
+      }
     } finally {
       setIsCalculating(false);
     }

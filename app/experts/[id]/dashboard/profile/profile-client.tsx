@@ -85,7 +85,7 @@ export default function ExpertProfilePage({ id }: { id: string }) {
           const exp = res.expert || res;
           const loadedProfile = {
             name: exp.user?.name || exp.name || '',
-            title: exp.specialty ? `Chuyên gia ` + mapSpecialtyToUI(exp.specialty) : '',
+            title: exp.title || (exp.specialty ? `Chuyên gia ` + (Array.isArray(exp.specialty) ? exp.specialty.map(mapSpecialtyToUI).join(', ') : mapSpecialtyToUI(exp.specialty)) : ''),
             bio: exp.bio || '',
             experience: exp.experience || '',
             yoe: exp.experience_years !== undefined ? exp.experience_years : ('' as number | ''),
@@ -93,7 +93,11 @@ export default function ExpertProfilePage({ id }: { id: string }) {
             phone: exp.phone || '',
             facebook: exp.media_channels?.facebook || '',
             instagram: exp.media_channels?.instagram || '',
-            specs: exp.specialty ? [mapSpecialtyToUI(exp.specialty)] : [],
+            specs: exp.specialty 
+              ? (Array.isArray(exp.specialty) 
+                 ? exp.specialty.map(mapSpecialtyToUI) 
+                 : [mapSpecialtyToUI(exp.specialty)]) 
+              : [],
             price: exp.price || '200.000đ',
           };
           const avatarUrl = exp.user?.avatar || exp.avatar;
@@ -183,9 +187,8 @@ export default function ExpertProfilePage({ id }: { id: string }) {
       if (tempProfile.bio && tempProfile.bio.length >= 10) {
         payload.bio = tempProfile.bio;
       }
-      if (tempProfile.specs.length > 0) {
-        payload.specialty = tempProfile.specs[0]?.toUpperCase() || 'TAROT';
-      }
+      // Send specialty as an array of uppercase strings
+      payload.specialty = tempProfile.specs.map(s => s.toUpperCase());
       if (tempProfile.yoe !== '') {
         payload.experience_years = Number(tempProfile.yoe);
       }

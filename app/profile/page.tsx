@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { ReminderSettings } from '@/components/profile/ReminderSettings';
 import ContentHeader from '@/components/layout/ContentHeader';
+import { profileApi } from '@/lib/api-client';
 
 const genderTypes = [
   { value: 'male', label: 'Nam', icon: User, color: 'text-blue-400' },
@@ -69,15 +70,8 @@ export default function ProfilePage() {
 
       // Load Profile
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          cache: 'no-store',
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
+        const userData = await profileApi.get(token);
+        if (userData) {
           const currentUser = useAuthStore.getState().user;
           const { vip_tier, vip_expires_at, birth_date, birth_time, birth_place, ...otherData } = userData;
 
@@ -191,7 +185,6 @@ export default function ProfilePage() {
   }, [breakupData, confirmRecovery]);
 
   const handleSaveProfile = async () => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
     if (token) {
       try {
         await updateProfile(editForm.name, editForm.birthDate, editForm.birthTime, editForm.birthPlace, token);

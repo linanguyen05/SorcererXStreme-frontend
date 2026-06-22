@@ -89,12 +89,20 @@ export default function ExpertDashboard({ id }: { id: string }) {
           const exp = profileRes.expert || profileRes;
           setProfileData({
             name: exp.user?.name || exp.name || "Chuyên gia",
-            title: exp.specialty ? `Chuyên gia ` + mapSpecialtyToUI(exp.specialty) : "Chuyên gia tư vấn",
+            title: exp.specialty 
+              ? `Chuyên gia ` + (Array.isArray(exp.specialty) 
+                 ? exp.specialty.map(mapSpecialtyToUI).join(', ') 
+                 : mapSpecialtyToUI(exp.specialty)) 
+              : "Chuyên gia tư vấn",
             bio: exp.bio || "",
             experience: exp.experience || "",
             yoe: exp.experience_years !== undefined ? exp.experience_years : 5,
             avatar: exp.user?.avatar || exp.avatar || null,
-            specs: exp.specialty ? [mapSpecialtyToUI(exp.specialty)] : ['Tarot']
+            specs: exp.specialty 
+              ? (Array.isArray(exp.specialty) 
+                 ? exp.specialty.map(mapSpecialtyToUI) 
+                 : [mapSpecialtyToUI(exp.specialty)]) 
+              : ['Tarot']
           });
           setIsVerified(exp.status === 'APPROVED' || exp.is_verified || false);
         }

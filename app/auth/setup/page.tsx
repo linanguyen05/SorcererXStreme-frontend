@@ -185,14 +185,13 @@ export default function SetupPage() {
 
             // 4. Save Expert Details locally and database if Expert role is selected
             if (role === 'EXPERT') {
-                const mainSpecialty = selectedSpecs[0]?.toUpperCase() || 'TAROT';
                 // Build media_channels with only valid URLs
                 const mediaChannels: Record<string, string> = {};
                 if (facebook && facebook.startsWith('http')) mediaChannels.facebook = facebook;
                 if (instagram && instagram.startsWith('http')) mediaChannels.instagram = instagram;
 
                 const expertPayload: Record<string, any> = {
-                    specialty: mainSpecialty,
+                    specialty: selectedSpecs.map(s => s.toUpperCase()),
                     experience_years: Number(experienceYears),
                 };
                 // bio must be >= 10 chars per backend validation

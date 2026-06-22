@@ -14,6 +14,8 @@ import { FormattedContent } from '@/components/ui/FormattedContent';
 import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import ContentHeader from '@/components/layout/ContentHeader';
 import { useRouter } from 'next/navigation';
+import { chatApi } from '@/lib/api-client';
+import { parseAIResponse } from '@/lib/utils';
 
 // Component để render nội dung AI với formatting đẹp
 const FormattedAIResponse = ({ content }: { content: string }) => {
@@ -69,26 +71,17 @@ export default function ChatPage() {
 
       if (!sessionId) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat/new-session`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` }),
-            },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            setSessionId(data.sessionId || data.session_id);
-          } else if (response.status === 401 && !isAuthenticated) {
+          const data = await chatApi.createSession(token || undefined);
+          setSessionId(data.sessionId || data.session_id);
+        } catch (error: any) {
+          console.error('Failed to create session:', error);
+          if (error.status === 401 && !isAuthenticated) {
             localStorage.removeItem('guestId');
             localStorage.removeItem('guestProfile');
             setHasGuestAccess(false);
             setShowGuestModal(true);
             toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
           }
-        } catch (error) {
-          console.error('Failed to create session:', error);
         }
       }
     };
@@ -112,28 +105,20 @@ export default function ChatPage() {
     if (!token && !guestId) return;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CHAT_SERVICE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat/new-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` }),
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSessionId(data.sessionId || data.session_id);
-        toast.success('Đã làm mới cuộc trò chuyện!');
-      } else if (response.status === 401 && !isAuthenticated) {
+      const data = await chatApi.createSession(token || undefined);
+      setSessionId(data.sessionId || data.session_id);
+      toast.success('Đã làm mới cuộc trò chuyện!');
+    } catch (error: any) {
+      console.error('Failed to refresh session:', error);
+      if (error.status === 401 && !isAuthenticated) {
         localStorage.removeItem('guestId');
         localStorage.removeItem('guestProfile');
         setHasGuestAccess(false);
         setShowGuestModal(true);
         toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
+      } else {
+        toast.error('Không thể làm mới, vui lòng thử lại');
       }
-    } catch (error) {
-      console.error('Failed to refresh session:', error);
-      toast.error('Không thể làm mới, vui lòng thử lại');
     }
   };
 
@@ -152,20 +137,18 @@ export default function ChatPage() {
     setLoading(true);
 
     const isGuest = !isAuthenticated;
-    const guestId = isGuest ? localStorage.getItem('guestId') : null;
 
     try {
       const { token, user } = useAuthStore.getState();
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/chat`;
 
       const context = isGuest 
         ? JSON.parse(localStorage.getItem('guestProfile') || '{}')
         : { name: user?.name, gender: user?.gender, birth_date: user?.birth_date, birth_time: user?.birth_time, birth_place: user?.birth_place };
 
       // Chuẩn bị user_context từ user profile hoặc guest profile với validation
-      const requestBody = {
-        domain: "chatbot",
-        feature_type: "question",
+      const requestPayload = {
+        domain: "chatbot" as const,
+        feature_type: "question" as const,
         user_context: {
           name: context.name || "Khách",
           gender: context.gender || "other",
@@ -179,120 +162,69 @@ export default function ChatPage() {
         }
       };
 
-      console.log('Sending chat request:', { ...requestBody, token: '***' });
+      console.log('Sending chat request:', { ...requestPayload, token: '***' });
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(!isAuthenticated ? { 'x-guest-id': guestId || '' } : { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const res = await chatApi.sendMessage(requestPayload, token || undefined);
+      console.log('Chat response data:', res);
 
-      console.log('Chat response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Chat API error:', errorData);
-
-        if (response.status === 401) {
-          if (!isAuthenticated) {
-            localStorage.removeItem('guestId');
-            localStorage.removeItem('guestProfile');
-            setHasGuestAccess(false);
-            setShowGuestModal(true);
-            toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
-            return;
-          }
-          toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
-          return;
-        } else if (response.status === 429) {
-          toast.error('Bạn đã hỏi quá nhiều. Vui lòng thử lại sau.');
-          return;
-        } else if (response.status === 403) {
-          if (errorData.error === 'GUEST_LIMIT_REACHED') {
-            toast.error('Bạn đã dùng hết 3 lượt dùng thử miễn phí. Hãy đăng ký để tiếp tục sử dụng!');
-            setTimeout(() => {
-              router.push('/auth/register');
-            }, 2500);
-            return;
-          }
-          toast.error('Bạn đã hết lượt sử dụng. Vui lòng nâng cấp VIP.');
-          return;
-        } else if (response.status === 500) {
-          const errorMsg = errorData.message || errorData.error || 'Lỗi server';
-          toast.error(`Lỗi server: ${errorMsg}`);
-
-          // Hiển thị chi tiết lỗi trong development mode
-          if (process.env.NODE_ENV === 'development') {
-            addMessage({
-              content: `❌ **Lỗi 500 - Internal Server Error**\n\n${errorMsg}\n\nChi tiết: ${JSON.stringify(errorData, null, 2)}`,
-              role: 'assistant'
-            });
-          }
-          return;
-        }
-
-        throw new Error(errorData.message || errorData.error || 'Không thể lấy phản hồi từ AI');
-      }
-
-      const responseData = await response.json();
-      console.log('Chat response data:', responseData);
-
-      // Xử lý response từ backend
-      let aiAnswer = null;
-
-      // Backend trả về: { data: "string" } - data là STRING trực tiếp
-      if (responseData.data && typeof responseData.data === 'string') {
-        aiAnswer = responseData.data;
-      }
-      // Nếu data là object có reply/answer
-      else if (responseData.data && typeof responseData.data === 'object') {
-        aiAnswer = responseData.data.reply || responseData.data.answer || responseData.data.message;
-      }
-      // Lambda proxy format
-      else if (responseData.body && typeof responseData.body === 'string') {
-        try {
-          const parsedBody = JSON.parse(responseData.body);
-          aiAnswer = parsedBody.reply || parsedBody.answer || parsedBody.message || parsedBody.data;
-        } catch (parseError) {
-          console.error('Failed to parse response body:', parseError);
-          aiAnswer = responseData.body;
-        }
-      }
-      // Direct response format
-      else {
-        aiAnswer = responseData.reply || responseData.answer || responseData.message;
-      }
-
+      const aiAnswer = parseAIResponse(res);
       console.log('Extracted AI answer:', aiAnswer);
 
       if (aiAnswer) {
-        // Đảm bảo content là string
-        const content = typeof aiAnswer === 'string'
-          ? aiAnswer
-          : JSON.stringify(aiAnswer, null, 2);
-
         addMessage({
-          content: content,
+          content: aiAnswer,
           role: 'assistant'
         });
       } else {
-        console.error('No AI answer found in response:', responseData);
+        console.error('No AI answer found in response:', res);
         toast.error('AI không trả lời được. Vui lòng thử lại hoặc hỏi câu khác.');
       }
     } catch (error: any) {
       console.error('Chat error:', error);
-      const errorMessage = error.message || 'Có lỗi xảy ra khi kết nối với AI';
-      toast.error(errorMessage);
+      
+      const errorData = error.errorData || {};
 
-      // Thêm error message vào chat nếu cần debug
-      if (process.env.NODE_ENV === 'development') {
-        addMessage({
-          content: `❌ Lỗi: ${errorMessage}`,
-          role: 'assistant'
-        });
+      if (error.status === 401) {
+        if (!isAuthenticated) {
+          localStorage.removeItem('guestId');
+          localStorage.removeItem('guestProfile');
+          setHasGuestAccess(false);
+          setShowGuestModal(true);
+          toast.error('Phiên dùng thử không hợp lệ hoặc đã hết hạn. Vui lòng thiết lập lại hồ sơ.');
+          return;
+        }
+        toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      } else if (error.status === 429) {
+        toast.error('Bạn đã hỏi quá nhiều. Vui lòng thử lại sau.');
+      } else if (error.status === 403) {
+        if (error.error === 'GUEST_LIMIT_REACHED') {
+          toast.error('Bạn đã dùng hết 3 lượt dùng thử miễn phí. Hãy đăng ký để tiếp tục sử dụng!');
+          setTimeout(() => {
+            router.push('/auth/register');
+          }, 2500);
+          return;
+        }
+        toast.error('Bạn đã hết lượt sử dụng. Vui lòng nâng cấp VIP.');
+      } else if (error.status === 500) {
+        const errorMsg = errorData.message || error.message || 'Lỗi server';
+        toast.error(`Lỗi server: ${errorMsg}`);
+
+        // Hiển thị chi tiết lỗi trong development mode
+        if (process.env.NODE_ENV === 'development') {
+          addMessage({
+            content: `❌ **Lỗi 500 - Internal Server Error**\n\n${errorMsg}\n\nChi tiết: ${JSON.stringify(errorData, null, 2)}`,
+            role: 'assistant'
+          });
+        }
+      } else {
+        const errorMessage = error.message || 'Có lỗi xảy ra khi kết nối với AI';
+        toast.error(errorMessage);
+        if (process.env.NODE_ENV === 'development') {
+          addMessage({
+            content: `❌ Lỗi: ${errorMessage}`,
+            role: 'assistant'
+          });
+        }
       }
     } finally {
       setLoading(false);

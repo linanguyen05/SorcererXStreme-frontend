@@ -51,6 +51,7 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
     errObj.status = response.status;
     errObj.error = error.error; // ví dụ: GUEST_RESTRICTED, GUEST_LIMIT_REACHED
     errObj.redirectRegister = error.redirectRegister;
+    errObj.errorData = error; // Đính kèm toàn bộ payload lỗi để UI chiết xuất thêm thông tin
     throw errObj;
   }
 
@@ -190,16 +191,34 @@ export const profileApi = {
 };
 
 export const chatApi = {
-  createSession: (token: string) =>
+  createSession: (token?: string) =>
     apiRequest('/api/chat/new-session', {
       method: 'POST',
       token,
     }),
 
-  sendMessage: (sessionId: string, message: string, token: string) =>
-    apiRequest('/api/chat/message', {
+  sendMessage: (
+    data: {
+      domain: 'chatbot';
+      feature_type: 'question';
+      user_context: {
+        name: string;
+        gender: string;
+        birth_date: string;
+        birth_time?: string;
+        birth_place?: string;
+        [key: string]: any;
+      };
+      data: {
+        sessionId: string;
+        question: string;
+      };
+    },
+    token?: string
+  ) =>
+    apiRequest('/api/chat', {
       method: 'POST',
-      body: { sessionId, message },
+      body: data,
       token,
     }),
 };
