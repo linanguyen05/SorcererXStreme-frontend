@@ -240,8 +240,10 @@ export default function SetupPage() {
             // 5. Redirect based on role
             if (role === 'EXPERT') {
                 router.push(`/experts/${userId}/pending`);
+            } else if (role === 'ADMIN') {
+                router.push(`/admins/${userId}/dashboard`);
             } else {
-                router.push('/profile');
+                router.push('/dashboard');
             }
         } catch (error) {
             toast.error('Có lỗi xảy ra, vui lòng thử lại');

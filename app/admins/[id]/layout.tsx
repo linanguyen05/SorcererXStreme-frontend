@@ -1,3 +1,5 @@
+import AdminGuard from '@/components/auth/AdminGuard';
+
 export function generateStaticParams() {
   const numericIds = Array.from({ length: 20 }, (_, i) => ({ id: (i + 1).toString() }));
   return [
@@ -12,5 +14,6 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <AdminGuard>{children}</AdminGuard>;
 }
+

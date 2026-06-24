@@ -53,7 +53,7 @@ export default function LoginPage() {
           router.push(`/admins/${user.id || '1'}/dashboard`);
         } else {
           if (user?.isProfileComplete) {
-            router.push('/profile'); 
+            router.push('/dashboard'); 
           } else {
             router.push('/auth/setup');
           }
