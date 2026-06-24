@@ -13,6 +13,22 @@ export default function ExpertGuard({ children }: { children: React.ReactNode })
   const [isCheckingApproval, setIsCheckingApproval] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
+  // Fallback khi không gọi được API: đọc trạng thái duyệt từ localStorage mock.
+  const checkLocalApproval = (): boolean => {
+    try {
+      const storedExperts = localStorage.getItem('mock-admin-experts');
+      if (!storedExperts) return false;
+      const allExperts = JSON.parse(storedExperts);
+      const matched = allExperts.find(
+        (e: any) => e.id === user?.id || (user?.email && e.email === user.email),
+      );
+      return !!(matched && matched.status === 'APPROVED');
+    } catch (e) {
+      console.error('Error parsing mock-admin-experts:', e);
+      return false;
+    }
+  };
+
   useEffect(() => {
     // 1. Authenticated Check
     if (!isAuthenticated) {
@@ -28,35 +44,30 @@ export default function ExpertGuard({ children }: { children: React.ReactNode })
 
     // 3. Approval status check
     const checkApprovalStatus = async () => {
-      if (!token || !user?.id) return;
-      
       let approved = false;
-      try {
-        const profileRes = await expertApi.getProfile(user.id, token);
-        const exp = profileRes?.expert || profileRes;
-        if (exp && exp.status === 'APPROVED') {
-          approved = true;
-        }
-      } catch (err) {
-        console.warn('API check failed in ExpertGuard, checking local fallback', err);
-        // Fallback to local storage
-        const storedExperts = localStorage.getItem('mock-admin-experts');
-        if (storedExperts) {
-          try {
-            const allExperts = JSON.parse(storedExperts);
-            const matched = allExperts.find((e: any) => e.id === user.id || (user.email && e.email === user.email));
-            if (matched && matched.status === 'APPROVED') {
-              approved = true;
-            }
-          } catch (e) {
-            console.error('Error parsing mock-admin-experts:', e);
+
+      // Ưu tiên hỏi API; nếu chưa có token thì fallback localStorage (không
+      // return sớm để tránh kẹt spinner mãi).
+      if (token && user?.id) {
+        try {
+          const profileRes = await expertApi.getProfile(user.id, token);
+          const exp = profileRes?.expert || profileRes;
+          if (exp && exp.status === 'APPROVED') {
+            approved = true;
           }
+        } catch (err) {
+          console.warn('API check failed in ExpertGuard, checking local fallback', err);
+          approved = checkLocalApproval();
         }
+      } else {
+        approved = checkLocalApproval();
       }
 
-      // Redirection behavior
-      const isPendingPage = pathname.endsWith('/pending');
-      
+      // pathname có thể kèm dấu "/" cuối (next config trailingSlash: true),
+      // nên chuẩn hoá trước khi so khớp để không vỡ logic /pending.
+      const normalizedPath = pathname.replace(/\/+$/, '');
+      const isPendingPage = normalizedPath.endsWith('/pending');
+
       if (approved) {
         if (isPendingPage) {
           router.push(`/expert/dashboard`);
