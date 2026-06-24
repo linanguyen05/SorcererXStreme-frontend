@@ -33,7 +33,7 @@ const mapSpecialtyToUI = (spec: string): string => {
 export default function ExpertDashboard({ id }: { id: string }) {
   const router = useRouter();
   const { token } = useAuthStore();
-  const baseUrl = `/experts/${id}/dashboard`;
+  const baseUrl = `/expert/dashboard`;
 
   // --- STATES ---
   const [isVerified, setIsVerified] = useState(false);
@@ -73,7 +73,7 @@ export default function ExpertDashboard({ id }: { id: string }) {
         const profileRes = await expertApi.getProfile(id, token);
         const exp = profileRes?.expert || profileRes;
         if (exp && exp.status === 'PENDING') {
-          router.push(`/experts/${id}/pending`);
+          router.push(`/expert/pending`);
           return;
         }
       } catch (err) {
@@ -498,7 +498,7 @@ function AppointmentRow({ name, serviceName, time, status, id, expertId }: any) 
         <span className="inline-flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-gray-500" /> {time}</span>
       </td>
       <td className="px-6 py-4 text-right">
-        <Link href={`/experts/${expertId}/dashboard/schedule`}>
+        <Link href={`/expert/dashboard/schedule`}>
           <button className="text-xs text-red-400 hover:text-red-300 font-black hover:underline transition-all">Chi tiết</button>
         </Link>
       </td>

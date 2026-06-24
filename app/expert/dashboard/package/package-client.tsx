@@ -96,7 +96,7 @@ export default function CreateOrEditPackage({ id }: { id: string }) {
         toast.success('Gửi yêu cầu tạo gói dịch vụ mới thành công! Đang chờ Admin duyệt.');
       }
 
-      router.push(`/experts/${id}/dashboard`);
+      router.push(`/expert/dashboard`);
     } catch (err) {
       console.error(err);
       toast.error('Lỗi khi lưu gói dịch vụ. Vui lòng thử lại.');
@@ -108,7 +108,7 @@ export default function CreateOrEditPackage({ id }: { id: string }) {
   return (
     <main className="min-h-screen pt-24 pb-20 px-4 flex justify-center bg-black font-['Be_Vietnam_Pro'] text-white">
       <div className="max-w-2xl w-full bg-gray-900/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 md:p-10 shadow-2xl space-y-8">
-        <Link href={`/experts/${id}/dashboard`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
+        <Link href={`/expert/dashboard`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
           <ArrowLeft className="w-4 h-4" /> Quay lại Workspace
         </Link>
 

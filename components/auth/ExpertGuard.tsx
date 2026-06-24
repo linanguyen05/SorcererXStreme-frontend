@@ -1,17 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter, useParams, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { expertApi } from '@/lib/api-client';
 
 export default function ExpertGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const params = useParams();
   const pathname = usePathname();
   const { user, isAuthenticated, token } = useAuthStore();
-  const id = params.id as string;
-  
+
   const [isCheckingApproval, setIsCheckingApproval] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -28,17 +26,7 @@ export default function ExpertGuard({ children }: { children: React.ReactNode })
       return;
     }
 
-    // 3. ID Mismatch Check
-    if (user?.id && user.id !== id) {
-      if (pathname.includes('/pending')) {
-        router.push(`/experts/${user.id}/pending`);
-      } else {
-        router.push(`/experts/${user.id}/dashboard`);
-      }
-      return;
-    }
-
-    // 4. Approval status check
+    // 3. Approval status check
     const checkApprovalStatus = async () => {
       if (!token || !user?.id) return;
       
@@ -71,7 +59,7 @@ export default function ExpertGuard({ children }: { children: React.ReactNode })
       
       if (approved) {
         if (isPendingPage) {
-          router.push(`/experts/${user.id}/dashboard`);
+          router.push(`/expert/dashboard`);
         } else {
           setIsAuthorized(true);
           setIsCheckingApproval(false);
@@ -81,16 +69,16 @@ export default function ExpertGuard({ children }: { children: React.ReactNode })
           setIsAuthorized(true);
           setIsCheckingApproval(false);
         } else {
-          router.push(`/experts/${user.id}/pending`);
+          router.push(`/expert/pending`);
         }
       }
     };
 
     checkApprovalStatus();
-  }, [isAuthenticated, user, id, token, pathname, router]);
+  }, [isAuthenticated, user, token, pathname, router]);
 
   // Render loader during redirect check
-  if (!isAuthenticated || user?.role?.toUpperCase() !== 'EXPERT' || (user?.id && user.id !== id) || isCheckingApproval || !isAuthorized) {
+  if (!isAuthenticated || user?.role?.toUpperCase() !== 'EXPERT' || isCheckingApproval || !isAuthorized) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">

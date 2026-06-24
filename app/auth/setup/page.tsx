@@ -239,7 +239,7 @@ export default function SetupPage() {
 
             // 5. Redirect based on role
             if (role === 'EXPERT') {
-                router.push(`/experts/${userId}/pending`);
+                router.push(`/expert/pending`);
             } else if (role === 'ADMIN') {
                 router.push(`/admins/${userId}/dashboard`);
             } else {

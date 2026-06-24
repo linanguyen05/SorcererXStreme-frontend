@@ -234,7 +234,7 @@ export default function ExpertProfilePage({ id }: { id: string }) {
         {/* Navigation & Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
           <div className="space-y-2">
-            <Link href={`/experts/${id}/dashboard`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-2 group">
+            <Link href={`/expert/dashboard`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-2 group">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Quay lại Workspace
             </Link>
             <h1 className="text-4xl font-bold font-['Pacifico'] tracking-wide">

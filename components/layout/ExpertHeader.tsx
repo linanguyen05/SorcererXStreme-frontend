@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname, useParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, User, LogOut, Bell, Sparkles, Shield, Layout, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
@@ -16,7 +16,6 @@ interface ExpertHeaderProps {
 export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const params = useParams();
   const { user, logout, isAuthenticated } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -32,17 +31,15 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
     router.push('/auth/login');
   };
 
-  const id = (params?.id as string) || user?.id || 'master-tri-duc';
-
   const navLinks = [
-    { name: 'Tổng quan', id: 'overview', href: `/experts/${id}/dashboard#overview` },
-    { name: 'Gói dịch vụ', id: 'services', href: `/experts/${id}/dashboard#services` },
-    { name: 'Quản lý lịch hẹn', id: 'appointments', href: `/experts/${id}/dashboard#appointments` },
-    { name: 'Phản hồi', id: 'feedback', href: `/experts/${id}/dashboard#feedback` },
+    { name: 'Tổng quan', id: 'overview', href: `/expert/dashboard#overview` },
+    { name: 'Gói dịch vụ', id: 'services', href: `/expert/dashboard#services` },
+    { name: 'Quản lý lịch hẹn', id: 'appointments', href: `/expert/dashboard#appointments` },
+    { name: 'Phản hồi', id: 'feedback', href: `/expert/dashboard#feedback` },
   ];
 
   const handleLinkClick = (e: React.MouseEvent, link: typeof navLinks[0]) => {
-    if (pathname === `/experts/${id}/dashboard` && onScrollToSection) {
+    if ((pathname === '/expert/dashboard' || pathname === '/expert/dashboard/') && onScrollToSection) {
       e.preventDefault();
       onScrollToSection(link.id);
       setIsMobileMenuOpen(false);
@@ -87,12 +84,12 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
             
             {/* Subpages shortcuts */}
             <div className="hidden md:flex items-center gap-2">
-              <Link href={`/experts/${id}/dashboard/profile`}>
+              <Link href={`/expert/dashboard/profile`}>
                 <Button variant="ghost" size="sm" className="text-xs hover:bg-white/5 border border-transparent hover:border-white/10 text-gray-300">
                   Hồ sơ
                 </Button>
               </Link>
-              <Link href={`/experts/${id}/dashboard/verify`}>
+              <Link href={`/expert/dashboard/verify`}>
                 <Button variant="ghost" size="sm" className="text-xs hover:bg-white/5 border border-transparent hover:border-white/10 text-gray-300">
                   Xác thực
                 </Button>
@@ -145,7 +142,7 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
                           Trang chủ khách hàng
                         </Link>
                         
-                        <Link href={`/experts/${id}/dashboard/profile`} className="flex md:hidden items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                        <Link href={`/expert/dashboard/profile`} className="flex md:hidden items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
                           <User className="w-4 h-4 text-red-400" />
                           Thiết lập trang cá nhân
                         </Link>
@@ -208,12 +205,12 @@ export function ExpertHeader({ onScrollToSection, onShowNotifications }: ExpertH
               <div className="h-[1px] bg-white/10 my-4" />
 
               <div className="grid grid-cols-2 gap-2">
-                <Link href={`/experts/${id}/dashboard/profile`} className="w-full">
+                <Link href={`/expert/dashboard/profile`} className="w-full">
                   <Button variant="secondary" className="w-full justify-center text-xs py-3 rounded-xl">
                     Hồ sơ chuyên gia
                   </Button>
                 </Link>
-                <Link href={`/experts/${id}/dashboard/verify`} className="w-full">
+                <Link href={`/expert/dashboard/verify`} className="w-full">
                   <Button variant="secondary" className="w-full justify-center text-xs py-3 rounded-xl">
                     Xác thực danh tính
                   </Button>

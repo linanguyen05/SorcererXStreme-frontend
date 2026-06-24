@@ -16,8 +16,8 @@ const USER_ONLY_ROUTES = [
   '/dashboard'
 ];
 
-// Expert routes pattern: /experts/:id/dashboard and all sub-routes
-const EXPERT_ROUTE_PATTERN = /^\/experts\/[^/]+\/(dashboard|pending)(\/.*)?$/;
+// Expert routes pattern: /expert/dashboard, /expert/pending and sub-routes (route tĩnh)
+const EXPERT_ROUTE_PATTERN = /^\/expert\/(dashboard|pending)(\/.*)?$/;
 
 function isExpertRoute(pathname: string): boolean {
   return EXPERT_ROUTE_PATTERN.test(pathname);
@@ -69,7 +69,7 @@ export default function AmplifyProvider({ children }: { children: React.ReactNod
     // EXPERT trying to access user-only routes → redirect to expert dashboard
     if (role === 'EXPERT') {
       if (isUserOnlyRoute(pathname)) {
-        router.replace(`/experts/${user!.id}/dashboard`);
+        router.replace(`/expert/dashboard`);
         return;
       }
     }

@@ -9,7 +9,7 @@ export default function VerifyExpert({ id }: { id: string }) {
   return (
     <main className="min-h-screen pt-24 pb-20 px-4 flex items-center justify-center">
       <div className="max-w-2xl w-full bg-gray-900/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 font-['Be_Vietnam_Pro']">
-        <Link href={`/experts/${id}/dashboard`} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
+        <Link href={`/expert/dashboard`} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
           <ArrowLeft className="w-4 h-4" /> Quay lại
         </Link>
         

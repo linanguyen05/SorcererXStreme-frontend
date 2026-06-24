@@ -149,9 +149,9 @@ export default function DashboardPage() {
         }
 
         if (isApproved) {
-          router.push(`/experts/${user.id}/dashboard`);
+          router.push(`/expert/dashboard`);
         } else {
-          router.push(`/experts/${user.id}/pending`);
+          router.push(`/expert/pending`);
         }
       };
       
