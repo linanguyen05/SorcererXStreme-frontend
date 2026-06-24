@@ -1,6 +1,11 @@
+'use client';
+
 import React, { Suspense } from 'react';
 import CreatePackageClient from './package-client';
-export default function Page({ params }: { params: { id: string } }) {
+import { useAuthStore } from '@/lib/store';
+
+export default function Page() {
+  const id = useAuthStore((s) => s.user?.id);
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-black flex items-center justify-center text-white">
@@ -10,7 +15,7 @@ export default function Page({ params }: { params: { id: string } }) {
         </div>
       </div>
     }>
-      <CreatePackageClient id={params.id} />
+      {id ? <CreatePackageClient id={id} /> : null}
     </Suspense>
   );
 }

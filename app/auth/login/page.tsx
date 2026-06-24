@@ -45,9 +45,9 @@ export default function LoginPage() {
             }
           }
           if (isApproved) {
-            router.push(`/experts/${user.id}/dashboard`);
+            router.push(`/expert/dashboard`);
           } else {
-            router.push(`/experts/${user.id}/pending`);
+            router.push(`/expert/pending`);
           }
         } else if (user?.role === 'ADMIN') {
           router.push(`/admins/${user.id || '1'}/dashboard`);
