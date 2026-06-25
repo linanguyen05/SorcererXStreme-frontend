@@ -28,7 +28,7 @@ export default function RegisterPage() {
     email: false 
   });
   
-  const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
+  const [role, setRole] = useState<'USER' | 'EXPERT'>('USER');
   const [isTouched, setIsTouched] = useState(false);
 
   const { register, confirmRegistration } = useAuthStore();

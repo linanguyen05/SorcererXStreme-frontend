@@ -117,12 +117,12 @@ export default function DashboardPage() {
       return;
     }
 
-    if (user?.role === 'ADMIN') {
+    if (user?.role?.toUpperCase() === 'ADMIN') {
       router.push(`/admins/${user.id || '1'}/dashboard`);
       return;
     }
 
-    if (user?.role === 'EXPERT') {
+    if (user?.role?.toUpperCase() === 'EXPERT') {
       const checkStatus = async () => {
         let isApproved = false;
         if (token && user.id !== 'temp-id') {
@@ -159,7 +159,7 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, user, token, router]);
 
-  if (!isAuthenticated || user?.role === 'EXPERT' || user?.role === 'ADMIN') {
+  if (!isAuthenticated || user?.role?.toUpperCase() === 'EXPERT' || user?.role?.toUpperCase() === 'ADMIN') {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">

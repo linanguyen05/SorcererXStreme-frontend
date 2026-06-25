@@ -1,0 +1,192 @@
+/* ──────────────────────────────────────────────────────────
+   Dark theme override cho react-big-calendar
+   Scope dưới .expert-calendar để không ảnh hưởng phần còn lại
+   ────────────────────────────────────────────────────────── */
+
+.expert-calendar {
+  color: #e5e7eb;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+/* Toolbar (nút điều hướng + chuyển view) */
+.expert-calendar .rbc-toolbar {
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.expert-calendar .rbc-toolbar .rbc-toolbar-label {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+  text-transform: capitalize;
+}
+
+.expert-calendar .rbc-toolbar button {
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.65rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.expert-calendar .rbc-toolbar button:hover,
+.expert-calendar .rbc-toolbar button:focus {
+  color: #fff;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.expert-calendar .rbc-toolbar button.rbc-active,
+.expert-calendar .rbc-toolbar button.rbc-active:hover,
+.expert-calendar .rbc-toolbar button.rbc-active:focus {
+  color: #fff;
+  background: rgba(239, 68, 68, 0.85);
+  border-color: rgba(239, 68, 68, 0.85);
+  box-shadow: none;
+}
+
+/* Đường viền chung */
+.expert-calendar .rbc-time-view,
+.expert-calendar .rbc-month-view,
+.expert-calendar .rbc-agenda-view table.rbc-agenda-table {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.expert-calendar .rbc-time-header,
+.expert-calendar .rbc-time-header-content,
+.expert-calendar .rbc-time-content,
+.expert-calendar .rbc-day-bg + .rbc-day-bg,
+.expert-calendar .rbc-month-row + .rbc-month-row,
+.expert-calendar .rbc-header,
+.expert-calendar .rbc-header + .rbc-header,
+.expert-calendar .rbc-time-gutter,
+.expert-calendar .rbc-day-slot {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Bỏ hẳn đường kẻ nửa giờ, chỉ giữ đường theo giờ (rất mờ) → bớt rối */
+.expert-calendar .rbc-day-slot .rbc-time-slot,
+.expert-calendar .rbc-time-gutter .rbc-time-slot {
+  border-top: none;
+}
+
+.expert-calendar .rbc-timeslot-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.expert-calendar .rbc-time-gutter .rbc-timeslot-group {
+  border-bottom: none;
+}
+
+/* Đường kẻ dọc giữa các cột ngày → mờ hơn nữa */
+.expert-calendar .rbc-time-content > * + * > * {
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Header các ngày trong tuần */
+.expert-calendar .rbc-header {
+  padding: 0.6rem 0;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+}
+
+.expert-calendar .rbc-header a,
+.expert-calendar .rbc-button-link {
+  color: inherit;
+}
+
+/* Cột giờ bên trái */
+.expert-calendar .rbc-label,
+.expert-calendar .rbc-time-gutter .rbc-timeslot-group {
+  color: #6b7280;
+  font-size: 0.72rem;
+}
+
+/* Ô ngày hôm nay */
+.expert-calendar .rbc-today {
+  background: rgba(239, 68, 68, 0.04);
+}
+
+/* Ngày ngoài tháng hiện tại */
+.expert-calendar .rbc-off-range-bg {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.expert-calendar .rbc-off-range {
+  color: #4b5563;
+}
+
+/* Đường chỉ thời gian hiện tại */
+.expert-calendar .rbc-current-time-indicator {
+  background-color: #ef4444;
+  height: 2px;
+}
+
+/* Vùng đang kéo chọn (selection) */
+.expert-calendar .rbc-slot-selection {
+  background-color: rgba(125, 131, 196, 0.4);
+  border: 1px solid rgba(125, 131, 196, 0.75);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 2px 5px;
+}
+
+/* Event mặc định (màu thật set qua eventPropGetter) */
+.expert-calendar .rbc-event {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 2px 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.expert-calendar .rbc-event:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.expert-calendar .rbc-event-label {
+  font-size: 0.66rem;
+  opacity: 0.85;
+}
+
+/* "+x more" trong month view */
+.expert-calendar .rbc-show-more {
+  color: #f87171;
+  background: transparent;
+  font-weight: 600;
+}
+
+/* Agenda view */
+.expert-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr > td,
+.expert-calendar .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #d1d5db;
+  padding: 0.6rem 0.8rem;
+}
+
+.expert-calendar .rbc-agenda-empty {
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Handle resize của DnD addon */
+.expert-calendar .rbc-addons-dnd .rbc-addons-dnd-resize-ns-icon,
+.expert-calendar .rbc-addons-dnd .rbc-addons-dnd-resize-ew-icon {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.expert-calendar .rbc-addons-dnd-dragged-event {
+  opacity: 0.6;
+}

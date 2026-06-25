@@ -27,7 +27,7 @@ export default function SetupPage() {
     });
 
     // Role state
-    const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
+    const [role, setRole] = useState<'USER' | 'EXPERT'>('USER');
 
     // Expert Info Form State
     const [bio, setBio] = useState('');
@@ -240,8 +240,6 @@ export default function SetupPage() {
             // 5. Redirect based on role
             if (role === 'EXPERT') {
                 router.push(`/experts/${userId}/pending`);
-            } else if (role === 'ADMIN') {
-                router.push(`/admins/${userId}/dashboard`);
             } else {
                 router.push('/dashboard');
             }
@@ -332,18 +330,18 @@ export default function SetupPage() {
                                 <motion.div
                                     className="absolute top-1 bottom-1 bg-gradient-to-r from-purple-600 via-indigo-500 to-blue-600 rounded-xl shadow-lg shadow-purple-600/30"
                                     style={{
-                                        width: 'calc(33.333% - 6px)',
+                                        width: 'calc(50% - 6px)',
                                         left: '4px',
                                     }}
                                     animate={{
-                                        x: role === 'USER' ? '0%' : role === 'EXPERT' ? 'calc(100% + 6px)' : 'calc(200% + 12px)'
+                                        x: role === 'USER' ? '0%' : 'calc(100% + 6px)'
                                     }}
                                     transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                                 />
 
-                                {(['USER', 'EXPERT', 'ADMIN'] as const).map((r) => {
+                                {(['USER', 'EXPERT'] as const).map((r) => {
                                     const isActive = role === r;
-                                    const displayLabel = r === 'USER' ? 'Người dùng' : r === 'EXPERT' ? 'Chuyên gia' : 'Admin';
+                                    const displayLabel = r === 'USER' ? 'Người dùng' : 'Chuyên gia';
                                     return (
                                         <button
                                             key={r}
@@ -365,7 +363,6 @@ export default function SetupPage() {
                             >
                                 {role === 'USER' && '🔮 Vai trò Người dùng: Tìm kiếm tư vấn Tử Vi, Tarot, Chiêm Tinh & Thần Số Học.'}
                                 {role === 'EXPERT' && '💼 Vai trò Chuyên gia: Thiết lập hồ sơ cá nhân và tư vấn các gói huyền học.'}
-                                {role === 'ADMIN' && '🛡️ Vai trò Quản trị viên: Quản trị hệ thống, duyệt hồ sơ & quản lý người dùng.'}
                             </motion.p>
                         </motion.div>
 
