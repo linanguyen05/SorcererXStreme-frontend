@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname, useParams } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, User, LogOut, Bell, Shield, Layout } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
@@ -16,12 +16,9 @@ interface AdminHeaderProps {
 export function AdminHeader({ onScrollToSection, onShowNotifications }: AdminHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const params = useParams();
   const { user, logout, isAuthenticated } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  const id = (params?.id as string) || user?.id || 'admin-root';
 
   // Close menus on path changes
   useEffect(() => {
@@ -35,11 +32,11 @@ export function AdminHeader({ onScrollToSection, onShowNotifications }: AdminHea
   };
 
   const navLinks = [
-    { name: 'Duyệt yêu cầu', id: 'approval-table', href: `/admins/${id}/dashboard#approval-table` },
+    { name: 'Duyệt yêu cầu', id: 'approval-table', href: `/admin/dashboard#approval-table` },
   ];
 
   const handleLinkClick = (e: React.MouseEvent, link: typeof navLinks[0]) => {
-    if (pathname === `/admins/${id}/dashboard` && onScrollToSection) {
+    if ((pathname === '/admin/dashboard' || pathname === '/admin/dashboard/') && onScrollToSection) {
       e.preventDefault();
       onScrollToSection(link.id);
       setIsMobileMenuOpen(false);

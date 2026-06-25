@@ -61,7 +61,7 @@ function ExpertPendingClient({ id }: { id: string }) {
         
         // Wait a short moment then redirect
         setTimeout(() => {
-          router.push(`/experts/${id}/dashboard`);
+          router.push(`/expert/dashboard`);
         }, 1500);
       } else if (!silent) {
         if (status === 'REJECTED') {
@@ -266,7 +266,7 @@ function ExpertPendingClient({ id }: { id: string }) {
             <div className="pt-2">
               <button
                 disabled={!allAgreed || currentStatus !== 'APPROVED'}
-                onClick={() => router.push(`/experts/${id}/dashboard`)}
+                onClick={() => router.push(`/expert/dashboard`)}
                 className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 ${
                   allAgreed && currentStatus === 'APPROVED'
                     ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white hover:shadow-lg hover:shadow-red-600/20 active:scale-[0.98]'
@@ -382,6 +382,8 @@ function ExpertPendingClient({ id }: { id: string }) {
   );
 }
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <ExpertPendingClient id={params.id} />;
+export default function Page() {
+  const id = useAuthStore((s) => s.user?.id);
+  if (!id) return null;
+  return <ExpertPendingClient id={id} />;
 }

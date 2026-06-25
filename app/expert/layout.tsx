@@ -1,16 +1,7 @@
 import ExpertGuard from '@/components/auth/ExpertGuard';
 
-export function generateStaticParams() {
-  return [
-    { id: 'exp-1' },
-    { id: 'exp-2' },
-    { id: 'exp-3' },
-    { id: 'expert' }
-  ];
-}
-
-export const dynamicParams = true;
-
+// Route tĩnh /expert/... — không còn segment động [id] nên không cần
+// generateStaticParams. Mọi trang dưới đây được build sẵn 1 lần.
 export default function ExpertLayout({
   children,
 }: {
@@ -18,4 +9,3 @@ export default function ExpertLayout({
 }) {
   return <ExpertGuard>{children}</ExpertGuard>;
 }
-

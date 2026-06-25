@@ -16,11 +16,19 @@ const USER_ONLY_ROUTES = [
   '/dashboard'
 ];
 
-// Expert routes pattern: /experts/:id/dashboard and all sub-routes
-const EXPERT_ROUTE_PATTERN = /^\/experts\/[^/]+\/(dashboard|pending)(\/.*)?$/;
+// Expert routes pattern: /expert/dashboard, /expert/pending and sub-routes (route tĩnh)
+const EXPERT_ROUTE_PATTERN = /^\/expert\/(dashboard|pending)(\/.*)?$/;
+// Admin routes pattern: /admin/dashboard và sub-routes (route tĩnh)
+const ADMIN_ROUTE_PATTERN = /^\/admin(\/.*)?$/;
+// Các trang onboarding/auth — không bao giờ bị chặn bởi guard hồ sơ.
+const AUTH_ROUTE_PREFIX = '/auth';
 
 function isExpertRoute(pathname: string): boolean {
   return EXPERT_ROUTE_PATTERN.test(pathname);
+}
+
+function isAdminRoute(pathname: string): boolean {
+  return ADMIN_ROUTE_PATTERN.test(pathname);
 }
 
 function isUserOnlyRoute(pathname: string): boolean {
@@ -58,7 +66,7 @@ export default function AmplifyProvider({ children }: { children: React.ReactNod
 
     if (!isAuthenticated) {
       // Redirect unauthenticated users trying to access protected routes
-      if (isUserOnlyRoute(pathname) || isExpertRoute(pathname)) {
+      if (isUserOnlyRoute(pathname) || isExpertRoute(pathname) || isAdminRoute(pathname)) {
         router.replace('/auth/login');
       }
       return;
@@ -66,18 +74,37 @@ export default function AmplifyProvider({ children }: { children: React.ReactNod
 
     const role = user?.role?.toUpperCase();
 
-    // EXPERT trying to access user-only routes → redirect to expert dashboard
+    // EXPERT chỉ được ở khu /expert → đẩy khỏi route user-only và admin.
     if (role === 'EXPERT') {
-      if (isUserOnlyRoute(pathname)) {
-        router.replace(`/experts/${user!.id}/dashboard`);
+      if (isUserOnlyRoute(pathname) || isAdminRoute(pathname)) {
+        router.replace('/expert/dashboard');
         return;
       }
     }
 
-    // USER trying to access expert routes → redirect to home
+    // ADMIN chỉ được ở khu /admin → đẩy khỏi route user-only và expert.
+    if (role === 'ADMIN') {
+      if (isUserOnlyRoute(pathname) || isExpertRoute(pathname)) {
+        router.replace('/admin/dashboard');
+        return;
+      }
+    }
+
+    // USER (hoặc role rỗng) không được vào khu expert/admin.
     if (role === 'USER' || !role) {
-      if (isExpertRoute(pathname)) {
+      if (isExpertRoute(pathname) || isAdminRoute(pathname)) {
         router.replace('/');
+        return;
+      }
+
+      // Chưa hoàn tất hồ sơ → ép về trang thiết lập trước khi dùng route bảo vệ.
+      // (trừ khi đang ở trang /auth/... để tránh vòng lặp điều hướng)
+      if (
+        !user?.isProfileComplete &&
+        isUserOnlyRoute(pathname) &&
+        !pathname.startsWith(AUTH_ROUTE_PREFIX)
+      ) {
+        router.replace('/auth/setup');
         return;
       }
     }
