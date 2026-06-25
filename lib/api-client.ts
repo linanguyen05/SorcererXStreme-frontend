@@ -118,11 +118,11 @@ export const authApi = {
 
     if (isSignedIn) {
       const session = await fetchAuthSession();
-      // Use Access Token for Backend Verification
-      const token = session.tokens?.accessToken?.toString();
+      // Use ID Token for Backend Verification to include email and custom claims
+      const token = session.tokens?.idToken?.toString();
 
       if (!token) {
-        throw new Error('Failed to retrieve access token from Cognito session');
+        throw new Error('Failed to retrieve ID token from Cognito session');
       }
 
       const role = session.tokens?.idToken?.payload?.['custom:role'] as string || 'USER';
