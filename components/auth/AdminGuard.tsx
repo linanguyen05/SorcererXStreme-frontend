@@ -1,14 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const params = useParams();
   const { user, isAuthenticated } = useAuthStore();
-  const id = params.id as string;
 
   useEffect(() => {
     // If not authenticated, redirect to login page
@@ -22,15 +20,10 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
       router.push('/dashboard');
       return;
     }
-
-    // If user's ID does not match the URL parameter [id], redirect to their own admin dashboard
-    if (user?.id && user.id !== id) {
-      router.push(`/admins/${user.id}/dashboard`);
-    }
-  }, [isAuthenticated, user, id, router]);
+  }, [isAuthenticated, user, router]);
 
   // Loading state / barrier
-  if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN' || (user?.id && user.id !== id)) {
+  if (!isAuthenticated || user?.role?.toUpperCase() !== 'ADMIN') {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">

@@ -241,7 +241,7 @@ export default function SetupPage() {
             if (role === 'EXPERT') {
                 router.push(`/expert/pending`);
             } else if (role === 'ADMIN') {
-                router.push(`/admins/${userId}/dashboard`);
+                router.push(`/admin/dashboard`);
             } else {
                 router.push('/dashboard');
             }
