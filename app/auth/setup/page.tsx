@@ -83,7 +83,7 @@ export default function SetupPage() {
             if (stored) {
                 try {
                     const guest = JSON.parse(stored);
-                    
+
                     // Định dạng lại birth_date từ ISOString sang YYYY-MM-DD
                     let birthDateFormatted = '';
                     const rawDate = guest.birth_date || guest.birthDate;
@@ -230,7 +230,7 @@ export default function SetupPage() {
                 localStorage.setItem(`expert-profile-data-${userId}`, JSON.stringify(expertProfilePayload));
                 localStorage.setItem('expert-profile-data', JSON.stringify(expertProfilePayload));
             }
-            
+
             // Xóa thông tin guest trong localStorage sau khi đã hoàn tất hồ sơ tài khoản chính thức
             localStorage.removeItem('guestId');
             localStorage.removeItem('guestProfile');
