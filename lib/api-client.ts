@@ -275,12 +275,19 @@ export const astrologyApi = {
       birth_place?: string;
       [key: string]: any;
     };
-  }, token: string) =>
-    apiRequest('/api/astrology/reading', {
+  }, token: string) => {
+    // Backend tách 2 endpoint theo feature_type (mỗi cái có giới hạn VIP riêng):
+    // /api/astrology/overview và /api/astrology/love. KHÔNG có /api/astrology/reading.
+    const endpoint = data.feature_type === 'love'
+      ? '/api/astrology/love'
+      : '/api/astrology/overview';
+
+    return apiRequest(endpoint, {
       method: 'POST',
       body: data,
       token,
-    }),
+    });
+  },
 };
 
 export const numerologyApi = {
