@@ -50,7 +50,7 @@ export default function LoginPage() {
             router.push(`/expert/pending`);
           }
         } else if (user?.role === 'ADMIN') {
-          router.push(`/admins/${user.id || '1'}/dashboard`);
+          router.push(`/admin/dashboard`);
         } else {
           if (user?.isProfileComplete) {
             router.push('/dashboard'); 
