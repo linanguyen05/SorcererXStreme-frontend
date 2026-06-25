@@ -328,7 +328,7 @@ export function ExpertTile({ expert, index }: { expert: Expert; index: number })
                             whileTap={{ scale: 0.97 }}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/expert-listing/${expert.id}`);
+                                router.push(`/expert-listing/detail?id=${expert.id}`);
                             }}
                             className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-black text-[11px] font-extrabold px-4 py-2 rounded-xl shadow-lg shadow-yellow-900/25 hover:from-yellow-300 hover:to-amber-400 transition-all"
                         >

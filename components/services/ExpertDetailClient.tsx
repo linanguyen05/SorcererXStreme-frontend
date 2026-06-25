@@ -500,7 +500,7 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                                 <motion.div
                                     key={e.id}
                                     whileHover={{ y: -3 }}
-                                    onClick={() => router.push(`/expert-listing/${e.id}`)}
+                                    onClick={() => router.push(`/expert-listing/detail?id=${e.id}`)}
                                     className="bg-gray-900/50 border border-gray-700/40 hover:border-yellow-500/30 rounded-2xl p-4 cursor-pointer transition-all duration-300 flex items-center gap-3"
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
