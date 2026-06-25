@@ -117,7 +117,7 @@ export default function DashboardPage() {
       return;
     }
 
-    if (user?.role?.toUpperCase() === 'ADMIN') {
+    if (user?.role === 'ADMIN') {
       router.push(`/admin/dashboard`);
       return;
     }

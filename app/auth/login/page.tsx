@@ -49,7 +49,7 @@ export default function LoginPage() {
           } else {
             router.push(`/expert/pending`);
           }
-        } else if (user?.role?.toUpperCase() === 'ADMIN') {
+        } else if (user?.role === 'ADMIN') {
           router.push(`/admin/dashboard`);
         } else {
           if (user?.isProfileComplete) {

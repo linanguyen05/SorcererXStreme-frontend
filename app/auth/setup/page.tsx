@@ -27,7 +27,7 @@ export default function SetupPage() {
     });
 
     // Role state
-    const [role, setRole] = useState<'USER' | 'EXPERT'>('USER');
+    const [role, setRole] = useState<'USER' | 'EXPERT' | 'ADMIN'>('USER');
 
     // Expert Info Form State
     const [bio, setBio] = useState('');
@@ -240,6 +240,8 @@ export default function SetupPage() {
             // 5. Redirect based on role
             if (role === 'EXPERT') {
                 router.push(`/expert/pending`);
+            } else if (role === 'ADMIN') {
+                router.push(`/admin/dashboard`);
             } else {
                 router.push('/dashboard');
             }
