@@ -509,6 +509,14 @@ export const expertApi = {
       token,
     }),
 
+  // Onboarding lần đầu: tạo Expert row + nâng role user->expert. Dùng ở /auth/setup.
+  register: (data: { bio?: string; specialty?: string | string[]; experience_years?: number; media_channels?: Record<string, string>; [key: string]: any }, token: string) =>
+    apiRequest('/api/experts/register', {
+      method: 'POST',
+      body: data,
+      token,
+    }),
+
   // B. Service Package Management (CRUD)
   getServices: (expertId: string, token: string, status?: string) => {
     const url = status ? `/experts/${expertId}/services?status=${status}` : `/experts/${expertId}/services`;

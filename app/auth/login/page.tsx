@@ -36,7 +36,7 @@ export default function LoginPage() {
           if (token && user.id !== 'temp-id') {
             try {
               const profileRes = await expertApi.getProfile(user.id, token);
-              const exp = profileRes?.expert || profileRes;
+              const exp = profileRes?.data || profileRes?.expert || profileRes;
               if (exp && exp.status === 'APPROVED') {
                 isApproved = true;
               }

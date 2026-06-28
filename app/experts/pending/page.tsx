@@ -40,7 +40,7 @@ function ExpertPendingClient({ id }: { id: string }) {
       if (token && id !== 'temp-id') {
         try {
           const profileRes = await expertApi.getProfile(id, token);
-          const exp = profileRes?.expert || profileRes;
+          const exp = profileRes?.data || profileRes?.expert || profileRes;
           if (exp && exp.status) {
             status = exp.status;
             isApproved = (exp.status === 'APPROVED');

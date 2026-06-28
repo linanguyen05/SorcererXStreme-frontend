@@ -51,7 +51,7 @@ export default function ExpertGuard({ children }: { children: React.ReactNode })
       if (token && user?.id) {
         try {
           const profileRes = await expertApi.getProfile(user.id, token);
-          const exp = profileRes?.expert || profileRes;
+          const exp = profileRes?.data || profileRes?.expert || profileRes;
           if (exp && exp.status === 'APPROVED') {
             approved = true;
           }

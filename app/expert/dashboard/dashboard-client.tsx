@@ -71,7 +71,7 @@ export default function ExpertDashboard({ id }: { id: string }) {
       // Check approval status via API
       try {
         const profileRes = await expertApi.getProfile(id, token);
-        const exp = profileRes?.expert || profileRes;
+        const exp = profileRes?.data || profileRes?.expert || profileRes;
         if (exp && exp.status === 'PENDING') {
           router.push(`/expert/pending`);
           return;
@@ -86,7 +86,7 @@ export default function ExpertDashboard({ id }: { id: string }) {
         // Fetch Profile
         const profileRes = await expertApi.getProfile(id, token);
         if (profileRes && isSubscribed) {
-          const exp = profileRes.expert || profileRes;
+          const exp = profileRes?.data || profileRes.expert || profileRes;
           setProfileData({
             name: exp.user?.name || exp.name || "Chuyên gia",
             title: exp.specialty 

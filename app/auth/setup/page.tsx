@@ -202,11 +202,14 @@ export default function SetupPage() {
                     expertPayload.media_channels = mediaChannels;
                 }
 
+                // Onboarding: tạo Expert row + nâng role user->expert (endpoint mới).
+                // Nếu thất bại thì DỪNG, không điều hướng sang /pending để tránh "thành công giả".
                 try {
-                    await expertApi.updateProfile(userId, expertPayload, token);
+                    await expertApi.register(expertPayload, token);
                 } catch (apiError) {
-                    console.error("Failed to update expert profile on backend:", apiError);
-                    toast.error("Không thể đồng bộ hồ sơ chuyên gia lên máy chủ");
+                    console.error("Failed to register expert on backend:", apiError);
+                    toast.error("Không thể tạo hồ sơ chuyên gia trên máy chủ. Vui lòng thử lại.");
+                    throw apiError;
                 }
 
                 const expertProfilePayload = {
