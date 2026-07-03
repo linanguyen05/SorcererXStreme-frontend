@@ -155,7 +155,7 @@ export default function CreateOrEditPackage({ id }: { id: string }) {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-300">Mô tả chi tiết</label>
               <textarea
-                className="w-full px-4 py-3 rounded-2xl bg-gray-850/50 border border-gray-700 text-white text-sm focus:ring-2 focus:ring-red-500/50 h-40 outline-none transition-all resize-y"
+                className="w-full px-4 py-3 rounded-2xl bg-gray-800/50 border border-gray-700 text-white text-sm focus:ring-2 focus:ring-red-500/50 h-40 outline-none transition-all resize-y"
                 placeholder="Khách hàng sẽ nhận được gì từ gói dịch vụ này?"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

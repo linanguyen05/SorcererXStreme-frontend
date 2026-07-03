@@ -14,6 +14,8 @@ import { AnimatedBackground } from '@/components/ui/AnimatedBackground';
 import { Footer } from '@/components/layout/Footer';
 import { PersonalInfoModal } from '@/components/services/PersonalInfoModal';
 import { experts, Expert, ServicePackage, formatPrice } from '@/lib/services-data';
+import { expertApi } from '@/lib/api-client';
+import { mapApiExpert } from '@/lib/expert-mapping';
 
 const SPECIALTY_COLORS: Record<string, string> = {
     'Tarot': 'from-purple-500 to-violet-600',
@@ -240,12 +242,33 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
 
     const staticExpert = experts.find((e) => e.id === expertId);
     const [dynamicExpert, setDynamicExpert] = useState<typeof staticExpert | null>(null);
+    // Đang tải chuyên gia THẬT từ API (khi id không nằm trong danh sách mock).
+    const [apiLoading, setApiLoading] = useState(!staticExpert);
+    // Chuyên gia THẬT khác (cho mục "Chuyên gia khác" — ẩn nếu rỗng).
+    const [otherExperts, setOtherExperts] = useState<Expert[]>([]);
 
     useEffect(() => {
         setMounted(true);
         const check = () => setIsMobile(window.innerWidth < 768);
         check();
         window.addEventListener('resize', check);
+
+        // Tải catalog thật: vừa để hiện hồ sơ khi id là UUID thật (không phải mock),
+        // vừa để gợi ý "Chuyên gia khác" bằng dữ liệu thật.
+        expertApi
+            .list()
+            .then((res: any) => {
+                const list: Expert[] = (Array.isArray(res?.data) ? res.data : []).map(mapApiExpert);
+                if (!staticExpert) {
+                    const found = list.find((e) => e.id === expertId);
+                    if (found) setDynamicExpert(found);
+                }
+                setOtherExperts(list.filter((e) => e.id !== expertId));
+            })
+            .catch((e: any) => {
+                console.warn('Không tải được chuyên gia từ API:', e);
+            })
+            .finally(() => setApiLoading(false));
 
         // Load custom data from localStorage if exists
         if (staticExpert) {
@@ -286,6 +309,17 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
     const expert = dynamicExpert || staticExpert;
 
     if (!mounted) return null;
+
+    if (!expert && apiLoading) {
+        return (
+            <div className="flex h-screen bg-black text-white items-center justify-center">
+                <div className="text-center space-y-4">
+                    <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                    <p className="text-gray-400 text-sm">Đang tải hồ sơ chuyên gia...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!expert) {
         return (
@@ -492,11 +526,12 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                         <TestimonialsSection expert={expert} />
                     </motion.section>
 
-                    {/* Other Experts */}
+                    {/* Other Experts — chuyên gia THẬT khác từ API, ẩn nếu chưa có ai */}
+                    {otherExperts.length > 0 && (
                     <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                         <h2 className="text-xl font-bold text-white mb-5">Chuyên gia khác</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            {experts.filter((e) => e.id !== expert.id).slice(0, 3).map((e) => (
+                            {otherExperts.slice(0, 3).map((e) => (
                                 <motion.div
                                     key={e.id}
                                     whileHover={{ y: -3 }}
@@ -517,6 +552,7 @@ export function ExpertDetailClient({ expertId }: { expertId: string }) {
                             ))}
                         </div>
                     </motion.section>
+                    )}
                 </div>
 
                 {/* STICKY CTA */}

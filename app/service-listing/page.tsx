@@ -11,7 +11,9 @@ import { Sparkles, Briefcase, Search, Filter } from "lucide-react";
 import { Sidebar, useSidebarCollapsed } from "@/components/layout/Sidebar";
 import ContentHeader from "@/components/layout/ContentHeader";
 import { useAuthStore } from "@/lib/store";
-import { experts, ExpertSpecialty } from "@/lib/services-data";
+import { Expert, ExpertSpecialty } from "@/lib/services-data";
+import { expertApi } from "@/lib/api-client";
+import { mapApiExpert } from "@/lib/expert-mapping";
 
 const imgZodiac = "/services/mystical-zodiac.jpg";
 const imgTarot = "/services/mystical-tarot.jpg";
@@ -47,6 +49,20 @@ function ServiceListingContent() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tất cả");
   const [specialty, setSpecialty] = useState<ExpertSpecialty | "all">("all");
+  // Chuyên gia THẬT từ backend (có gói ACTIVE). Hiển thị trước, mock demo xếp sau.
+  const [realExperts, setRealExperts] = useState<Expert[]>([]);
+
+  useEffect(() => {
+    expertApi
+      .list()
+      .then((res: any) => {
+        const list = Array.isArray(res?.data) ? res.data : [];
+        setRealExperts(list.map(mapApiExpert));
+      })
+      .catch((e: any) => {
+        console.warn("Không tải được danh sách chuyên gia từ API:", e);
+      });
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -81,13 +97,14 @@ function ServiceListingContent() {
 
   const filteredExperts = useMemo(() => {
     const q = search.toLowerCase();
-    return experts.filter((e) => {
+    // Chỉ hiển thị chuyên gia THẬT từ backend (mock demo đã gỡ).
+    return realExperts.filter((e) => {
       const matchQ = !q || e.name.toLowerCase().includes(q) || e.title.toLowerCase().includes(q) ||
         e.specialties.some((s) => s.toLowerCase().includes(q)) || e.location?.toLowerCase().includes(q);
       const matchF = specialty === "all" || e.specialties.includes(specialty);
       return matchQ && matchF;
     });
-  }, [search, specialty]);
+  }, [search, specialty, realExperts]);
 
   if (!isAuthenticated) {
     return null;

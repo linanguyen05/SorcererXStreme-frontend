@@ -194,9 +194,10 @@ export default function SetupPage() {
                     specialty: selectedSpecs.map(s => s.toUpperCase()),
                     experience_years: Number(experienceYears),
                 };
-                // bio must be >= 10 chars per backend validation
-                if (bio && bio.length >= 10) {
-                    expertPayload.bio = bio;
+                // BE không yêu cầu độ dài tối thiểu cho bio (chỉ max 5000) -> gửi
+                // nguyên văn, tránh âm thầm bỏ bio ngắn khiến cột bio bị null.
+                if (bio.trim()) {
+                    expertPayload.bio = bio.trim();
                 }
                 if (Object.keys(mediaChannels).length > 0) {
                     expertPayload.media_channels = mediaChannels;

@@ -438,57 +438,57 @@ export const guestApi = {
 
 export const adminApi = {
   getPendingExperts: (token: string) =>
-    apiRequest('/admin/experts?status=PENDING', { token }),
+    apiRequest('/api/admin/experts?status=PENDING', { token }),
 
   getPendingServices: (token: string) =>
-    apiRequest('/admin/services?status=PENDING', { token }),
+    apiRequest('/api/admin/services?status=PENDING', { token }),
 
   approveExpert: (id: string, action: 'approve' | 'reject', token: string) =>
-    apiRequest(`/experts/${id}/status`, {
+    apiRequest(`/api/admin/experts/${id}/status`, {
       method: 'PUT',
       body: { status: action === 'approve' ? 'APPROVED' : 'REJECTED' },
       token,
     }),
 
   approveService: (id: string, action: 'approve' | 'reject', token: string) =>
-    apiRequest(`/services/${id}/status`, {
+    apiRequest(`/api/admin/services/${id}/status`, {
       method: 'PUT',
       body: { status: action === 'approve' ? 'APPROVED' : 'REJECTED' },
       token,
     }),
 
   getExperts: (token: string, status?: string) => {
-    const url = status ? `/admin/experts?status=${status}` : '/admin/experts';
+    const url = status ? `/api/admin/experts?status=${status}` : '/api/admin/experts';
     return apiRequest(url, { token });
   },
 
   updateExpertStatus: (expertId: string, status: string, token: string) =>
-    apiRequest(`/experts/${expertId}/status`, {
+    apiRequest(`/api/admin/experts/${expertId}/status`, {
       method: 'PUT',
       body: { status },
       token,
     }),
 
   deleteExpert: (expertId: string, token: string) =>
-    apiRequest(`/experts/${expertId}`, {
+    apiRequest(`/api/admin/experts/${expertId}`, {
       method: 'DELETE',
       token,
     }),
 
   getServices: (token: string, status?: string) => {
-    const url = status ? `/admin/services?status=${status}` : '/admin/services';
+    const url = status ? `/api/admin/services?status=${status}` : '/api/admin/services';
     return apiRequest(url, { token });
   },
 
   updateServiceStatus: (serviceId: string, status: string, token: string) =>
-    apiRequest(`/services/${serviceId}/status`, {
+    apiRequest(`/api/admin/services/${serviceId}/status`, {
       method: 'PUT',
       body: { status },
       token,
     }),
 
   deleteService: (serviceId: string, token: string) =>
-    apiRequest(`/services/${serviceId}`, {
+    apiRequest(`/api/admin/services/${serviceId}`, {
       method: 'DELETE',
       token,
     }),
@@ -519,52 +519,52 @@ export const expertApi = {
 
   // B. Service Package Management (CRUD)
   getServices: (expertId: string, token: string, status?: string) => {
-    const url = status ? `/experts/${expertId}/services?status=${status}` : `/experts/${expertId}/services`;
+    const url = status ? `/api/experts/${expertId}/services?status=${status}` : `/api/experts/${expertId}/services`;
     return apiRequest(url, { token });
   },
 
   createService: (expertId: string, data: any, token: string) =>
-    apiRequest(`/experts/${expertId}/services`, {
+    apiRequest(`/api/experts/${expertId}/services`, {
       method: 'POST',
       body: data,
       token,
     }),
 
   updateService: (expertId: string, serviceId: string, data: any, token: string) =>
-    apiRequest(`/experts/${expertId}/services/${serviceId}`, {
+    apiRequest(`/api/experts/${expertId}/services/${serviceId}`, {
       method: 'PATCH',
       body: data,
       token,
     }),
 
   deleteService: (expertId: string, serviceId: string, token: string) =>
-    apiRequest(`/experts/${expertId}/services/${serviceId}`, {
+    apiRequest(`/api/experts/${expertId}/services/${serviceId}`, {
       method: 'DELETE',
       token,
     }),
 
   // C. Schedule / Slot Management
   getAppointments: (expertId: string, token: string, status?: string) => {
-    const url = status ? `/experts/${expertId}/appointments?status=${status}` : `/experts/${expertId}/appointments`;
+    const url = status ? `/api/experts/${expertId}/appointments?status=${status}` : `/api/experts/${expertId}/appointments`;
     return apiRequest(url, { token });
   },
 
   createAppointmentSlot: (expertId: string, data: { start_time: string; end_time: string; [key: string]: any }, token: string) =>
-    apiRequest(`/experts/${expertId}/appointments`, {
+    apiRequest(`/api/experts/${expertId}/appointments`, {
       method: 'POST',
       body: data,
       token,
     }),
 
   updateAppointment: (expertId: string, appointmentId: string, data: { start_time?: string; end_time?: string; status?: string; [key: string]: any }, token: string) =>
-    apiRequest(`/experts/${expertId}/appointments/${appointmentId}`, {
+    apiRequest(`/api/experts/${expertId}/appointments/${appointmentId}`, {
       method: 'PATCH',
       body: data,
       token,
     }),
 
   deleteAppointmentSlot: (expertId: string, appointmentId: string, token: string) =>
-    apiRequest(`/experts/${expertId}/appointments/${appointmentId}`, {
+    apiRequest(`/api/experts/${expertId}/appointments/${appointmentId}`, {
       method: 'DELETE',
       token,
     }),
