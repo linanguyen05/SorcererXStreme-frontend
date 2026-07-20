@@ -438,60 +438,70 @@ export const guestApi = {
 
 export const adminApi = {
   getPendingExperts: (token: string) =>
-    apiRequest('/admin/experts?status=PENDING', { token }),
+    apiRequest('/api/admin/experts?status=PENDING', { token }),
 
   getPendingServices: (token: string) =>
-    apiRequest('/admin/services?status=PENDING', { token }),
+    apiRequest('/api/admin/services?status=PENDING', { token }),
 
   approveExpert: (id: string, action: 'approve' | 'reject', token: string) =>
-    apiRequest(`/experts/${id}/status`, {
+    apiRequest(`/api/admin/experts/${id}/status`, {
       method: 'PUT',
       body: { status: action === 'approve' ? 'APPROVED' : 'REJECTED' },
       token,
     }),
 
   approveService: (id: string, action: 'approve' | 'reject', token: string) =>
-    apiRequest(`/services/${id}/status`, {
+    apiRequest(`/api/admin/services/${id}/status`, {
       method: 'PUT',
       body: { status: action === 'approve' ? 'APPROVED' : 'REJECTED' },
       token,
     }),
 
   getExperts: (token: string, status?: string) => {
-    const url = status ? `/admin/experts?status=${status}` : '/admin/experts';
+    const url = status ? `/api/admin/experts?status=${status}` : '/api/admin/experts';
     return apiRequest(url, { token });
   },
 
   updateExpertStatus: (expertId: string, status: string, token: string) =>
-    apiRequest(`/experts/${expertId}/status`, {
+    apiRequest(`/api/admin/experts/${expertId}/status`, {
       method: 'PUT',
       body: { status },
       token,
     }),
 
   deleteExpert: (expertId: string, token: string) =>
-    apiRequest(`/experts/${expertId}`, {
+    apiRequest(`/api/admin/experts/${expertId}`, {
       method: 'DELETE',
       token,
     }),
 
   getServices: (token: string, status?: string) => {
-    const url = status ? `/admin/services?status=${status}` : '/admin/services';
+    const url = status ? `/api/admin/services?status=${status}` : '/api/admin/services';
     return apiRequest(url, { token });
   },
 
   updateServiceStatus: (serviceId: string, status: string, token: string) =>
-    apiRequest(`/services/${serviceId}/status`, {
+    apiRequest(`/api/admin/services/${serviceId}/status`, {
       method: 'PUT',
       body: { status },
       token,
     }),
 
   deleteService: (serviceId: string, token: string) =>
-    apiRequest(`/services/${serviceId}`, {
+    apiRequest(`/api/admin/services/${serviceId}`, {
       method: 'DELETE',
       token,
     }),
+
+  // Statistics
+  getUserStats: (token: string) =>
+    apiRequest('/api/admin/stats/users', { token }),
+
+  getVipTierStats: (token: string) =>
+    apiRequest('/api/admin/stats/vip', { token }),
+
+  getVipRevenueStats: (token: string) =>
+    apiRequest('/api/admin/stats/vip-revenue', { token }),
 };
 
 export const expertApi = {

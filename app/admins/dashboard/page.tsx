@@ -371,76 +371,202 @@ function ServiceRevenueChart() {
   );
 }
 
-// --- Participant Distribution Panel ---
-function UserDistributionPanel() {
-  const customerCount = 1240;
-  const expertCount = 186;
-  const total = customerCount + expertCount;
-  const customerRatio = Math.round((customerCount / total) * 100);
-  const expertRatio = Math.round((expertCount / total) * 100);
+// --- Participant Distribution Panel (Real API data) ---
+function UserDistributionPanel({ data }: { data: { total: number; byRole: { user: number; guest: number; expert: number; admin: number } } | null }) {
+  const userCount = data?.byRole.user ?? 0;
+  const guestCount = data?.byRole.guest ?? 0;
+  const expertCount = data?.byRole.expert ?? 0;
+  const adminCount = data?.byRole.admin ?? 0;
+  const total = data?.total ?? 0;
+
+  const segments = [
+    { label: 'User', count: userCount, color: '#ef4444', borderColor: 'border-red-400/20', bgClass: 'bg-red-500' },
+    { label: 'Guest', count: guestCount, color: '#a855f7', borderColor: 'border-purple-400/20', bgClass: 'bg-purple-500' },
+    { label: 'Expert', count: expertCount, color: '#3b82f6', borderColor: 'border-blue-400/20', bgClass: 'bg-blue-500' },
+    { label: 'Admin', count: adminCount, color: '#f59e0b', borderColor: 'border-amber-400/20', bgClass: 'bg-amber-500' },
+  ];
+
+  // Build donut segments
+  let cumulativePercent = 0;
+  const donutSegments = segments.map((seg) => {
+    const pct = total > 0 ? (seg.count / total) * 100 : 0;
+    const offset = cumulativePercent;
+    cumulativePercent += pct;
+    return { ...seg, pct, offset };
+  });
 
   return (
     <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between">
       <div>
         <span className="text-[10px] font-black uppercase tracking-wider text-blue-500 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">User Matrix</span>
-        <h3 className="text-lg font-bold text-white mt-1 mb-6">Tỷ lệ Người tham gia</h3>
+        <h3 className="text-lg font-bold text-white mt-1 mb-6">Phân bố Người dùng theo Role</h3>
       </div>
 
-      <div className="flex items-center justify-around gap-6 mb-6">
-        <div className="relative w-32 h-32 flex items-center justify-center">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-            <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
-            <circle 
-              cx="18" 
-              cy="18" 
-              r="15.915" 
-              fill="none" 
-              stroke="#ef4444" 
-              strokeWidth="3.2" 
-              strokeDasharray={`${customerRatio} ${100 - customerRatio}`} 
-              strokeDashoffset="0"
-              strokeLinecap="round"
-            />
-            <circle 
-              cx="18" 
-              cy="18" 
-              r="15.915" 
-              fill="none" 
-              stroke="#3b82f6" 
-              strokeWidth="3.2" 
-              strokeDasharray={`${expertRatio} ${100 - expertRatio}`} 
-              strokeDashoffset={`-${customerRatio}`}
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute text-center">
-            <p className="text-2xl font-black text-white">{total}</p>
-            <p className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Thành viên</p>
+      {!data ? (
+        <div className="flex items-center justify-center h-32">
+          <span className="text-gray-500 text-sm animate-pulse">Đang tải dữ liệu...</span>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-around gap-6 mb-6">
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
+                {donutSegments.map((seg, i) => (
+                  <circle
+                    key={i}
+                    cx="18"
+                    cy="18"
+                    r="15.915"
+                    fill="none"
+                    stroke={seg.color}
+                    strokeWidth="3.2"
+                    strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
+                    strokeDashoffset={`-${seg.offset}`}
+                    strokeLinecap="round"
+                  />
+                ))}
+              </svg>
+              <div className="absolute text-center">
+                <p className="text-2xl font-black text-white">{total}</p>
+                <p className="text-[9px] uppercase tracking-wider text-gray-500 font-bold">Tổng</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {segments.map((seg, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <span className={`w-3.5 h-3.5 rounded ${seg.bgClass} mt-0.5 border ${seg.borderColor}`} />
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400">{seg.label}</p>
+                    <p className="text-base font-black text-white">
+                      {seg.count} ({total > 0 ? Math.round((seg.count / total) * 100) : 0}%)
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-white/5 flex justify-between items-center text-xs text-gray-500 font-medium">
+            <span>Dữ liệu thời gian thực</span>
+            <span className="text-green-400 flex items-center gap-1 font-bold">
+              <TrendingUp className="w-3 h-3" /> Live
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// --- VIP Tier Statistics Panel (Real API data) ---
+const vipTierConfig: Record<string, { label: string; color: string; bgClass: string; borderColor: string; icon: string }> = {
+  FREE: { label: 'Miễn phí', color: '#6b7280', bgClass: 'bg-gray-500', borderColor: 'border-gray-400/20', icon: '🆓' },
+  BASIC: { label: 'Basic', color: '#3b82f6', bgClass: 'bg-blue-500', borderColor: 'border-blue-400/20', icon: '⭐' },
+  PRO: { label: 'Pro', color: '#a855f7', bgClass: 'bg-purple-500', borderColor: 'border-purple-400/20', icon: '💎' },
+  PREMIUM: { label: 'Premium', color: '#f59e0b', bgClass: 'bg-amber-500', borderColor: 'border-amber-400/20', icon: '👑' },
+};
+
+function VipTierStatsPanel({ data }: { data: { total: number; totalVip: number; byTier: Record<string, number> } | null }) {
+  if (!data) {
+    return (
+      <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">VIP Breakdown</span>
+          <h3 className="text-lg font-bold text-white mt-1 mb-6">Thống kê gói VIP</h3>
+        </div>
+        <div className="flex items-center justify-center h-32">
+          <span className="text-gray-500 text-sm animate-pulse">Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const tiers = Object.entries(data.byTier).map(([tier, count]) => {
+    const config = vipTierConfig[tier] ?? { label: tier, color: '#6b7280', bgClass: 'bg-gray-500', borderColor: 'border-gray-400/20', icon: '📦' };
+    return { tier, count, ...config };
+  });
+
+  // Sort: FREE first, then by count descending
+  tiers.sort((a, b) => {
+    if (a.tier === 'FREE') return -1;
+    if (b.tier === 'FREE') return 1;
+    return b.count - a.count;
+  });
+
+  const maxCount = Math.max(...tiers.map((t) => t.count), 1);
+  const vipRatio = data.total > 0 ? Math.round((data.totalVip / data.total) * 100) : 0;
+
+  return (
+    <div className="bg-[#121214] border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-2xl group hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between">
+      <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-amber-500/10 transition-colors duration-500"></div>
+
+      <div>
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">VIP Breakdown</span>
+            <h3 className="text-lg font-bold text-white mt-1">Thống kê gói VIP</h3>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-black text-white">{data.totalVip}</p>
+            <p className="text-[10px] text-gray-500 font-bold uppercase">VIP Users</p>
           </div>
         </div>
 
+        {/* Summary bar */}
+        <div className="flex items-center gap-3 mb-6 p-3 bg-white/5 rounded-xl border border-white/10">
+          <div className="p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <Star className="w-4 h-4 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-gray-400 font-medium">Tỷ lệ VIP / Tổng người dùng</p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${vipRatio}%` }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
+                />
+              </div>
+              <span className="text-sm font-black text-amber-400">{vipRatio}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tier breakdown */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-2.5">
-            <span className="w-3.5 h-3.5 rounded bg-red-500 mt-0.5 border border-red-400/20" />
-            <div>
-              <p className="text-xs font-semibold text-gray-400">Khách hàng</p>
-              <p className="text-base font-black text-white">{customerCount} ({customerRatio}%)</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2.5">
-            <span className="w-3.5 h-3.5 rounded bg-blue-500 mt-0.5 border border-blue-400/20" />
-            <div>
-              <p className="text-xs font-semibold text-gray-400">Chuyên gia</p>
-              <p className="text-base font-black text-white">{expertCount} ({expertRatio}%)</p>
-            </div>
-          </div>
+          {tiers.map((t, i) => {
+            const barPct = (t.count / maxCount) * 100;
+            return (
+              <div key={t.tier} className="flex items-center gap-3">
+                <span className="text-lg w-7 text-center">{t.icon}</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-gray-300">{t.label}</span>
+                    <span className="text-xs font-black text-white">{t.count} người</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${barPct}%` }}
+                      transition={{ duration: 0.8, delay: i * 0.1, ease: 'easeOut' }}
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: t.color }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="pt-4 border-t border-white/5 flex justify-between items-center text-xs text-gray-500 font-medium">
-        <span>Cập nhật: Mới đây</span>
-        <span className="text-green-400 flex items-center gap-1 font-bold">
-          <TrendingUp className="w-3 h-3" /> +12% tháng này
+      <div className="pt-4 mt-6 border-t border-white/5 flex justify-between items-center text-xs text-gray-500 font-medium">
+        <span>Dữ liệu thời gian thực</span>
+        <span className="text-amber-400 flex items-center gap-1 font-bold">
+          <Zap className="w-3 h-3" /> {data.totalVip} / {data.total} users
         </span>
       </div>
     </div>
@@ -621,6 +747,10 @@ export default function AdminDashboard() {
     pendingServicesCount: 0
   });
 
+  // Real-time statistics from API
+  const [userStatsData, setUserStatsData] = useState<{ total: number; byRole: { user: number; guest: number; expert: number; admin: number } } | null>(null);
+  const [vipTierData, setVipTierData] = useState<{ total: number; totalVip: number; byTier: Record<string, number> } | null>(null);
+
   // Notifications simulation state
   const [notifications, setNotifications] = useState([
     { id: 1, title: "Đăng ký mới", desc: "Chuyên gia Master Alistair đã nộp hồ sơ đăng ký tài khoản.", time: "10 phút trước", icon: <UserCheck className="w-4 h-4 text-purple-400" /> },
@@ -687,6 +817,22 @@ export default function AdminDashboard() {
         pendingExpertsCount: allMockExp.filter((e: any) => e.status === 'PENDING').length,
         pendingServicesCount: allMockSer.filter((s: any) => s.status === 'PENDING').length
       });
+
+      // Fetch user & VIP statistics from API
+      if (token) {
+        try {
+          const userStats = await adminApi.getUserStats(token);
+          setUserStatsData(userStats);
+        } catch (e) {
+          console.warn("API getUserStats failed:", e);
+        }
+        try {
+          const vipStats = await adminApi.getVipTierStats(token);
+          setVipTierData(vipStats);
+        } catch (e) {
+          console.warn("API getVipTierStats failed:", e);
+        }
+      }
     } catch (error) {
       console.error("Error loading admin dashboard data:", error);
     } finally {
@@ -1015,22 +1161,22 @@ export default function AdminDashboard() {
           <div className="space-y-10">
             {/* STATS OVERVIEW CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* VIP Revenue Overview */}
+              {/* VIP Users Count */}
               <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Doanh thu VIP (6T)</p>
-                    <h4 className="text-2xl font-black text-white mt-1.5">150.5Mđ</h4>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Khách VIP</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">{vipTierData ? vipTierData.totalVip.toLocaleString() : '—'}</h4>
                   </div>
                   <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500">
                     <DollarSign className="w-5 h-5" />
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 mt-4 text-xs">
-                  <span className="text-green-400 font-bold flex items-center gap-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" /> +24%
+                  <span className="text-amber-400 font-bold flex items-center gap-0.5">
+                    <Star className="w-3.5 h-3.5" /> {vipTierData && vipTierData.total > 0 ? Math.round((vipTierData.totalVip / vipTierData.total) * 100) : 0}%
                   </span>
-                  <span className="text-gray-500 font-medium">so với tháng trước</span>
+                  <span className="text-gray-500 font-medium">trên tổng người dùng</span>
                 </div>
               </div>
 
@@ -1039,7 +1185,7 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tổng Người Dùng</p>
-                    <h4 className="text-2xl font-black text-white mt-1.5">1,426</h4>
+                    <h4 className="text-2xl font-black text-white mt-1.5">{userStatsData ? userStatsData.total.toLocaleString() : '—'}</h4>
                   </div>
                   <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
                     <Users className="w-5 h-5" />
@@ -1047,18 +1193,18 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-1.5 mt-4 text-xs">
                   <span className="text-green-400 font-bold flex items-center gap-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" /> +12%
+                    <TrendingUp className="w-3.5 h-3.5" /> Live
                   </span>
-                  <span className="text-gray-500 font-medium">thành viên mới</span>
+                  <span className="text-gray-500 font-medium">dữ liệu thời gian thực</span>
                 </div>
               </div>
 
-              {/* Active Experts */}
+              {/* Experts */}
               <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tổng Chuyên Gia</p>
-                    <h4 className="text-2xl font-black text-white mt-1.5">186</h4>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Chuyên Gia</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">{userStatsData ? userStatsData.byRole.expert.toLocaleString() : '—'}</h4>
                   </div>
                   <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
                     <Briefcase className="w-5 h-5" />
@@ -1066,18 +1212,18 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-1.5 mt-4 text-xs">
                   <span className="text-green-400 font-bold flex items-center gap-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" /> +8%
+                    <TrendingUp className="w-3.5 h-3.5" /> Live
                   </span>
-                  <span className="text-gray-500 font-medium">chuyên gia hoạt động</span>
+                  <span className="text-gray-500 font-medium">từ cơ sở dữ liệu</span>
                 </div>
               </div>
 
-              {/* Total Traffic */}
+              {/* Guests */}
               <div className="bg-[#121214] border border-white/5 rounded-2xl p-5 relative overflow-hidden shadow-xl group hover:border-red-500/30 transition-all duration-300">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Truy cập tháng này</p>
-                    <h4 className="text-2xl font-black text-white mt-1.5">28.5K</h4>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Khách (Guest)</p>
+                    <h4 className="text-2xl font-black text-white mt-1.5">{userStatsData ? userStatsData.byRole.guest.toLocaleString() : '—'}</h4>
                   </div>
                   <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
                     <Activity className="w-5 h-5" />
@@ -1085,9 +1231,9 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-1.5 mt-4 text-xs">
                   <span className="text-green-400 font-bold flex items-center gap-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" /> +18.6%
+                    <TrendingUp className="w-3.5 h-3.5" /> Live
                   </span>
-                  <span className="text-gray-500 font-medium">lượt xem trang</span>
+                  <span className="text-gray-500 font-medium">từ cơ sở dữ liệu</span>
                 </div>
               </div>
             </div>
@@ -1101,15 +1247,18 @@ export default function AdminDashboard() {
             {/* CHART GRID 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1">
-                <UserDistributionPanel />
+                <UserDistributionPanel data={userStatsData} />
               </div>
               <div className="lg:col-span-2">
                 <TopPerformingServices />
               </div>
             </div>
 
-            {/* TRAFFIC ANALYSIS */}
-            <TrafficChart />
+            {/* VIP TIER STATISTICS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <VipTierStatsPanel data={vipTierData} />
+              <TrafficChart />
+            </div>
           </div>
         ) : (
           <>
