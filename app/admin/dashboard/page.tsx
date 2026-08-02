@@ -6,7 +6,7 @@ import {
   User, Briefcase, CheckCircle, AlertCircle,
   Bell, Search, X, ShieldCheck, UserCheck, Users, BarChart3,
   Eye, Ban, Mail, Phone, Award, FileText,
-  DollarSign, Zap, TrendingUp, Activity, Calendar, ArrowUpRight, Lock,
+  DollarSign, CreditCard, Zap, TrendingUp, Activity, Calendar, ArrowUpRight, Lock,
   Globe, BookOpen, Star, UserX, ShieldAlert
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
