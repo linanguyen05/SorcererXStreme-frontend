@@ -500,6 +500,9 @@ export const adminApi = {
   getVipTierStats: (token: string) =>
     apiRequest('/api/admin/stats/vip', { token }),
 
+  getVipSubscriptions: (token: string, limit = 100) =>
+    apiRequest(`/api/admin/vip-subscriptions?limit=${limit}`, { token }),
+
   getVipRevenueStats: (token: string) =>
     apiRequest('/api/admin/stats/vip-revenue', { token }),
 };

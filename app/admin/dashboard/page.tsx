@@ -767,6 +767,7 @@ export default function AdminDashboard() {
   const [userStatsData, setUserStatsData] = useState<{ total: number; byRole: { user: number; guest: number; expert: number; admin: number } } | null>(null);
   const [vipTierData, setVipTierData] = useState<{ total: number; totalVip: number; byTier: Record<string, number> } | null>(null);
   const [vipRevenueData, setVipRevenueData] = useState<{ totalRevenue: number; activeVipCount: number; estimatedMonthlyRevenue: number; monthlyBreakdown: { month: string; revenue: number; subscribers: number }[] } | null>(null);
+  const [vipSubscriptions, setVipSubscriptions] = useState<any[]>([]);
 
   // Notifications simulation state
   const [notifications, setNotifications] = useState([
@@ -854,6 +855,13 @@ export default function AdminDashboard() {
           setVipRevenueData(revenueStats);
         } catch (e) {
           console.warn("API getVipRevenueStats failed:", e);
+        }
+        try {
+          const subscriptions = await adminApi.getVipSubscriptions(token);
+          setVipSubscriptions(Array.isArray(subscriptions) ? subscriptions : []);
+        } catch (e) {
+          console.warn("API getVipSubscriptions failed:", e);
+          setVipSubscriptions([]);
         }
       }
     } catch (error) {
@@ -1282,6 +1290,14 @@ export default function AdminDashboard() {
               <VipTierStatsPanel data={vipTierData} />
               <TrafficChart />
             </div>
+
+            {/* VIP SUBSCRIPTION DETAILS */}
+            <section className="bg-[#121214] border border-white/5 rounded-2xl p-6 shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between gap-4 mb-5"><div><h3 className="text-lg font-bold text-white flex items-center gap-2"><CreditCard className="w-5 h-5 text-amber-400" /> Giao dịch VIP</h3><p className="text-xs text-gray-500 mt-1">Thông tin lấy trực tiếp từ bảng Subscription và User</p></div><span className="text-xs text-gray-500">{vipSubscriptions.length} bản ghi gần nhất</span></div>
+              <div className="overflow-x-auto rounded-xl border border-white/5"><table className="w-full min-w-[1050px] text-left"><thead className="bg-white/5 text-[10px] uppercase tracking-wider text-gray-400"><tr><th className="px-4 py-3">Người dùng</th><th className="px-4 py-3">Gói</th><th className="px-4 py-3">Số tiền</th><th className="px-4 py-3">Trạng thái</th><th className="px-4 py-3">Mã giao dịch</th><th className="px-4 py-3">Phương thức</th><th className="px-4 py-3">Tạo lúc</th><th className="px-4 py-3">Thời hạn</th></tr></thead><tbody className="divide-y divide-white/5 text-xs text-gray-300">
+                {vipSubscriptions.length === 0 ? (<tr><td colSpan={8} className="px-4 py-8 text-center text-gray-500">Chưa có giao dịch VIP</td></tr>) : vipSubscriptions.map((subscription) => (<tr key={subscription.id} className="hover:bg-white/5"><td className="px-4 py-3"><div className="font-semibold text-white">{subscription.user?.name || 'Chưa cập nhật'}</div><div className="text-[11px] text-gray-500">{subscription.user?.email}</div></td><td className="px-4 py-3 font-semibold text-amber-300">{subscription.tier}</td><td className="px-4 py-3 text-white">{Number(subscription.price || 0).toLocaleString('vi-VN')} ₫</td><td className="px-4 py-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${subscription.status === 'active' ? 'bg-green-500/10 text-green-400' : subscription.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-white/10 text-gray-400'}`}>{subscription.status}</span></td><td className="px-4 py-3 font-mono text-[11px]">{subscription.transactionId || '—'}</td><td className="px-4 py-3">{subscription.paymentMethod || '—'}</td><td className="px-4 py-3 whitespace-nowrap">{subscription.createdAt ? new Date(subscription.createdAt).toLocaleString('vi-VN') : '—'}</td><td className="px-4 py-3 whitespace-nowrap">{subscription.startDate ? new Date(subscription.startDate).toLocaleDateString('vi-VN') : '—'} → {subscription.endDate ? new Date(subscription.endDate).toLocaleDateString('vi-VN') : '—'}</td></tr>))}
+              </tbody></table></div>
+            </section>
           </div>
         ) : (
           <>
