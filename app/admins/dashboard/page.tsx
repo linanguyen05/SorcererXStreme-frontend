@@ -302,10 +302,10 @@ function VipRevenueChart() {
 
 // --- Service Packages Revenue Data & Component ---
 const serviceRevenueData = [
-  { name: "Tarot", revenue: 84500000, bookings: 420, color: "from-purple-500 to-indigo-500" },
-  { name: "Thần Số Học", revenue: 112000000, bookings: 560, color: "from-red-500 to-rose-500" },
-  { name: "Chiêm Tinh", revenue: 67000000, bookings: 310, color: "from-blue-500 to-cyan-500" },
-  { name: "Phong Thủy", revenue: 95000000, bookings: 190, color: "from-amber-500 to-orange-500" },
+  { name: "Tarot", revenue: 0, bookings: 0, color: "from-purple-500 to-indigo-500" },
+  { name: "Thần Số Học", revenue: 0, bookings: 0, color: "from-red-500 to-rose-500" },
+  { name: "Chiêm Tinh", revenue: 0, bookings: 0, color: "from-blue-500 to-cyan-500" },
+  { name: "Phong Thủy", revenue: 0, bookings: 0, color: "from-amber-500 to-orange-500" },
 ];
 
 function ServiceRevenueChart() {
@@ -328,7 +328,7 @@ function ServiceRevenueChart() {
 
       <div className="flex flex-col gap-5">
         {serviceRevenueData.map((service, index) => {
-          const percentage = (service.revenue / maxRevenue) * 100;
+          const percentage = maxRevenue > 0 ? (service.revenue / maxRevenue) * 100 : 0;
           const isSelected = selectedService === index;
           
           return (
@@ -359,7 +359,7 @@ function ServiceRevenueChart() {
                     className="overflow-hidden mt-3 flex items-center justify-between text-xs text-gray-400"
                   >
                     <span>Lượt đặt: <strong>{service.bookings} lượt</strong></span>
-                    <span>Đơn giá TB: <strong>{formatVND(service.revenue / service.bookings)} / lượt</strong></span>
+                    <span>Đơn giá TB: <strong>{service.bookings > 0 ? formatVND(service.revenue / service.bookings) : '0đ'} / lượt</strong></span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -575,10 +575,10 @@ function VipTierStatsPanel({ data }: { data: { total: number; totalVip: number; 
 
 // --- Top Performing Services Component ---
 const topServices = [
-  { id: 1, name: "Giải mã bản đồ sao cá nhân nâng cao", category: "Chiêm Tinh", expert: "Astrologer Celine", bookings: 124, revenue: "31.000.000đ", trend: "up" },
-  { id: 2, name: "Bản đồ vận mệnh cuộc đời trọn đời", category: "Thần Số Học", expert: "Master Alistair", bookings: 98, revenue: "49.000.000đ", trend: "up" },
-  { id: 3, name: "Trải bài Tarot định hướng sự nghiệp 6 tháng", category: "Tarot", expert: "Master Lina", bookings: 85, revenue: "21.250.000đ", trend: "down" },
-  { id: 4, name: "Tư vấn thiết kế Phong thủy nhà phố hợp mệnh", category: "Phong Thủy", expert: "Cô Diệu Lâm", bookings: 42, revenue: "50.400.000đ", trend: "up" },
+  { id: 1, name: "Giải mã bản đồ sao cá nhân nâng cao", category: "Chiêm Tinh", expert: "Astrologer Celine", bookings: 0, revenue: "0đ", trend: "up" },
+  { id: 2, name: "Bản đồ vận mệnh cuộc đời trọn đời", category: "Thần Số Học", expert: "Master Alistair", bookings: 0, revenue: "0đ", trend: "up" },
+  { id: 3, name: "Trải bài Tarot định hướng sự nghiệp 6 tháng", category: "Tarot", expert: "Master Lina", bookings: 0, revenue: "0đ", trend: "down" },
+  { id: 4, name: "Tư vấn thiết kế Phong thủy nhà phố hợp mệnh", category: "Phong Thủy", expert: "Cô Diệu Lâm", bookings: 0, revenue: "0đ", trend: "up" },
 ];
 
 function TopPerformingServices() {
